@@ -46,17 +46,8 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
+  html, body { height: 100%; margin: 0; padding: 0; }
 
-  /* ============================================================
-     SAFARI THEME-COLOR FIX
-     html имеет СПЛОШНОЙ цвет — именно его Safari берёт для панелей.
-     body прозрачный, анимированный градиент лежит на .page-gradient-bg.
-     ============================================================ */
   html { background-color: var(--solid-bg); transition: background-color 0.4s ease; }
   html.dark { background-color: var(--solid-bg); }
 
@@ -68,7 +59,6 @@
     transition: color 0.5s;
   }
 
-  /* Слой с анимированным градиентом */
   .page-gradient-bg {
     position: fixed;
     inset: 0;
@@ -84,15 +74,10 @@
     50% { background-position: 100% 50%; }
   }
 
-  /* Фиксация краёв под панели Safari */
   .safari-top-fix,
   .safari-bottom-fix {
-    position: fixed;
-    left: 0;
-    right: 0;
-    height: 110px;
-    z-index: 1;
-    pointer-events: none;
+    position: fixed; left: 0; right: 0; height: 110px;
+    z-index: 1; pointer-events: none;
     transition: background 0.4s ease;
   }
   .safari-top-fix {
@@ -109,7 +94,6 @@
   html.dark .safari-bottom-fix {
     background: linear-gradient(to top, var(--solid-bg) 0%, rgba(11,15,30,0.5) 45%, transparent 100%);
   }
-  /* На десктопе фиксы не нужны */
   @media (min-width: 900px) {
     .safari-top-fix,
     .safari-bottom-fix { display: none; }
@@ -164,10 +148,7 @@
     user-select: none;
     -webkit-user-select: none;
   }
-  .bubble-text {
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
+  .bubble-text { white-space: pre-wrap; word-break: break-word; }
 
   .msg-row { display: flex; width: 100%; }
   .msg-row.me { justify-content: flex-end; }
@@ -667,6 +648,25 @@
       0 0 0 1px rgba(255,255,255,0.05) inset;
   }
 
+  /* Плавное схлопывание экрана звонка в пилюлю */
+  #callScreen.hiding-anim {
+    transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.4, 0, 0.6, 1) !important;
+    transform-origin: center bottom;
+    opacity: 0;
+    transform: scale(0.25) translateY(60%);
+    pointer-events: none;
+  }
+
+  /* Появление экрана звонка при восстановлении */
+  @keyframes callScreenReveal {
+    0%   { opacity: 0; transform: scale(0.55) translateY(20%); }
+    60%  { opacity: 1; transform: scale(1.015) translateY(-1%); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  #callScreen.revealing {
+    animation: callScreenReveal 0.42s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  }
+
   .call-frost {
     position: absolute;
     inset: 0;
@@ -1010,7 +1010,7 @@
   .no-select { user-select: none; -webkit-user-select: none; }
 
   /* ============================================================
-     МОБИЛЬНЫЙ РЕЖИМ (iPhone 11 и подобные)
+     МОБИЛЬНЫЙ РЕЖИМ
      ============================================================ */
 
   #hamburgerBtn { display: none; }
@@ -1184,12 +1184,15 @@
     bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   }
 
-  /* ===== Плавающая пилюля активного звонка ===== */
+  /* ============================================================
+     ПЛАВАЮЩАЯ ПИЛЮЛЯ АКТИВНОГО ЗВОНКА
+     (z-index 100 — ниже сайдбара (200) и overlay (199))
+     ============================================================ */
   #callPill {
     position: fixed;
-    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
     left: 50%;
-    transform: translateX(-50%) translateY(16px) scale(0.92);
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%) scale(0.7);
     display: none;
     align-items: center;
     gap: 8px;
@@ -1201,26 +1204,46 @@
       0 12px 32px rgba(34, 197, 94, 0.42),
       0 4px 12px rgba(0,0,0,0.15),
       0 0 0 1px rgba(255,255,255,0.18) inset;
-    z-index: 9998;
-    cursor: pointer;
+    z-index: 100;
+    cursor: grab;
     font-size: 13px;
     font-weight: 500;
     font-family: inherit;
     opacity: 0;
     pointer-events: none;
     transition:
-      opacity 0.3s ease,
-      transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+      opacity 0.35s ease,
+      transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
     -webkit-tap-highlight-color: transparent;
     max-width: calc(100vw - 24px);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    will-change: transform, left, top;
   }
   #callPill.show {
     display: inline-flex;
     opacity: 1;
     pointer-events: auto;
-    transform: translateX(-50%) translateY(0) scale(1);
+    transform: translateX(-50%) scale(1);
   }
-  #callPill:active { transform: translateX(-50%) translateY(0) scale(0.97); }
+  #callPill.custom-pos {
+    left: 0;
+    top: 0;
+    bottom: auto;
+    transform: scale(0.7);
+  }
+  #callPill.custom-pos.show {
+    transform: scale(1);
+  }
+  #callPill.dragging {
+    transition: opacity 0.2s ease !important;
+    cursor: grabbing;
+    transform: scale(1.06) !important;
+  }
+  #callPill.custom-pos.dragging {
+    transform: scale(1.06) !important;
+  }
 
   .call-pill-dot {
     width: 9px; height: 9px; border-radius: 50%;
@@ -1234,6 +1257,7 @@
     white-space: nowrap;
     min-width: 0;
     overflow: hidden;
+    pointer-events: none;
   }
   #callPillLabel {
     overflow: hidden;
@@ -1271,10 +1295,7 @@
 </head>
 <body>
 
-<!-- Слой анимированного градиента (Safari берёт цвет панелей из html) -->
 <div class="page-gradient-bg"></div>
-
-<!-- Верхний/нижний фиксы для панелей Safari (только на мобильных) -->
 <div class="safari-top-fix"></div>
 <div class="safari-bottom-fix"></div>
 
@@ -1637,7 +1658,7 @@
 </div>
 
 <!-- ===== Плавающая пилюля активного звонка ===== -->
-<div id="callPill" onclick="restoreCallFromPill()">
+<div id="callPill">
   <span class="call-pill-dot"></span>
   <div class="call-pill-text">
     <span id="callPillLabel">В звонке</span>
@@ -1734,6 +1755,9 @@ const MINI_W = 280;
 const MINI_H = 380;
 const MINI_MARGIN = 20;
 
+// Pill position (persist in-memory)
+let pillPos = { x: null, y: null };
+
 // Reply
 let replyTo = null;
 let contextMenuMsg = null;
@@ -1741,6 +1765,134 @@ let contextMenuMsg = null;
 const $ = (id) => document.getElementById(id);
 
 function generateRoomId() { return Math.random().toString(36).slice(2, 8).toUpperCase(); }
+
+// ============================================================
+//  ЗВУКИ (Web Audio API)
+// ============================================================
+let audioCtxGlobal = null;
+function getAudioCtx() {
+  if (!audioCtxGlobal) {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      audioCtxGlobal = new AC();
+    } catch (e) { return null; }
+  }
+  if (audioCtxGlobal.state === 'suspended') {
+    try { audioCtxGlobal.resume(); } catch (e) {}
+  }
+  return audioCtxGlobal;
+}
+
+// Разблокировка AudioContext при первом жесте пользователя
+(function unlockAudioOnGesture() {
+  const unlock = () => {
+    try {
+      const c = getAudioCtx();
+      if (c && c.state === 'suspended') c.resume();
+    } catch (e) {}
+  };
+  document.addEventListener('touchstart', unlock, { once: true, passive: true });
+  document.addEventListener('click', unlock, { once: true });
+  document.addEventListener('keydown', unlock, { once: true });
+})();
+
+// Приятный "динь" при новом сообщении
+function playNotifySound() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const notes = [
+    { f: 1568.0, at: 0.00, dur: 0.10, vol: 0.14 }, // G6
+    { f: 2093.0, at: 0.07, dur: 0.24, vol: 0.12 }  // C7
+  ];
+  notes.forEach(n => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = n.f;
+    gain.gain.setValueAtTime(0, t + n.at);
+    gain.gain.linearRampToValueAtTime(n.vol, t + n.at + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + n.at + n.dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t + n.at);
+    osc.stop(t + n.at + n.dur + 0.03);
+  });
+}
+
+// Мелодия для входящего звонка
+let ringtoneTimer = null;
+let ringtoneOscs = [];
+function playRingtone() {
+  stopRingtone();
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const playBar = () => {
+    const t = ctx.currentTime;
+    // A5 + C#6 — колокольчик "дважды" с паузой
+    const pattern = [
+      { f: 880.00, at: 0.00, dur: 0.40, vol: 0.10 },
+      { f: 1108.73, at: 0.00, dur: 0.40, vol: 0.07 },
+      { f: 880.00, at: 0.48, dur: 0.40, vol: 0.10 },
+      { f: 1108.73, at: 0.48, dur: 0.40, vol: 0.07 }
+    ];
+    pattern.forEach(n => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = n.f;
+      gain.gain.setValueAtTime(0, t + n.at);
+      gain.gain.linearRampToValueAtTime(n.vol, t + n.at + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + n.at + n.dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t + n.at);
+      osc.stop(t + n.at + n.dur + 0.05);
+      ringtoneOscs.push(osc);
+    });
+  };
+  playBar();
+  ringtoneTimer = setInterval(playBar, 1800);
+}
+function stopRingtone() {
+  if (ringtoneTimer) { clearInterval(ringtoneTimer); ringtoneTimer = null; }
+  ringtoneOscs.forEach(o => { try { o.stop(); } catch(e){} });
+  ringtoneOscs = [];
+}
+
+// Гудки для исходящего звонка
+let ringbackTimer = null;
+let ringbackOscs = [];
+function playRingback() {
+  stopRingback();
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const playBar = () => {
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 425;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.06, t + 0.03);
+    gain.gain.setValueAtTime(0.06, t + 0.85);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.0);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 1.05);
+    ringbackOscs.push(osc);
+  };
+  playBar();
+  ringbackTimer = setInterval(playBar, 3000);
+}
+function stopRingback() {
+  if (ringbackTimer) { clearInterval(ringbackTimer); ringbackTimer = null; }
+  ringbackOscs.forEach(o => { try { o.stop(); } catch(e){} });
+  ringbackOscs = [];
+}
+function stopAllSounds() { stopRingtone(); stopRingback(); }
 
 // ============================================================
 //  МОБИЛЬНЫЙ РЕЖИМ
@@ -2117,8 +2269,16 @@ function handleMessage(msg) {
     case 'offer': handleOffer(msg.sdp, msg.callType); break;
     case 'answer': handleAnswer(msg.sdp); break;
     case 'ice': handleIce(msg.candidate); break;
-    case 'call-reject': log('Звонок отклонён', 'info'); endCall(true); break;
-    case 'call-end': log('Собеседник завершил звонок', 'info'); endCall(true); break;
+    case 'call-reject':
+      log('Звонок отклонён', 'info');
+      stopAllSounds();
+      endCall(true);
+      break;
+    case 'call-end':
+      log('Собеседник завершил звонок', 'info');
+      stopAllSounds();
+      endCall(true);
+      break;
   }
 }
 
@@ -2346,7 +2506,10 @@ function handleTyping() {
 
 function renderMessage({ text, time, mine, reply }) {
   const c = $('messageContainer');
-  if (!mine) showTypingIndicator(false);
+  if (!mine) {
+    showTypingIndicator(false);
+    try { playNotifySound(); } catch (e) {}
+  }
 
   const row = document.createElement('div');
   row.className = 'msg-row ' + (mine ? 'me' : 'other') + ' animate-message';
@@ -2538,6 +2701,7 @@ function createPeerConnection() {
     if (st === 'connected') {
       setCallStatus('Соединение установлено');
       startCallTimer();
+      stopAllSounds();
       setTimeout(() => tryStartVoiceWave(15), 500);
     } else if (st === 'failed' || st === 'disconnected' || st === 'closed') {
       setCallStatus('Соединение потеряно');
@@ -2567,6 +2731,9 @@ async function startCall(type) {
   $('callDuration').classList.add('hidden');
   $('voiceWave').classList.add('hidden');
   $('btnCamera').style.display = type === 'video' ? 'flex' : 'none';
+
+  // Гудки абонента
+  try { playRingback(); } catch (e) {}
 
   try {
     localStream = await getLocalStream(type === 'video');
@@ -2599,9 +2766,13 @@ async function handleOffer(sdp, callType) {
 
   $('incomingCallModal').classList.remove('hidden');
   $('incomingCallModal').style.display = 'flex';
+
+  // Мелодия входящего
+  try { playRingtone(); } catch (e) {}
 }
 
 async function acceptCall() {
+  stopRingtone();
   $('incomingCallModal').classList.add('hidden');
   $('incomingCallModal').style.display = '';
   if (!incomingOffer) return;
@@ -2645,6 +2816,7 @@ async function handleIce(candidate) {
 }
 
 function rejectCall() {
+  stopRingtone();
   $('incomingCallModal').classList.add('hidden');
   $('incomingCallModal').style.display = '';
   sendMQTT({ type: 'call-reject' });
@@ -2653,11 +2825,11 @@ function rejectCall() {
 
 function endCall(silent = false) {
   if (!silent) sendMQTT({ type: 'call-end' });
+  stopAllSounds();
   clearTimeout(callStateTimeout);
   resetCallScreenState();
   stopVoiceWave();
-  const __pill = $('callPill');
-  if (__pill) __pill.classList.remove('show');
+  hideCallPill();
   callHidden = false;
   if (pc) { try { pc.close(); } catch(e){} pc = null; }
   if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
@@ -2765,8 +2937,7 @@ function expandCall() {
   cs.style.top = '0px';
   cs.style.width = window.innerWidth + 'px';
   cs.style.height = window.innerHeight + 'px';
-  const pill = $('callPill');
-  if (pill) pill.classList.remove('show');
+  hideCallPill();
 }
 
 function toggleCallMinimize() {
@@ -2775,41 +2946,87 @@ function toggleCallMinimize() {
 }
 
 // ============================================================
-//  ПОЛНОЕ СКРЫТИЕ ЗВОНКА (пилюля в чате)
+//  ПИЛЮЛЯ — показать / скрыть / позиция
+// ============================================================
+function showCallPill() {
+  const pill = $('callPill');
+  if (!pill) return;
+
+  const lbl = $('callPillLabel');
+  if (lbl) lbl.textContent = (currentCallType === 'video') ? 'Видеозвонок' : 'Аудиозвонок';
+  const pd = $('callPillDuration');
+  const cd = $('callDuration');
+  if (pd && cd) pd.textContent = cd.innerText || '00:00';
+
+  // Проверяем сохранённую позицию на валидность
+  const needsReset = (
+    pillPos.x === null || pillPos.y === null ||
+    pillPos.x < 4 || pillPos.y < 4 ||
+    pillPos.x + 200 > window.innerWidth - 4 ||
+    pillPos.y + 44 > window.innerHeight - 4
+  );
+
+  if (needsReset) {
+    pillPos.x = null;
+    pillPos.y = null;
+    pill.classList.remove('custom-pos');
+    pill.classList.remove('dragging');
+    pill.style.left = '';
+    pill.style.top = '';
+    pill.style.bottom = '';
+    pill.style.transform = '';
+    pill.classList.add('show');
+  } else {
+    pill.classList.add('custom-pos');
+    pill.classList.remove('dragging');
+    pill.style.left = pillPos.x + 'px';
+    pill.style.top = pillPos.y + 'px';
+    pill.style.bottom = 'auto';
+    pill.classList.add('show');
+  }
+}
+
+function hideCallPill() {
+  const pill = $('callPill');
+  if (!pill) return;
+  pill.classList.remove('show');
+  pill.classList.remove('dragging');
+}
+
+// ============================================================
+//  ПОЛНОЕ СКРЫТИЕ ЗВОНКА (анимация + пилюля)
 // ============================================================
 function hideCall() {
   const cs = $('callScreen');
-  const pill = $('callPill');
   if (!cs || callHidden) return;
 
-  callHidden = true;
-  cs.classList.add('hidden');
-  cs.classList.remove('minimized');
-  callMinimized = false;
+  // Плавное схлопывание экрана звонка
+  cs.classList.add('hiding-anim');
 
-  if (pill) {
-    const lbl = $('callPillLabel');
-    if (lbl) lbl.textContent = (currentCallType === 'video') ? 'Видеозвонок' : 'Аудиозвонок';
-    const pd = $('callPillDuration');
-    const cd = $('callDuration');
-    if (pd && cd) pd.textContent = cd.innerText || '00:00';
-    pill.classList.add('show');
-  }
-
-  cs.classList.remove('dragging');
+  setTimeout(() => {
+    callHidden = true;
+    cs.classList.add('hidden');
+    cs.classList.remove('minimized');
+    cs.classList.remove('hiding-anim');
+    callMinimized = false;
+    showCallPill();
+  }, 420);
 }
 
 function restoreCallFromPill() {
   const cs = $('callScreen');
-  const pill = $('callPill');
   if (!cs || !callHidden) return;
 
   callHidden = false;
   cs.classList.remove('hidden');
   cs.classList.remove('minimized');
   callMinimized = false;
-  if (pill) pill.classList.remove('show');
+  hideCallPill();
   setFullscreenDim();
+
+  // Красивое появление
+  cs.classList.add('revealing');
+  setTimeout(() => cs.classList.remove('revealing'), 480);
 }
 
 function resetCallScreenState() {
@@ -2820,11 +3037,104 @@ function resetCallScreenState() {
   if (!cs) return;
   cs.classList.remove('minimized');
   cs.classList.remove('dragging');
-  const pill = $('callPill');
-  if (pill) pill.classList.remove('show');
+  cs.classList.remove('hiding-anim');
+  cs.classList.remove('revealing');
+  hideCallPill();
   setFullscreenDim();
 }
 
+// ============================================================
+//  ПЕРЕТАСКИВАНИЕ ПИЛЮЛИ ЗВОНКА
+// ============================================================
+(function initPillDrag() {
+  const pill = $('callPill');
+  if (!pill) return;
+
+  let dragging = false;
+  let moved = false;
+  let startX = 0, startY = 0;
+  let origX = 0, origY = 0;
+
+  function pt(e) {
+    const t = (e.touches && e.touches[0]) || e;
+    return { x: t.clientX, y: t.clientY };
+  }
+
+  function onDown(e) {
+    if (e.target.closest('.call-pill-btn')) return;
+    if (!pill.classList.contains('show')) return;
+
+    const p = pt(e);
+    const rect = pill.getBoundingClientRect();
+    origX = rect.left;
+    origY = rect.top;
+    startX = p.x;
+    startY = p.y;
+    dragging = true;
+    moved = false;
+
+    pill.classList.add('dragging');
+    pill.classList.add('custom-pos');
+    pill.style.left = origX + 'px';
+    pill.style.top = origY + 'px';
+    pill.style.bottom = 'auto';
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    const p = pt(e);
+    const dx = p.x - startX;
+    const dy = p.y - startY;
+    if (!moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) moved = true;
+    if (!moved) return;
+
+    let nx = origX + dx;
+    let ny = origY + dy;
+    const w = pill.offsetWidth;
+    const h = pill.offsetHeight;
+    nx = Math.max(8, Math.min(window.innerWidth - w - 8, nx));
+    ny = Math.max(8, Math.min(window.innerHeight - h - 8, ny));
+    pill.style.left = nx + 'px';
+    pill.style.top = ny + 'px';
+    pillPos.x = nx;
+    pillPos.y = ny;
+    if (e.cancelable) e.preventDefault();
+  }
+
+  function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    pill.classList.remove('dragging');
+    if (!moved) {
+      // Простой тап по пилюле — развернуть звонок
+      restoreCallFromPill();
+    }
+  }
+
+  pill.addEventListener('mousedown', onDown);
+  pill.addEventListener('touchstart', onDown, { passive: true });
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('mouseup', onUp);
+  document.addEventListener('touchend', onUp);
+  document.addEventListener('touchcancel', onUp);
+
+  // Автокоррекция позиции при ресайзе
+  window.addEventListener('resize', () => {
+    if (pillPos.x === null || pillPos.y === null) return;
+    if (!pill.classList.contains('show')) return;
+    const w = pill.offsetWidth || 200;
+    const h = pill.offsetHeight || 44;
+    pillPos.x = Math.max(8, Math.min(window.innerWidth - w - 8, pillPos.x));
+    pillPos.y = Math.max(8, Math.min(window.innerHeight - h - 8, pillPos.y));
+    pill.style.left = pillPos.x + 'px';
+    pill.style.top = pillPos.y + 'px';
+  });
+})();
+
+// ============================================================
+//  ПЕРЕТАСКИВАНИЕ МИНИ-ОКНА ЗВОНКА
+// ============================================================
 (function initMiniCallDrag() {
   const topbar = $('callMiniTopbar');
   const cs = $('callScreen');
