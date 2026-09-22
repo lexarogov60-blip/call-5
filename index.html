@@ -157,13 +157,10 @@
   }
   .bubble-text { white-space: pre-wrap; word-break: break-word; }
 
-  /* Нажатие на сообщение — плавное уменьшение */
   .bubble-pressed {
     transform: scale(0.95) !important;
   }
 
-  /* Отскок при открытии меню ответа / на long-press.
-     На iOS вибрации нет — эта анимация заменяет «тактильный» отклик. */
   @keyframes bubbleReplyPop {
     0%   { transform: scale(1);    box-shadow: 0 4px 16px rgba(109,127,214,0.3); }
     38%  { transform: scale(1.075); box-shadow: 0 10px 32px rgba(139,154,224,0.55); }
@@ -546,11 +543,10 @@
   .call-ctrl.accept:hover { background: #16a34a; }
   .call-ctrl.muted { background: rgba(239,68,68,0.6); }
 
-  /* ====== Кнопка громкой связи — только в мобильном режиме ====== */
+  /* ====== Кнопка громкой связи — ТОЛЬКО мобильная версия ====== */
   #btnSpeaker { display: none !important; }
   body.mobile-mode #btnSpeaker { display: flex !important; }
-  #callScreen.minimized #btnSpeaker { display: flex !important; }
-  /* ============================================================= */
+  /* ============================================================ */
 
   .call-avatar-pulse {
     aspect-ratio: 1 / 1;
@@ -1195,7 +1191,6 @@
     bottom: 12px !important;
   }
 
-  /* Компактнее для мобилы: 6 кнопок должны влезать в узкий экран */
   body.mobile-mode .call-ctrl { width: 48px; height: 48px; }
   body.mobile-mode .call-ctrl svg { width: 20px; height: 20px; }
   body.mobile-mode .call-controls-bar {
@@ -1784,7 +1779,7 @@ let callTimerInterval = null;
 let callStartTime = null;
 let isMuted = false;
 let isCameraOff = false;
-let isSpeakerOn = false;   // <-- НОВОЕ: состояние громкой связи
+let isSpeakerOn = false;
 let typingTimeout = null;
 let typingSent = false;
 let typingVisible = false;
@@ -1942,6 +1937,33 @@ function stopRingback() {
   ringbackOscs = [];
 }
 function stopAllSounds() { stopRingtone(); stopRingback(); }
+
+// ============================================================
+//  УПРАВЛЕНИЕ АУДИОСЕССИЕЙ (iOS 16.4+ / Safari)
+//  Решает две задачи:
+//  1) Во время звонка переводит звук на громкую связь (play-and-record).
+//  2) После звонка сбрасывает сессию обратно в 'auto', чтобы звук
+//     вернулся на обычный динамик телефона (иначе звук "залипает").
+// ============================================================
+function setIOSAudioSession(type) {
+  if (!navigator.audioSession) return; // не iOS 16.4+ / не Safari
+  try {
+    navigator.audioSession.type = type;
+    log(`🔊 Аудиосессия: ${type}`, 'info');
+  } catch (e) {
+    log(`⚠️ Аудиосессия: ${e.message}`, 'warn');
+  }
+}
+function setupCallAudioSession() {
+  // "play-and-record" — режим для звонков. На iOS роутит звук
+  // на громкую связь (loudspeaker) и держит микрофон активным.
+  setIOSAudioSession('play-and-record');
+}
+function restoreAudioSession() {
+  // "auto" — возвращаем контроль системе. Звук уведомлений,
+  // музыки и т.п. снова идёт через штатный маршрут.
+  setIOSAudioSession('auto');
+}
 
 // ============================================================
 //  МОБИЛЬНЫЙ РЕЖИМ
@@ -2321,11 +2343,13 @@ function handleMessage(msg) {
     case 'call-reject':
       log('Звонок отклонён', 'info');
       stopAllSounds();
+      restoreAudioSession();
       endCall(true);
       break;
     case 'call-end':
       log('Собеседник завершил звонок', 'info');
       stopAllSounds();
+      restoreAudioSession();
       endCall(true);
       break;
   }
@@ -2376,6 +2400,7 @@ function showApp() {
 function logout() {
   closeSidebarIfMobile();
   sendMQTT({ type: 'bye' });
+  restoreAudioSession();
   if (peerCheckInterval) clearInterval(peerCheckInterval);
   if (mqttClient) mqttClient.end();
   if (pc) pc.close();
@@ -2453,7 +2478,6 @@ function doReply() {
   const container = $('messageContainer');
   if (!container) return;
 
-  // Вспомогательные функции для анимации
   function pressBubble(bubble) {
     if (!bubble) return;
     bubble.classList.add('bubble-pressed');
@@ -2465,7 +2489,6 @@ function doReply() {
   function flashBubble(bubble) {
     if (!bubble) return;
     bubble.classList.remove('bubble-pop');
-    // перезапуск анимации
     void bubble.offsetWidth;
     bubble.classList.add('bubble-pop');
     setTimeout(() => bubble.classList.remove('bubble-pop'), 460);
@@ -2483,7 +2506,7 @@ function doReply() {
     });
   });
 
-  // ====== Desktop: визуальный отклик на нажатие ЛКМ ======
+  // ====== Desktop: отклик на ЛКМ ======
   container.addEventListener('mousedown', (e) => {
     if (e.button !== 0) return;
     const bubble = e.target.closest('.bubble-me, .bubble-other');
@@ -2830,6 +2853,9 @@ async function startCall(type) {
 
   try {
     localStream = await getLocalStream(type === 'video');
+    // ВАЖНО: сессию включаем ПОСЛЕ getUserMedia — иначе Safari
+    // может проигнорировать смену типа до выдачи разрешений.
+    setupCallAudioSession();
     $('localVideo').srcObject = localStream;
     pc = createPeerConnection();
     localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
@@ -2863,18 +2889,14 @@ async function handleOffer(sdp, callType) {
   try { playRingtone(); } catch (e) {}
 }
 
-// ============================================================
-//  ACCEPT CALL — ИСПРАВЛЕНО: UI теперь настраивается ДО создания pc,
-//  чтобы ontrack не перетёр статус/не спрятал таймер
-// ============================================================
 async function acceptCall() {
   stopRingtone();
   $('incomingCallModal').classList.add('hidden');
   $('incomingCallModal').style.display = '';
   if (!incomingOffer) return;
 
-  // 1) Сначала — весь UI. Иначе ontrack выставит "Соединение установлено" и
-  //    покажет таймер, а последующие строки ниже их перетрут/спрячут.
+  // Сначала — весь UI. Иначе ontrack выставит "Соединение установлено"
+  // и покажет таймер, а последующие строки их перетрут/спрячут.
   const avatarSeed = peerNick || 'Собеседник';
   setAvatar($('callPeerAvatar'), avatarSeed);
   if ($('callPeerName')) $('callPeerName').innerText = peerNick || 'Собеседник';
@@ -2887,9 +2909,10 @@ async function acceptCall() {
   $('voiceWave').classList.add('hidden');
   $('btnCamera').style.display = currentCallType === 'video' ? 'flex' : 'none';
 
-  // 2) Теперь работаем с медиа / peer connection
+  // Теперь работаем с медиа / peer connection
   try {
     localStream = await getLocalStream(currentCallType === 'video');
+    setupCallAudioSession();
     $('localVideo').srcObject = localStream;
     pc = createPeerConnection();
     localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
@@ -2917,6 +2940,7 @@ async function handleIce(candidate) {
 
 function rejectCall() {
   stopRingtone();
+  restoreAudioSession();
   $('incomingCallModal').classList.add('hidden');
   $('incomingCallModal').style.display = '';
   sendMQTT({ type: 'call-reject' });
@@ -2924,6 +2948,9 @@ function rejectCall() {
 }
 
 function endCall(silent = false) {
+  // Сбрасываем iOS-аудиосессию в самом начале — иначе после звонка
+  // звук остаётся на громкой связи или уходит в "ушной" режим.
+  restoreAudioSession();
   if (!silent) sendMQTT({ type: 'call-end' });
   stopAllSounds();
   clearTimeout(callStateTimeout);
@@ -2969,60 +2996,76 @@ function updateCameraUI() {
   $('iconCamOff').classList.toggle('hidden', !isCameraOff);
 }
 
-// ====== ГРОМКАЯ СВЯЗЬ (только мобильная версия) ======
-// ПРИМЕЧАНИЕ: iOS Safari не поддерживает ни setSinkId, ни вибрацию — там
-// кнопка будет нажиматься, но фактического переключения не произойдёт.
-// На Android Chrome переключение вывода работает.
+// ============================================================
+//  ГРОМКАЯ СВЯЗЬ
+//  — На iOS 16.4+ используем Audio Session API (setSinkId не работает).
+//  — На Chrome/Edge/Android — setSinkId.
+//  — На Firefox — не поддерживается ничего (ограничение браузера).
+// ============================================================
 async function toggleSpeaker() {
   isSpeakerOn = !isSpeakerOn;
   updateSpeakerUI();
+
+  // --- ПУТЬ 1: iOS Safari (navigator.audioSession доступен) ---
+  if (navigator.audioSession) {
+    try {
+      if (isSpeakerOn) {
+        // play-and-record на iOS автоматически направляет звук
+        // на громкую связь (loudspeaker).
+        navigator.audioSession.type = 'play-and-record';
+        log('🔊 Громкая связь вкл. (iOS Audio Session)', 'ok');
+      } else {
+        // 'playback' во время звонка обычно роутит звук на ушной
+        // динамик. Микрофон при этом остаётся активен,
+        // т.к. getUserMedia уже захватил трек.
+        navigator.audioSession.type = 'playback';
+        log('🔈 Громкая связь выкл. (iOS Audio Session)', 'ok');
+      }
+    } catch (e) {
+      log(`⚠️ Ошибка Audio Session: ${e.message}`, 'warn');
+    }
+    return;
+  }
+
+  // --- ПУТЬ 2: Chrome / Edge / Android (setSinkId) ---
   const rv = $('remoteVideo');
   if (!rv) return;
-
   if (typeof rv.setSinkId !== 'function') {
-    log('⚠️ Переключение вывода звука не поддерживается устройством', 'warn');
+    log('⚠️ Переключение вывода звука не поддерживается браузером', 'warn');
     return;
   }
   try {
     if (isSpeakerOn) {
-      // default на большинстве мобильных = громкая связь
-      await rv.setSinkId('default');
-      log('🔊 Громкая связь включена', 'ok');
+      await rv.setSinkId('default'); // обычно = громкая связь
+      log('🔊 Громкая связь вкл. (setSinkId)', 'ok');
     } else {
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const outs = devices.filter(d => d.kind === 'audiooutput');
-        const ear = outs.find(d => /earpiece|receiver|headset|ear|наушн|динамик/i.test(d.label));
-        if (ear) {
-          await rv.setSinkId(ear.deviceId);
-        } else {
-          await rv.setSinkId('');
-        }
-        log('🔈 Громкая связь выключена', 'ok');
-      } catch (e) {
-        log('Не удалось переключить: ' + e.message, 'warn');
-      }
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const outs = devices.filter(d => d.kind === 'audiooutput');
+      const ear = outs.find(d =>
+        /earpiece|receiver|headset|earphone|ear|наушн|динамик|tel/i.test(d.label)
+      );
+      await rv.setSinkId(ear ? ear.deviceId : '');
+      log('🔈 Громкая связь выкл. (setSinkId)', 'ok');
     }
   } catch (e) {
     log('Ошибка громкой связи: ' + e.message, 'warn');
   }
 }
+
 function updateSpeakerUI() {
-  const on = $('iconSpeakerOn');
+  const on  = $('iconSpeakerOn');
   const off = $('iconSpeakerOff');
-  if (on) on.classList.toggle('hidden', !isSpeakerOn);
-  if (off) off.classList.toggle('hidden', isSpeakerOn);
+  if (on)  on.classList.toggle('hidden', !isSpeakerOn);
+  if (off) off.classList.toggle('hidden',  isSpeakerOn);
   const btn = $('btnSpeaker');
   if (btn) btn.classList.toggle('muted', !isSpeakerOn);
 }
-// ====================================================
+// ============================================================
 
-// ====== ТАЙМЕР (ИСПРАВЛЕНО) ======
+// ====== ТАЙМЕР ======
 function startCallTimer() {
   const cd = $('callDuration');
   if (callTimerInterval) {
-    // Интервал уже идёт (например, вызывался из ontrack раньше),
-    // но нас могли спрятать — принудительно показываем снова.
     if (cd) cd.classList.remove('hidden');
     return;
   }
@@ -3107,7 +3150,7 @@ function toggleCallMinimize() {
 }
 
 // ============================================================
-//  ПИЛЮЛЯ — показать / скрыть / позиция
+//  ПИЛЮЛЯ
 // ============================================================
 function showCallPill() {
   const pill = $('callPill');
@@ -3153,9 +3196,6 @@ function hideCallPill() {
   pill.classList.remove('dragging');
 }
 
-// ============================================================
-//  ПОЛНОЕ СКРЫТИЕ ЗВОНКА (анимация + пилюля)
-// ============================================================
 function hideCall() {
   const cs = $('callScreen');
   if (!cs || callHidden) return;
@@ -3202,7 +3242,7 @@ function resetCallScreenState() {
 }
 
 // ============================================================
-//  ПЕРЕТАСКИВАНИЕ ПИЛЮЛИ ЗВОНКА
+//  ПЕРЕТАСКИВАНИЕ ПИЛЮЛИ
 // ============================================================
 (function initPillDrag() {
   const pill = $('callPill');
@@ -3440,6 +3480,7 @@ function resetCallScreenState() {
 })();
 
 window.addEventListener('beforeunload', () => {
+  restoreAudioSession();
   if (mqttClient && mqttClient.connected) sendMQTT({ type: 'bye' });
 });
 </script>
