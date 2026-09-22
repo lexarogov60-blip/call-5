@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <title>DianaCalm</title>
+<meta name="theme-color" content="#EEF2FF" id="themeColorMeta">
 <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <style>
   :root {
@@ -43,12 +44,15 @@
     -moz-osx-font-smoothing: grayscale;
   }
   html, body { height: 100%; }
+  html { background: #EEF2FF; }
+  html.dark { background: #0B0F1E; }
   body {
     background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
     background-size: 200% 200%;
     animation: bgShift 20s ease infinite;
     color: var(--text);
     overflow: hidden;
+    overscroll-behavior: none;
     transition: color 0.5s;
   }
   @keyframes bgShift {
@@ -762,6 +766,7 @@
   #callScreen.minimized .call-ctrl { width: 42px; height: 42px; }
   #callScreen.minimized .call-ctrl svg { width: 18px !important; height: 18px !important; }
   #callScreen.minimized #btnMinimizeCall { display: none; }
+  #callScreen.minimized #btnHideCall { display: none; }
 
   @media (max-width: 640px) {
     #callScreen.minimized { border-radius: 22px; }
@@ -953,11 +958,8 @@
      МОБИЛЬНЫЙ РЕЖИМ (iPhone 11 и подобные)
      ============================================================ */
 
-  /* Кнопка-гамбургер в шапке — видна только в мобильном режиме */
   #hamburgerBtn { display: none; }
   body.mobile-mode #hamburgerBtn { display: inline-flex !important; }
-
-  /* Кнопка "Диагностика" в шапке — скрыть на мобильном */
   body.mobile-mode #headerLogsBtn { display: none !important; }
 
   body.mobile-mode {
@@ -966,7 +968,6 @@
     overflow: hidden;
   }
 
-  /* Сайдбар превращается в выезжающий drawer */
   body.mobile-mode #sidebar {
     position: fixed !important;
     top: 0;
@@ -1064,7 +1065,6 @@
     height: 17px;
   }
 
-  /* Оверлей под drawer */
   #sidebarOverlay {
     position: fixed;
     inset: 0;
@@ -1083,7 +1083,6 @@
     pointer-events: auto;
   }
 
-  /* Логин-экран / модалки на мобильном */
   body.mobile-mode #loginScreen { padding: 14px; }
   body.mobile-mode #loginScreen .glass {
     padding: 28px 20px !important;
@@ -1105,19 +1104,16 @@
     max-width: 100%;
   }
 
-  /* Экран звонка — safe area для панели управления */
   body.mobile-mode #callScreen .call-controls-bar {
     padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
     bottom: 12px !important;
   }
 
-  /* Панель управления в звонке — компактнее на мобильном */
   body.mobile-mode .call-ctrl { width: 54px; height: 54px; }
   body.mobile-mode .call-ctrl svg { width: 22px; height: 22px; }
   body.mobile-mode #callScreen.minimized .call-ctrl { width: 40px; height: 40px; }
   body.mobile-mode #callScreen.minimized .call-ctrl svg { width: 17px !important; height: 17px !important; }
 
-  /* Локальное PiP-видео — компактнее */
   body.mobile-mode .local-video-pip {
     width: 108px !important;
     height: 80px !important;
@@ -1126,13 +1122,96 @@
     border-radius: 14px !important;
   }
 
-  /* Лог-панель на мобильном */
   body.mobile-mode #logPanel {
     left: 10px;
     right: 10px;
     width: auto;
     bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   }
+
+  /* ===== Плавающая пилюля активного звонка ===== */
+  #callPill {
+    position: fixed;
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%) translateY(16px) scale(0.92);
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px 7px 14px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+    color: #fff;
+    box-shadow:
+      0 12px 32px rgba(34, 197, 94, 0.42),
+      0 4px 12px rgba(0,0,0,0.15),
+      0 0 0 1px rgba(255,255,255,0.18) inset;
+    z-index: 9998;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.3s ease,
+      transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+    -webkit-tap-highlight-color: transparent;
+    max-width: calc(100vw - 24px);
+  }
+  #callPill.show {
+    display: inline-flex;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  #callPill:active { transform: translateX(-50%) translateY(0) scale(0.97); }
+
+  .call-pill-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.32);
+    animation: onlinePulse 1.6s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  .call-pill-text {
+    display: flex; align-items: center; gap: 8px;
+    white-space: nowrap;
+    min-width: 0;
+    overflow: hidden;
+  }
+  #callPillLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 110px;
+  }
+  .call-pill-timer {
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.22);
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+  .call-pill-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.22);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .call-pill-btn:hover { background: rgba(255,255,255,0.38); transform: scale(1.08); }
+  .call-pill-btn:active { transform: scale(0.9); }
+  .call-pill-btn.end { background: rgba(239,68,68,0.9); }
+  .call-pill-btn.end:hover { background: #ef4444; }
 </style>
 </head>
 <body>
@@ -1402,14 +1481,25 @@
 
     <div class="call-mini-topbar" id="callMiniTopbar">
       <span id="miniPeerName" class="truncate">Собеседник</span>
-      <button onclick="expandCall()" type="button" title="Развернуть на весь экран">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
-          <path d="M15 3h6v6"/>
-          <path d="M9 21H3v-6"/>
-          <path d="M21 3l-7 7"/>
-          <path d="M3 21l7-7"/>
-        </svg>
-      </button>
+      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+        <button onclick="hideCall()" type="button" title="Свернуть в чат">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+               width="15" height="15">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <button onclick="expandCall()" type="button" title="Развернуть на весь экран">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               width="15" height="15">
+            <path d="M15 3h6v6"/>
+            <path d="M9 21H3v-6"/>
+            <path d="M21 3l-7 7"/>
+            <path d="M3 21l7-7"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <video id="remoteVideo" autoplay playsinline class="absolute inset-0 w-full h-full object-cover" style="z-index:1;"></video>
@@ -1454,6 +1544,14 @@
           <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
         </svg>
       </button>
+      <button id="btnHideCall" onclick="hideCall()" class="call-ctrl" title="Свернуть в чат">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.9"
+             stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+          <line x1="4" y1="20" x2="20" y2="20"/>
+        </svg>
+      </button>
       <button onclick="endCall()" class="call-ctrl end" title="Завершить">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"/></svg>
       </button>
@@ -1473,6 +1571,37 @@
       </svg>
     </span>
     <span>Ответить</span>
+  </button>
+</div>
+
+<!-- ===== Плавающая пилюля активного звонка ===== -->
+<div id="callPill" onclick="restoreCallFromPill()">
+  <span class="call-pill-dot"></span>
+  <div class="call-pill-text">
+    <span id="callPillLabel">В звонке</span>
+    <span id="callPillDuration" class="call-pill-timer">00:00</span>
+  </div>
+  <button class="call-pill-btn restore"
+          onclick="event.stopPropagation(); restoreCallFromPill()"
+          title="Развернуть" type="button">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.4"
+         stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 3h6v6"/>
+      <path d="M9 21H3v-6"/>
+      <path d="M21 3l-7 7"/>
+      <path d="M3 21l7-7"/>
+    </svg>
+  </button>
+  <button class="call-pill-btn end"
+          onclick="event.stopPropagation(); endCall()"
+          title="Завершить" type="button">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.4"
+         stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+      <path d="M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"/>
+    </svg>
   </button>
 </div>
 
@@ -1537,6 +1666,7 @@ let voiceRafId = null;
 
 // Mini-call
 let callMinimized = false;
+let callHidden = false;
 let miniCallPos = { x: null, y: null };
 const MINI_W = 280;
 const MINI_H = 380;
@@ -1554,7 +1684,6 @@ function generateRoomId() { return Math.random().toString(36).slice(2, 8).toUppe
 //  МОБИЛЬНЫЙ РЕЖИМ
 // ============================================================
 function applyMobileMode(on) {
-  // Очищаем инлайн-стили сайдбара, которые ставит resize-хендлер
   const sb = $('sidebar');
   if (sb) {
     if (on) {
@@ -1575,11 +1704,9 @@ function applyMobileMode(on) {
     if ($('iconMobileMode')) $('iconMobileMode').classList.remove('hidden');
     if ($('iconDesktopMode')) $('iconDesktopMode').classList.add('hidden');
     if ($('mobileToggleLabel')) $('mobileToggleLabel').innerText = 'Мобильная версия';
-    // Закрыть drawer
     if (sb) sb.classList.remove('open');
     const ov = $('sidebarOverlay');
     if (ov) ov.classList.remove('open');
-    // Вернуть ширину сайдбара из localStorage
     try {
       const w = parseInt(localStorage.getItem('cc-sidebar-width') || '280', 10);
       if (sb && window.innerWidth > 1024) {
@@ -1596,14 +1723,11 @@ function toggleMobileMode() {
   const isOn = document.body.classList.contains('mobile-mode');
   applyMobileMode(!isOn);
   try { localStorage.setItem('cc-mobile-mode', !isOn ? '1' : '0'); } catch(e) {}
-  // Подгоняем callScreen под новые размеры
   const cs = $('callScreen');
-  if (cs && !cs.classList.contains('hidden') && !callMinimized) {
+  if (cs && !cs.classList.contains('hidden') && !callMinimized && !callHidden) {
     setTimeout(() => { setFullscreenDim(); }, 60);
   }
-  // Закрыть drawer в мобильном режиме
   if (!isOn) {
-    // switching to mobile → close drawer
     const sb = $('sidebar');
     const ov = $('sidebarOverlay');
     if (sb) sb.classList.remove('open');
@@ -1665,6 +1789,8 @@ function applyTheme(isDark) {
     if ($('iconMoon')) $('iconMoon').classList.remove('hidden');
     if ($('iconSun')) $('iconSun').classList.add('hidden');
   }
+  const meta = document.getElementById('themeColorMeta');
+  if (meta) meta.setAttribute('content', isDark ? '#0B0F1E' : '#EEF2FF');
 }
 function toggleTheme() {
   const isDark = !document.body.classList.contains('dark');
@@ -2468,6 +2594,9 @@ function endCall(silent = false) {
   clearTimeout(callStateTimeout);
   resetCallScreenState();
   stopVoiceWave();
+  const __pill = $('callPill');
+  if (__pill) __pill.classList.remove('show');
+  callHidden = false;
   if (pc) { try { pc.close(); } catch(e){} pc = null; }
   if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
   remoteStream = null;
@@ -2510,7 +2639,11 @@ function startCallTimer() {
   $('callDuration').classList.remove('hidden');
   callTimerInterval = setInterval(() => {
     const s = Math.floor((Date.now() - callStartTime) / 1000);
-    $('callDuration').innerText = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    const txt = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    const cd = $('callDuration');
+    if (cd) cd.innerText = txt;
+    const pd = $('callPillDuration');
+    if (pd) pd.innerText = txt;
   }, 1000);
 }
 function stopCallTimer() {
@@ -2561,13 +2694,17 @@ function minimizeCall() {
 
 function expandCall() {
   const cs = $('callScreen');
-  if (!cs || !callMinimized) return;
+  if (!cs || (!callMinimized && !callHidden)) return;
   callMinimized = false;
+  callHidden = false;
   cs.classList.remove('minimized');
+  cs.classList.remove('hidden');
   cs.style.left = '0px';
   cs.style.top = '0px';
   cs.style.width = window.innerWidth + 'px';
   cs.style.height = window.innerHeight + 'px';
+  const pill = $('callPill');
+  if (pill) pill.classList.remove('show');
 }
 
 function toggleCallMinimize() {
@@ -2575,13 +2712,54 @@ function toggleCallMinimize() {
   else minimizeCall();
 }
 
+// ============================================================
+//  ПОЛНОЕ СКРЫТИЕ ЗВОНКА (пилюля в чате)
+// ============================================================
+function hideCall() {
+  const cs = $('callScreen');
+  const pill = $('callPill');
+  if (!cs || callHidden) return;
+
+  callHidden = true;
+  cs.classList.add('hidden');
+  cs.classList.remove('minimized');
+  callMinimized = false;
+
+  if (pill) {
+    const lbl = $('callPillLabel');
+    if (lbl) lbl.textContent = (currentCallType === 'video') ? 'Видеозвонок' : 'Аудиозвонок';
+    const pd = $('callPillDuration');
+    const cd = $('callDuration');
+    if (pd && cd) pd.textContent = cd.innerText || '00:00';
+    pill.classList.add('show');
+  }
+
+  cs.classList.remove('dragging');
+}
+
+function restoreCallFromPill() {
+  const cs = $('callScreen');
+  const pill = $('callPill');
+  if (!cs || !callHidden) return;
+
+  callHidden = false;
+  cs.classList.remove('hidden');
+  cs.classList.remove('minimized');
+  callMinimized = false;
+  if (pill) pill.classList.remove('show');
+  setFullscreenDim();
+}
+
 function resetCallScreenState() {
   callMinimized = false;
+  callHidden = false;
   miniCallPos = { x: null, y: null };
   const cs = $('callScreen');
   if (!cs) return;
   cs.classList.remove('minimized');
   cs.classList.remove('dragging');
+  const pill = $('callPill');
+  if (pill) pill.classList.remove('show');
   setFullscreenDim();
 }
 
@@ -2646,7 +2824,7 @@ function resetCallScreenState() {
       miniCallPos.y = Math.max(8, Math.min(window.innerHeight - h - 8, miniCallPos.y || 0));
       cs2.style.left = miniCallPos.x + 'px';
       cs2.style.top = miniCallPos.y + 'px';
-    } else {
+    } else if (!callHidden) {
       cs2.style.width = window.innerWidth + 'px';
       cs2.style.height = window.innerHeight + 'px';
     }
