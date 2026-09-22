@@ -115,6 +115,7 @@
   .dark .glass { box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.05); }
   .glass-2 { background: var(--glass-2-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-2-border); }
 
+  /* ====== BUBBLES + REPLY/TAP ANIMATIONS ====== */
   .bubble-me {
     display: inline-block;
     background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%);
@@ -130,6 +131,9 @@
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.22s ease;
+    will-change: transform;
   }
   .bubble-other {
     display: inline-block;
@@ -147,8 +151,31 @@
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.22s ease;
+    will-change: transform;
   }
   .bubble-text { white-space: pre-wrap; word-break: break-word; }
+
+  /* Нажатие на сообщение — плавное уменьшение */
+  .bubble-pressed {
+    transform: scale(0.95) !important;
+  }
+
+  /* Отскок при открытии меню ответа / на long-press.
+     На iOS вибрации нет — эта анимация заменяет «тактильный» отклик. */
+  @keyframes bubbleReplyPop {
+    0%   { transform: scale(1);    box-shadow: 0 4px 16px rgba(109,127,214,0.3); }
+    38%  { transform: scale(1.075); box-shadow: 0 10px 32px rgba(139,154,224,0.55); }
+    100% { transform: scale(1);    box-shadow: 0 4px 16px rgba(109,127,214,0.3); }
+  }
+  .bubble-pop {
+    animation: bubbleReplyPop 0.44s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .bubble-other.bubble-pop {
+    animation: bubbleReplyPop 0.44s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  /* ============================================== */
 
   .msg-row { display: flex; width: 100%; }
   .msg-row.me { justify-content: flex-end; }
@@ -519,6 +546,12 @@
   .call-ctrl.accept:hover { background: #16a34a; }
   .call-ctrl.muted { background: rgba(239,68,68,0.6); }
 
+  /* ====== Кнопка громкой связи — только в мобильном режиме ====== */
+  #btnSpeaker { display: none !important; }
+  body.mobile-mode #btnSpeaker { display: flex !important; }
+  #callScreen.minimized #btnSpeaker { display: flex !important; }
+  /* ============================================================= */
+
   .call-avatar-pulse {
     aspect-ratio: 1 / 1;
     border-radius: 50%;
@@ -648,7 +681,6 @@
       0 0 0 1px rgba(255,255,255,0.05) inset;
   }
 
-  /* Плавное схлопывание экрана звонка в пилюлю */
   #callScreen.hiding-anim {
     transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.4, 0, 0.6, 1) !important;
     transform-origin: center bottom;
@@ -657,7 +689,6 @@
     pointer-events: none;
   }
 
-  /* Появление экрана звонка при восстановлении */
   @keyframes callScreenReveal {
     0%   { opacity: 0; transform: scale(0.55) translateY(20%); }
     60%  { opacity: 1; transform: scale(1.015) translateY(-1%); }
@@ -1164,10 +1195,19 @@
     bottom: 12px !important;
   }
 
-  body.mobile-mode .call-ctrl { width: 54px; height: 54px; }
-  body.mobile-mode .call-ctrl svg { width: 22px; height: 22px; }
-  body.mobile-mode #callScreen.minimized .call-ctrl { width: 40px; height: 40px; }
-  body.mobile-mode #callScreen.minimized .call-ctrl svg { width: 17px !important; height: 17px !important; }
+  /* Компактнее для мобилы: 6 кнопок должны влезать в узкий экран */
+  body.mobile-mode .call-ctrl { width: 48px; height: 48px; }
+  body.mobile-mode .call-ctrl svg { width: 20px; height: 20px; }
+  body.mobile-mode .call-controls-bar {
+    gap: 10px !important;
+    padding: 8px 14px !important;
+  }
+  body.mobile-mode #callScreen.minimized .call-ctrl { width: 38px; height: 38px; }
+  body.mobile-mode #callScreen.minimized .call-ctrl svg { width: 16px !important; height: 16px !important; }
+  body.mobile-mode #callScreen.minimized .call-controls-bar {
+    gap: 6px !important;
+    padding: 6px 10px !important;
+  }
 
   body.mobile-mode .local-video-pip {
     width: 108px !important;
@@ -1186,7 +1226,6 @@
 
   /* ============================================================
      ПЛАВАЮЩАЯ ПИЛЮЛЯ АКТИВНОГО ЗВОНКА
-     (z-index 100 — ниже сайдбара (200) и overlay (199))
      ============================================================ */
   #callPill {
     position: fixed;
@@ -1621,6 +1660,20 @@
         <svg id="iconCamOn" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
         <svg id="iconCamOff" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/><path d="M3 3l18 18"/></svg>
       </button>
+
+      <!-- ====== КНОПКА ГРОМКОЙ СВЯЗИ (только в мобильной версии) ====== -->
+      <button id="btnSpeaker" onclick="toggleSpeaker()" class="call-ctrl" title="Громкая связь">
+        <svg id="iconSpeakerOff" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+        </svg>
+        <svg id="iconSpeakerOn" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+        </svg>
+      </button>
+      <!-- ============================================================ -->
+
       <button id="btnMinimizeCall" onclick="toggleCallMinimize()" class="call-ctrl" title="Свернуть к чату">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -1731,6 +1784,7 @@ let callTimerInterval = null;
 let callStartTime = null;
 let isMuted = false;
 let isCameraOff = false;
+let isSpeakerOn = false;   // <-- НОВОЕ: состояние громкой связи
 let typingTimeout = null;
 let typingSent = false;
 let typingVisible = false;
@@ -1784,7 +1838,6 @@ function getAudioCtx() {
   return audioCtxGlobal;
 }
 
-// Разблокировка AudioContext при первом жесте пользователя
 (function unlockAudioOnGesture() {
   const unlock = () => {
     try {
@@ -1797,14 +1850,13 @@ function getAudioCtx() {
   document.addEventListener('keydown', unlock, { once: true });
 })();
 
-// Приятный "динь" при новом сообщении
 function playNotifySound() {
   const ctx = getAudioCtx();
   if (!ctx) return;
   const t = ctx.currentTime;
   const notes = [
-    { f: 1568.0, at: 0.00, dur: 0.10, vol: 0.14 }, // G6
-    { f: 2093.0, at: 0.07, dur: 0.24, vol: 0.12 }  // C7
+    { f: 1568.0, at: 0.00, dur: 0.10, vol: 0.14 },
+    { f: 2093.0, at: 0.07, dur: 0.24, vol: 0.12 }
   ];
   notes.forEach(n => {
     const osc = ctx.createOscillator();
@@ -1821,7 +1873,6 @@ function playNotifySound() {
   });
 }
 
-// Мелодия для входящего звонка
 let ringtoneTimer = null;
 let ringtoneOscs = [];
 function playRingtone() {
@@ -1830,7 +1881,6 @@ function playRingtone() {
   if (!ctx) return;
   const playBar = () => {
     const t = ctx.currentTime;
-    // A5 + C#6 — колокольчик "дважды" с паузой
     const pattern = [
       { f: 880.00, at: 0.00, dur: 0.40, vol: 0.10 },
       { f: 1108.73, at: 0.00, dur: 0.40, vol: 0.07 },
@@ -1861,7 +1911,6 @@ function stopRingtone() {
   ringtoneOscs = [];
 }
 
-// Гудки для исходящего звонка
 let ringbackTimer = null;
 let ringbackOscs = [];
 function playRingback() {
@@ -2404,32 +2453,74 @@ function doReply() {
   const container = $('messageContainer');
   if (!container) return;
 
+  // Вспомогательные функции для анимации
+  function pressBubble(bubble) {
+    if (!bubble) return;
+    bubble.classList.add('bubble-pressed');
+  }
+  function releaseBubble(bubble) {
+    if (!bubble) return;
+    bubble.classList.remove('bubble-pressed');
+  }
+  function flashBubble(bubble) {
+    if (!bubble) return;
+    bubble.classList.remove('bubble-pop');
+    // перезапуск анимации
+    void bubble.offsetWidth;
+    bubble.classList.add('bubble-pop');
+    setTimeout(() => bubble.classList.remove('bubble-pop'), 460);
+  }
+
+  // ====== Desktop: правый клик ======
   container.addEventListener('contextmenu', (e) => {
     const bubble = e.target.closest('.bubble-me, .bubble-other');
     if (!bubble) return;
     e.preventDefault();
+    flashBubble(bubble);
     showContextMenu(e.clientX, e.clientY, {
       text: bubble.dataset.text || '',
       mine: bubble.dataset.mine === '1'
     });
   });
 
+  // ====== Desktop: визуальный отклик на нажатие ЛКМ ======
+  container.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    const bubble = e.target.closest('.bubble-me, .bubble-other');
+    if (!bubble) return;
+    pressBubble(bubble);
+  });
+  document.addEventListener('mouseup', () => {
+    container.querySelectorAll('.bubble-pressed').forEach(releaseBubble);
+  });
+  document.addEventListener('mouseleave', () => {
+    container.querySelectorAll('.bubble-pressed').forEach(releaseBubble);
+  });
+
+  // ====== Mobile: long-press ======
   let pressTimer = null;
   let startPos = null;
   let longTriggered = false;
+  let pressedBubble = null;
 
   container.addEventListener('touchstart', (e) => {
     const bubble = e.target.closest('.bubble-me, .bubble-other');
     if (!bubble) return;
+    pressedBubble = bubble;
+    pressBubble(bubble);
     const t = e.touches[0];
     startPos = { x: t.clientX, y: t.clientY };
     longTriggered = false;
     pressTimer = setTimeout(() => {
       longTriggered = true;
+      releaseBubble(bubble);
+      // «Пружинка» — визуальная замена вибрации (на iOS navigator.vibrate не работает)
+      flashBubble(bubble);
       showContextMenu(t.clientX, t.clientY, {
         text: bubble.dataset.text || '',
         mine: bubble.dataset.mine === '1'
       });
+      // Пытаемся вибрировать — работает только на Android Chrome
       if (navigator.vibrate) { try { navigator.vibrate(15); } catch(e){} }
     }, 480);
   }, { passive: true });
@@ -2439,11 +2530,13 @@ function doReply() {
     const t = e.touches[0];
     if (Math.abs(t.clientX - startPos.x) > 10 || Math.abs(t.clientY - startPos.y) > 10) {
       if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+      if (pressedBubble) { releaseBubble(pressedBubble); pressedBubble = null; }
     }
   }, { passive: true });
 
   container.addEventListener('touchend', (e) => {
     if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    if (pressedBubble) { releaseBubble(pressedBubble); pressedBubble = null; }
     startPos = null;
     if (longTriggered) {
       e.preventDefault();
@@ -2453,6 +2546,7 @@ function doReply() {
 
   container.addEventListener('touchcancel', () => {
     if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    if (pressedBubble) { releaseBubble(pressedBubble); pressedBubble = null; }
     startPos = null;
   });
 
@@ -2732,7 +2826,6 @@ async function startCall(type) {
   $('voiceWave').classList.add('hidden');
   $('btnCamera').style.display = type === 'video' ? 'flex' : 'none';
 
-  // Гудки абонента
   try { playRingback(); } catch (e) {}
 
   try {
@@ -2767,15 +2860,34 @@ async function handleOffer(sdp, callType) {
   $('incomingCallModal').classList.remove('hidden');
   $('incomingCallModal').style.display = 'flex';
 
-  // Мелодия входящего
   try { playRingtone(); } catch (e) {}
 }
 
+// ============================================================
+//  ACCEPT CALL — ИСПРАВЛЕНО: UI теперь настраивается ДО создания pc,
+//  чтобы ontrack не перетёр статус/не спрятал таймер
+// ============================================================
 async function acceptCall() {
   stopRingtone();
   $('incomingCallModal').classList.add('hidden');
   $('incomingCallModal').style.display = '';
   if (!incomingOffer) return;
+
+  // 1) Сначала — весь UI. Иначе ontrack выставит "Соединение установлено" и
+  //    покажет таймер, а последующие строки ниже их перетрут/спрячут.
+  const avatarSeed = peerNick || 'Собеседник';
+  setAvatar($('callPeerAvatar'), avatarSeed);
+  if ($('callPeerName')) $('callPeerName').innerText = peerNick || 'Собеседник';
+
+  resetCallScreenState();
+  $('callScreen').classList.remove('hidden');
+  $('remotePlaceholder').classList.remove('hidden');
+  setCallStatus('Соединение…');
+  $('callDuration').classList.add('hidden');
+  $('voiceWave').classList.add('hidden');
+  $('btnCamera').style.display = currentCallType === 'video' ? 'flex' : 'none';
+
+  // 2) Теперь работаем с медиа / peer connection
   try {
     localStream = await getLocalStream(currentCallType === 'video');
     $('localVideo').srcObject = localStream;
@@ -2785,18 +2897,6 @@ async function acceptCall() {
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
     sendMQTT({ type: 'answer', sdp: answer });
-
-    const avatarSeed = peerNick || 'Собеседник';
-    setAvatar($('callPeerAvatar'), avatarSeed);
-    if ($('callPeerName')) $('callPeerName').innerText = peerNick || 'Собеседник';
-
-    resetCallScreenState();
-    $('callScreen').classList.remove('hidden');
-    $('remotePlaceholder').classList.remove('hidden');
-    setCallStatus('Соединение…');
-    $('callDuration').classList.add('hidden');
-    $('voiceWave').classList.add('hidden');
-    $('btnCamera').style.display = currentCallType === 'video' ? 'flex' : 'none';
     incomingOffer = null;
   } catch (e) { endCall(true); }
 }
@@ -2842,7 +2942,8 @@ function endCall(silent = false) {
   $('incomingCallModal').style.display = '';
   stopCallTimer();
   isMuted = false; isCameraOff = false; isCaller = false;
-  updateMuteUI(); updateCameraUI();
+  isSpeakerOn = false;
+  updateMuteUI(); updateCameraUI(); updateSpeakerUI();
 }
 
 function toggleMute() {
@@ -2867,15 +2968,71 @@ function updateCameraUI() {
   $('iconCamOn').classList.toggle('hidden', isCameraOff);
   $('iconCamOff').classList.toggle('hidden', !isCameraOff);
 }
+
+// ====== ГРОМКАЯ СВЯЗЬ (только мобильная версия) ======
+// ПРИМЕЧАНИЕ: iOS Safari не поддерживает ни setSinkId, ни вибрацию — там
+// кнопка будет нажиматься, но фактического переключения не произойдёт.
+// На Android Chrome переключение вывода работает.
+async function toggleSpeaker() {
+  isSpeakerOn = !isSpeakerOn;
+  updateSpeakerUI();
+  const rv = $('remoteVideo');
+  if (!rv) return;
+
+  if (typeof rv.setSinkId !== 'function') {
+    log('⚠️ Переключение вывода звука не поддерживается устройством', 'warn');
+    return;
+  }
+  try {
+    if (isSpeakerOn) {
+      // default на большинстве мобильных = громкая связь
+      await rv.setSinkId('default');
+      log('🔊 Громкая связь включена', 'ok');
+    } else {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const outs = devices.filter(d => d.kind === 'audiooutput');
+        const ear = outs.find(d => /earpiece|receiver|headset|ear|наушн|динамик/i.test(d.label));
+        if (ear) {
+          await rv.setSinkId(ear.deviceId);
+        } else {
+          await rv.setSinkId('');
+        }
+        log('🔈 Громкая связь выключена', 'ok');
+      } catch (e) {
+        log('Не удалось переключить: ' + e.message, 'warn');
+      }
+    }
+  } catch (e) {
+    log('Ошибка громкой связи: ' + e.message, 'warn');
+  }
+}
+function updateSpeakerUI() {
+  const on = $('iconSpeakerOn');
+  const off = $('iconSpeakerOff');
+  if (on) on.classList.toggle('hidden', !isSpeakerOn);
+  if (off) off.classList.toggle('hidden', isSpeakerOn);
+  const btn = $('btnSpeaker');
+  if (btn) btn.classList.toggle('muted', !isSpeakerOn);
+}
+// ====================================================
+
+// ====== ТАЙМЕР (ИСПРАВЛЕНО) ======
 function startCallTimer() {
-  if (callTimerInterval) return;
+  const cd = $('callDuration');
+  if (callTimerInterval) {
+    // Интервал уже идёт (например, вызывался из ontrack раньше),
+    // но нас могли спрятать — принудительно показываем снова.
+    if (cd) cd.classList.remove('hidden');
+    return;
+  }
   callStartTime = Date.now();
-  $('callDuration').classList.remove('hidden');
+  if (cd) cd.classList.remove('hidden');
   callTimerInterval = setInterval(() => {
     const s = Math.floor((Date.now() - callStartTime) / 1000);
     const txt = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-    const cd = $('callDuration');
-    if (cd) cd.innerText = txt;
+    const cdx = $('callDuration');
+    if (cdx) cdx.innerText = txt;
     const pd = $('callPillDuration');
     if (pd) pd.innerText = txt;
   }, 1000);
@@ -2883,9 +3040,13 @@ function startCallTimer() {
 function stopCallTimer() {
   clearInterval(callTimerInterval); callTimerInterval = null;
   callStartTime = null;
-  $('callDuration').innerText = '00:00';
-  $('callDuration').classList.add('hidden');
+  const cd = $('callDuration');
+  if (cd) {
+    cd.innerText = '00:00';
+    cd.classList.add('hidden');
+  }
 }
+// =================================
 
 // ============================================================
 //  МИНИ-ОКНО ЗВОНКА
@@ -2958,7 +3119,6 @@ function showCallPill() {
   const cd = $('callDuration');
   if (pd && cd) pd.textContent = cd.innerText || '00:00';
 
-  // Проверяем сохранённую позицию на валидность
   const needsReset = (
     pillPos.x === null || pillPos.y === null ||
     pillPos.x < 4 || pillPos.y < 4 ||
@@ -3000,7 +3160,6 @@ function hideCall() {
   const cs = $('callScreen');
   if (!cs || callHidden) return;
 
-  // Плавное схлопывание экрана звонка
   cs.classList.add('hiding-anim');
 
   setTimeout(() => {
@@ -3024,7 +3183,6 @@ function restoreCallFromPill() {
   hideCallPill();
   setFullscreenDim();
 
-  // Красивое появление
   cs.classList.add('revealing');
   setTimeout(() => cs.classList.remove('revealing'), 480);
 }
@@ -3106,7 +3264,6 @@ function resetCallScreenState() {
     dragging = false;
     pill.classList.remove('dragging');
     if (!moved) {
-      // Простой тап по пилюле — развернуть звонок
       restoreCallFromPill();
     }
   }
@@ -3119,7 +3276,6 @@ function resetCallScreenState() {
   document.addEventListener('touchend', onUp);
   document.addEventListener('touchcancel', onUp);
 
-  // Автокоррекция позиции при ресайзе
   window.addEventListener('resize', () => {
     if (pillPos.x === null || pillPos.y === null) return;
     if (!pill.classList.contains('show')) return;
