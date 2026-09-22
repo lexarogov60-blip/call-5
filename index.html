@@ -2,88 +2,674 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>MQTT Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CalmConnect</title>
 <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <style>
-  body { font-family: monospace; background: #0b0f1e; color: #e5e7eb; padding: 20px; }
-  .test { padding: 12px; margin: 8px 0; border-radius: 8px; background: #1f2937; font-size: 13px; }
-  .ok { background: #065f46; }
-  .err { background: #7f1d1d; }
-  .pending { background: #78350f; }
-  h1 { color: #a5b4fc; }
-  button { padding: 10px 20px; background: #8B9AE0; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
+  * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { background: linear-gradient(135deg, #EEF2FF 0%, #F8F9FA 50%, #FCE7F3 100%); color: #1F2937; overflow: hidden; }
+  .glass { background: rgba(255,255,255,0.72); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.55); box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+  .glass-2 { background: rgba(255,255,255,0.55); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5); }
+  .bubble-me { background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%); color: #fff; border-radius: 22px 22px 6px 22px; box-shadow: 0 2px 8px rgba(109,127,214,0.2); }
+  .bubble-other { background: #fff; color: #1F2937; border-radius: 22px 22px 22px 6px; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  @keyframes messageIn { from { opacity:0; transform:translateY(8px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+  .animate-message { animation: messageIn 0.3s cubic-bezier(0.22,1,0.36,1) both; }
+  @keyframes modalIn { from { opacity:0; transform:translateY(20px) scale(0.95); } to { opacity:1; transform:translateY(0) scale(1); } }
+  .animate-modal { animation: modalIn 0.3s cubic-bezier(0.22,1,0.36,1) both; }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  .animate-fade { animation: fadeIn 0.25s ease both; }
+  @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(139,154,224,0.4); } 70% { box-shadow: 0 0 0 16px rgba(139,154,224,0); } 100% { box-shadow: 0 0 0 0 rgba(139,154,224,0); } }
+  .calling-pulse { animation: pulse-ring 1.6s infinite; }
+  .btn-icon { transition: all 0.25s; cursor: pointer; border-radius: 14px; background: transparent; border: none; padding: 10px; display: inline-flex; align-items: center; justify-content: center; }
+  .btn-icon:hover { background: rgba(139,154,224,0.1); }
+  .btn-icon:active { transform: scale(0.93); }
+  .input-field { background: #fff; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 2px 8px rgba(0,0,0,0.03); border-radius: 22px; display: flex; align-items: center; gap: 8px; padding: 8px 16px; }
+  .input-field:focus-within { border-color: rgba(139,154,224,0.6); box-shadow: 0 0 0 3px rgba(139,154,224,0.12); }
+  .input-field input { flex: 1; background: transparent; border: none; outline: none; font-size: 14px; padding: 6px 0; color: #1F2937; }
+  .input-field input::placeholder { color: #9CA3AF; }
+  .modal-overlay { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; background: rgba(20,20,40,0.5); backdrop-filter: blur(8px); padding: 16px; }
+  .modal-overlay.show { display: flex; animation: fadeIn 0.25s ease both; }
+  .send-btn { background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%); box-shadow: 0 2px 8px rgba(139,154,224,0.25); border-radius: 14px; border: none; color: #fff; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .send-btn:active { transform: scale(0.94); }
+  .call-ctrl { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); color: #fff; backdrop-filter: blur(10px); cursor: pointer; border: 1px solid rgba(255,255,255,0.15); }
+  .call-ctrl:hover { background: rgba(255,255,255,0.3); }
+  .call-ctrl.muted { background: rgba(255,255,255,0.95); color: #374151; }
+  .call-ctrl.end { background: #EF4444; }
+  .call-ctrl.end:hover { background: #DC2626; }
+  .call-ctrl.accept { background: #22C55E; }
+  .call-ctrl.accept:hover { background: #16A34A; }
+  .scroll-smooth-custom::-webkit-scrollbar { width: 6px; }
+  .scroll-smooth-custom::-webkit-scrollbar-thumb { background: rgba(139,154,224,0.3); border-radius: 3px; }
+  #logPanel { position: fixed; bottom: 10px; right: 10px; z-index: 99999; width: 360px; max-height: 220px; overflow-y: auto; background: rgba(0,0,0,0.85); color: #a3e635; font-family: monospace; font-size: 11px; padding: 8px 10px; border-radius: 12px; display: none; }
+  #logPanel.show { display: block; }
+  #logPanel .err { color: #f87171; }
+  #logPanel .info { color: #60a5fa; }
+  #logPanel .ok { color: #4ade80; }
+  #logPanel .warn { color: #fbbf24; }
+  .hidden { display: none !important; }
+  .flex { display: flex; }
+  .flex-col { flex-direction: column; }
+  .items-center { align-items: center; }
+  .justify-center { justify-content: center; }
+  .justify-between { justify-content: space-between; }
+  .gap-1 { gap: 4px; } .gap-2 { gap: 8px; } .gap-3 { gap: 12px; } .gap-4 { gap: 16px; } .gap-6 { gap: 24px; }
+  .relative { position: relative; } .absolute { position: absolute; } .fixed { position: fixed; }
+  .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+  .w-full { width: 100%; } .h-full { height: 100%; } .overflow-hidden { overflow: hidden; } .overflow-y-auto { overflow-y: auto; }
+  .text-center { text-align: center; }
+  .text-xs { font-size: 12px; } .text-sm { font-size: 14px; } .text-lg { font-size: 18px; } .text-xl { font-size: 20px; } .text-2xl { font-size: 24px; }
+  .text-\[10px\] { font-size: 10px; }
+  .font-medium { font-weight: 500; } .font-semibold { font-weight: 600; } .font-mono { font-family: monospace; }
+  .italic { font-style: italic; } .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .break-words { word-break: break-word; }
+  .mt-1 { margin-top: 4px; } .mt-4 { margin-top: 16px; } .mb-1 { margin-bottom: 4px; } .mb-5 { margin-bottom: 20px; } .mb-6 { margin-bottom: 24px; } .mb-7 { margin-bottom: 28px; } .mb-8 { margin-bottom: 32px; }
+  .ml-2 { margin-left: 8px; } .mr-2 { margin-right: 8px; } .m-4 { margin: 16px; } .mx-auto { margin-left: auto; margin-right: auto; }
+  .p-2 { padding: 8px; } .p-4 { padding: 16px; } .p-6 { padding: 24px; } .p-8 { padding: 32px; }
+  .px-3 { padding-left: 12px; padding-right: 12px; } .px-4 { padding-left: 16px; padding-right: 16px; } .px-6 { padding-left: 24px; padding-right: 24px; }
+  .py-2 { padding-top: 8px; padding-bottom: 8px; } .py-3 { padding-top: 12px; padding-bottom: 12px; } .py-4 { padding-top: 16px; padding-bottom: 16px; } .pb-1 { padding-bottom: 4px; }
+  .rounded-\[16px\] { border-radius: 16px; } .rounded-\[20px\] { border-radius: 20px; } .rounded-\[28px\] { border-radius: 28px; } .rounded-\[32px\] { border-radius: 32px; } .rounded-full { border-radius: 9999px; } .rounded-2xl { border-radius: 16px; }
+  .border-b { border-bottom: 1px solid rgba(0,0,0,0.05); } .border-2 { border-width: 2px; } .border-4 { border-width: 4px; }
+  .border-white { border-color: #fff; } .border-white\/10 { border-color: rgba(255,255,255,0.1); } .border-white\/20 { border-color: rgba(255,255,255,0.2); }
+  .bg-black\/30 { background: rgba(0,0,0,0.3); } .bg-black\/40 { background: rgba(0,0,0,0.4); }
+  .bg-green-400 { background: #4ade80; } .bg-yellow-400 { background: #facc15; } .bg-gray-300 { background: #d1d5db; }
+  .text-white { color: #fff; } .text-gray-400 { color: #9ca3af; } .text-gray-500 { color: #6b7280; } .text-gray-600 { color: #4b5563; }
+  .text-brand { color: #8B9AE0; } .text-green-500 { color: #22c55e; } .text-red-500 { color: #ef4444; } .text-white\/60 { color: rgba(255,255,255,0.6); }
+  .max-w-\[75\%\] { max-width: 75%; } .max-w-sm { max-width: 384px; } .max-w-md { max-width: 448px; }
+  .self-end { align-self: flex-end; } .flex-shrink-0 { flex-shrink: 0; } .flex-1 { flex: 1; } .min-w-0 { min-width: 0; }
+  .object-cover { object-fit: cover; } .backdrop-blur-xl { backdrop-filter: blur(24px); }
+  .space-y-3 > * + * { margin-top: 12px; }
+  .w-2 { width: 8px; } .h-2 { height: 8px; } .w-11 { width: 44px; } .h-11 { height: 44px; }
+  .w-16 { width: 64px; } .h-16 { height: 64px; } .w-28 { width: 112px; } .h-28 { height: 112px; }
+  .w-32 { width: 128px; } .h-32 { height: 128px; } .w-36 { width: 144px; } .h-36 { height: 144px; } .w-48 { width: 192px; }
+  .top-6 { top: 24px; } .right-6 { right: 24px; } .left-6 { left: 24px; } .bottom-8 { bottom: 32px; }
+  .left-1\/2 { left: 50%; } .-translate-x-1\/2 { transform: translateX(-50%); }
+  .z-\[9999\] { z-index: 9999; } .z-\[10000\] { z-index: 10000; }
+  .underline { text-decoration: underline; } .cursor-pointer { cursor: pointer; } .transition { transition: all 0.2s; }
+  .bg-gradient-to-br { background: linear-gradient(135deg, var(--tw-from, #8B9AE0), var(--tw-to, #6D7FD6)); }
+  .from-brand { --tw-from: #8B9AE0; } .to-\[\#6D7FD6\] { --tw-to: #6D7FD6; }
+  .from-\[\#1E1B4B\] { --tw-from: #1E1B4B; } .to-\[\#0B0F1E\] { --tw-to: #0B0F1E; }
+  .hover\:opacity-90:hover { opacity: 0.9; } .active\:scale-\[0\.98\]:active { transform: scale(0.98); }
+  body > #loginScreen { background: linear-gradient(135deg, #EEF2FF 0%, #F8F9FA 50%, #FCE7F3 100%); }
+  #app { height: 100vh; width: 100vw; display: flex; overflow: hidden; }
+  aside { width: 256px; display: flex; flex-direction: column; justify-content: space-between; padding: 24px 12px; margin: 16px; border-radius: 32px; }
+  main { flex: 1; display: flex; gap: 16px; margin: 16px 16px 16px 0; overflow: hidden; }
+  @media (max-width: 1024px) { aside { width: 80px; } aside .hide-mobile { display: none; } }
 </style>
 </head>
 <body>
-<h1>Тест WQTT из браузера</h1>
-<p>Логин: <b>u_E08RBR</b></p>
-<button onclick="runTests()">▶ Запустить</button>
-<div id="results"></div>
+
+<div id="loginScreen" class="fixed inset-0 z-\[10000\] flex items-center justify-center p-4">
+  <div class="glass rounded-[28px] p-8 w-full max-w-md text-center animate-modal">
+    <div class="w-16 h-16 mx-auto mb-5 rounded-[20px] bg-gradient-to-br from-brand to-[#6D7FD6] flex items-center justify-center text-white">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+    </div>
+
+    <div id="hostView">
+      <h1 class="text-xl font-semibold mb-1">Вы — хост</h1>
+      <p class="text-sm text-gray-500 mb-6">Отправьте эту ссылку собеседнику</p>
+      <div class="input-field rounded-[16px] mb-3">
+        <input type="text" id="shareLink" readonly style="font-size:12px;color:#6b7280;">
+        <button onclick="copyLink(event)" class="btn-icon text-brand flex-shrink-0" title="Скопировать">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+        </button>
+      </div>
+      <button onclick="copyLink(event)" class="w-full py-3 rounded-[16px] bg-gradient-to-br from-brand to-[#6D7FD6] text-white font-medium text-sm mb-4 cursor-pointer" style="border:none;">
+        Скопировать ссылку
+      </button>
+      <div class="flex items-center justify-center gap-2 text-xs text-gray-500">
+        <span class="w-2 h-2 rounded-full bg-yellow-400" id="hostStatusDot"></span>
+        <span id="hostStatusText">Подключение к серверу…</span>
+      </div>
+    </div>
+
+    <div id="guestView" class="hidden">
+      <h1 class="text-xl font-semibold mb-1">Подключение…</h1>
+      <p class="text-sm text-gray-500 mb-6">Комната: <span id="guestRoomId" class="font-mono font-semibold"></span></p>
+      <div class="flex items-center justify-center gap-2 text-xs text-gray-500">
+        <span class="w-2 h-2 rounded-full bg-yellow-400" id="guestStatusDot"></span>
+        <span id="guestStatusText">Подключение к серверу…</span>
+      </div>
+    </div>
+
+    <p id="loginError" class="text-xs text-red-500 mt-4 hidden"></p>
+    <button onclick="toggleLogs()" class="text-[10px] text-gray-400 mt-4 underline cursor-pointer" style="background:none;border:none;">Показать диагностику</button>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <aside class="glass">
+    <div>
+      <div class="flex items-center gap-3 px-3 mb-8 text-brand font-semibold text-lg">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        <span class="hide-mobile">Calm</span>
+      </div>
+      <div class="flex items-center gap-2 px-3 py-3 text-xs text-gray-500 hide-mobile">
+        <span id="myDot" class="w-2 h-2 rounded-full bg-green-400"></span>
+        <span>Вы: <span id="myNameLabel" class="font-medium">—</span></span>
+      </div>
+      <div class="flex items-center gap-2 px-3 py-2 text-xs text-gray-500 hide-mobile">
+        <span id="peerDot" class="w-2 h-2 rounded-full bg-gray-300"></span>
+        <span>Собеседник: <span id="peerNameLabel" class="font-medium">—</span></span>
+      </div>
+    </div>
+    <button onclick="logout()" class="flex items-center justify-center gap-2 py-3 rounded-[16px] glass-2 text-gray-600 text-sm font-medium cursor-pointer" style="border:none;">
+      Выйти
+    </button>
+  </aside>
+
+  <main>
+    <div class="glass flex-1 flex flex-col rounded-[32px] overflow-hidden relative">
+      <header class="px-6 py-4 flex items-center justify-between border-b">
+        <div class="flex items-center gap-3">
+          <img id="headerPeerAvatar" src="https://i.pravatar.cc/150?u=peer" class="w-11 h-11 rounded-[16px] object-cover" alt="">
+          <div>
+            <h3 id="headerPeerName" class="font-medium text-sm">Собеседник</h3>
+            <p id="headerPeerStatus" class="text-xs text-gray-500">Не в сети</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1">
+          <button onclick="startCall('audio')" class="btn-icon text-brand" title="Аудиозвонок">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+          </button>
+          <button onclick="startCall('video')" class="btn-icon text-brand" title="Видеозвонок">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          </button>
+          <button onclick="toggleLogs()" class="btn-icon text-gray-400" title="Диагностика">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          </button>
+        </div>
+      </header>
+      <div id="messageContainer" class="flex-1 overflow-y-auto scroll-smooth-custom p-6 space-y-3 flex flex-col"></div>
+      <div id="typingIndicator" class="px-6 pb-1 text-xs text-gray-400 italic hidden">печатает…</div>
+      <div class="p-4">
+        <div class="input-field">
+          <input type="text" id="messageInput" placeholder="Сообщение..." onkeypress="handleKeyPress(event)" oninput="handleTyping()">
+          <button onclick="sendMessage()" class="send-btn" title="Отправить">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="incomingCallModal" class="modal-overlay">
+  <div class="glass rounded-[28px] p-8 w-full max-w-sm text-center animate-modal">
+    <div class="calling-pulse w-28 h-28 mx-auto mb-5 rounded-full overflow-hidden border-4 border-white">
+      <img id="incomingAvatar" src="https://i.pravatar.cc/150?u=peer" class="w-full h-full object-cover" alt="">
+    </div>
+    <h3 id="incomingName" class="text-lg font-semibold mb-1">Собеседник</h3>
+    <p id="incomingType" class="text-sm text-gray-500 mb-7">Входящий звонок…</p>
+    <div class="flex justify-center gap-6">
+      <button onclick="rejectCall()" class="call-ctrl end">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"/></svg>
+      </button>
+      <button onclick="acceptCall()" class="call-ctrl accept">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="callScreen" class="fixed inset-0 z-\[9999\] hidden" style="background: linear-gradient(135deg, #1E1B4B, #111827, #0B0F1E); color: white;">
+  <div class="relative w-full h-full">
+    <video id="remoteVideo" autoplay playsinline class="absolute inset-0 w-full h-full object-cover"></video>
+    <div id="remotePlaceholder" class="absolute inset-0 flex items-center justify-center" style="background: linear-gradient(135deg, #1E1B4B, #111827, #0B0F1E);">
+      <div class="text-center">
+        <div class="calling-pulse w-32 h-32 mx-auto mb-5 rounded-full overflow-hidden border-4 border-white\/10">
+          <img id="callPeerAvatar" src="https://i.pravatar.cc/150?u=peer" class="w-full h-full object-cover" alt="">
+        </div>
+        <h3 id="callPeerName" class="text-2xl font-semibold mb-2">Собеседник</h3>
+        <p id="callStatusText" class="text-sm text-white\/60">Соединение…</p>
+      </div>
+    </div>
+    <div class="absolute top-6 right-6 w-48 h-36 rounded-2xl overflow-hidden border-2 border-white\/20 bg-black\/40">
+      <video id="localVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+    </div>
+    <div id="callDuration" class="absolute top-6 left-6 px-4 py-2 rounded-full bg-black\/30 backdrop-blur-xl border-2 border-white\/10 text-sm font-mono hidden">00:00</div>
+    <div class="absolute bottom-8 left-1\/2 -translate-x-1\/2 flex items-center gap-4 px-6 py-4 rounded-full bg-black\/30 backdrop-blur-xl border-2 border-white\/10">
+      <button id="btnMute" onclick="toggleMute()" class="call-ctrl">
+        <svg id="iconMicOn" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+        <svg id="iconMicOff" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/><path d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
+      </button>
+      <button id="btnCamera" onclick="toggleCamera()" class="call-ctrl">
+        <svg id="iconCamOn" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+        <svg id="iconCamOff" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/><path d="M3 3l18 18"/></svg>
+      </button>
+      <button onclick="endCall()" class="call-ctrl end">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="logPanel"></div>
 
 <script>
-const USER = 'u_E08RBR';
-const PASS = 'kKT5IV5L';
-const CONFIGS = [
-  { name: 'порт 22481 /mqtt',      url: 'wss://m8.wqtt.ru:22481/mqtt' },
-  { name: 'порт 22481 /',           url: 'wss://m8.wqtt.ru:22481/' },
-  { name: 'порт 22481 /ws',         url: 'wss://m8.wqtt.ru:22481/ws' },
-  { name: 'порт 22481 (нет пути)',  url: 'wss://m8.wqtt.ru:22481' },
-  { name: 'порт 22479 /mqtt',       url: 'wss://m8.wqtt.ru:22479/mqtt' },
-  { name: 'порт 443 /mqtt',         url: 'wss://m8.wqtt.ru:443/mqtt' },
-  { name: 'порт 8084 /mqtt',        url: 'wss://m8.wqtt.ru:8084/mqtt' },
+// ============================================================
+//  ✅ WQTT.RU — рабочие настройки из теста
+// ============================================================
+const MQTT_BROKER = 'wss://m8.wqtt.ru:22481/mqtt';
+const MQTT_USER = 'u_E08RBR';
+const MQTT_PASS = 'kKT5IV5L';
+
+// ✅ ВАЖНО: топики ДОЛЖНЫ начинаться с логина (требование WQTT)
+const TOPIC_PREFIX = MQTT_USER;
+
+const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun.sipnet.ru:3478' },
+  { urls: 'stun:stun.nextcloud.com:443' },
+  { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
 ];
 
-async function testOne(cfg) {
-  return new Promise((resolve) => {
-    const div = document.createElement('div');
-    div.className = 'test pending';
-    div.innerHTML = `⏳ ${cfg.name} — <small>${cfg.url}</small>`;
-    document.getElementById('results').appendChild(div);
+const urlParams = new URLSearchParams(location.search);
+const roomFromUrl = urlParams.get('room');
+const isHost = !roomFromUrl;
+const roomId = isHost ? generateRoomId() : roomFromUrl;
+const myRole = isHost ? 'host' : 'guest';
+const peerRole = isHost ? 'guest' : 'host';
+const myDisplay = isHost ? 'Вы (хост)' : 'Вы (гость)';
+const peerDisplay = isHost ? 'Гость' : 'Хост';
 
-    let done = false;
-    const timer = setTimeout(() => {
-      if (done) return; done = true;
-      div.className = 'test err';
-      div.innerHTML = `❌ ${cfg.name} — <small>${cfg.url}</small><br><b>Таймаут 8 сек</b>`;
-      try { c.end(true); } catch(e){}
-      resolve(false);
-    }, 8000);
+let mqttClient = null;
+let pc = null;
+let localStream = null;
+let remoteStream = null;
+let currentCallType = null;
+let incomingOffer = null;
+let callTimerInterval = null;
+let callStartTime = null;
+let isMuted = false;
+let isCameraOff = false;
+let typingTimeout = null;
+let isCaller = false;
+let peerOnline = false;
+let peerCheckInterval = null;
+let lastPeerPing = 0;
 
-    let c;
-    try {
-      c = mqtt.connect(cfg.url, {
-        clientId: 'test_' + Math.random().toString(16).slice(2, 10),
-        username: USER, password: PASS,
-        connectTimeout: 7000, reconnectPeriod: 0,
-        protocolVersion: 4, rejectUnauthorized: false
-      });
-    } catch (e) {
-      clearTimeout(timer); done = true;
-      div.className = 'test err';
-      div.innerHTML = `❌ ${cfg.name}<br><b>${e.message}</b>`;
-      return resolve(false);
-    }
+const $ = (id) => document.getElementById(id);
 
-    c.on('connect', () => {
-      if (done) return; done = true; clearTimeout(timer);
-      div.className = 'test ok';
-      div.innerHTML = `✅ ${cfg.name} — <small>${cfg.url}</small><br><b>РАБОТАЕТ!</b>`;
-      c.end(true); resolve(true);
+function generateRoomId() { return Math.random().toString(36).slice(2, 8).toUpperCase(); }
+
+function log(msg, type = 'info') {
+  const panel = $('logPanel');
+  const t = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  const line = document.createElement('div');
+  line.className = type;
+  line.textContent = `[${t}] ${msg}`;
+  panel.appendChild(line);
+  panel.scrollTop = panel.scrollHeight;
+  console.log(`[${type}]`, msg);
+}
+function toggleLogs() { $('logPanel').classList.toggle('show'); }
+
+function initScreen() {
+  if (isHost) {
+    const link = `${location.origin}${location.pathname}?room=${roomId}`;
+    $('shareLink').value = link;
+    $('hostView').classList.remove('hidden');
+    $('guestView').classList.add('hidden');
+    log(`Комната создана: ${roomId}`, 'ok');
+  } else {
+    $('guestRoomId').innerText = roomId;
+    $('hostView').classList.add('hidden');
+    $('guestView').classList.remove('hidden');
+    log(`Комната: ${roomId}`, 'info');
+  }
+  connectMQTT();
+}
+
+function copyLink(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const input = $('shareLink');
+  input.select();
+  input.setSelectionRange(0, 99999);
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(input.value).then(() => {
+      log('✅ Ссылка скопирована', 'ok');
+      alert('Ссылка скопирована! Отправьте её другу.');
+    }).catch(() => { document.execCommand('copy'); alert('Ссылка скопирована!'); });
+  } else { document.execCommand('copy'); alert('Ссылка скопирована!'); }
+}
+
+function connectMQTT() {
+  log(`Подключение к ${MQTT_BROKER}`, 'info');
+  try {
+    mqttClient = mqtt.connect(MQTT_BROKER, {
+      clientId: 'cc_' + Math.random().toString(16).slice(2, 12),
+      username: MQTT_USER,
+      password: MQTT_PASS,
+      clean: true,
+      connectTimeout: 20000,
+      reconnectPeriod: 3000,
+      keepalive: 60,
+      protocolVersion: 4,
+      rejectUnauthorized: false
     });
-    c.on('error', (err) => {
-      if (done) return; done = true; clearTimeout(timer);
-      div.className = 'test err';
-      div.innerHTML = `❌ ${cfg.name} — <small>${cfg.url}</small><br><b>${err.message}</b>`;
-      try { c.end(true); } catch(e){}
-      resolve(false);
+  } catch (e) {
+    log('❌ Ошибка создания клиента: ' + e.message, 'err');
+    return;
+  }
+
+  mqttClient.on('connect', () => {
+    log('✅ MQTT подключён', 'ok');
+    // ✅ Подписываемся на ВСЁ под своим логином — так WQTT разрешает
+    const subTopic = `${TOPIC_PREFIX}/#`;
+    mqttClient.subscribe(subTopic, { qos: 0 }, (err) => {
+      if (err) log(`❌ Ошибка подписки: ${err.message}`, 'err');
+      else log(`✅ Подписка на ${subTopic}`, 'ok');
+      // Объявляем о себе только ПОСЛЕ подписки
+      setTimeout(() => sendMQTT({ type: 'hello', from: myRole }), 300);
+      startPeerCheck();
     });
   });
+
+  mqttClient.on('message', (topic, payload) => {
+    try {
+      const msg = JSON.parse(payload.toString());
+      if (msg.from === myRole) return;
+      handleMessage(msg);
+    } catch (e) {}
+  });
+
+  mqttClient.on('error', (err) => {
+    log('❌ MQTT ошибка: ' + err.message, 'err');
+  });
+
+  mqttClient.on('offline', () => {
+    log('⚠️ MQTT offline', 'err');
+    if (isHost) $('hostStatusText').innerText = 'Нет связи с сервером…';
+    else $('guestStatusText').innerText = 'Нет связи с сервером…';
+  });
+
+  mqttClient.on('reconnect', () => log('🔄 Переподключение…', 'warn'));
+  mqttClient.on('close', () => log('⚠️ MQTT соединение закрыто', 'warn'));
 }
 
-async function runTests() {
-  document.getElementById('results').innerHTML = '';
-  for (const cfg of CONFIGS) await testOne(cfg);
+function sendMQTT(msg) {
+  if (!mqttClient || !mqttClient.connected) return;
+  // ✅ Публикуем тоже с префиксом логина
+  const pubTopic = `${TOPIC_PREFIX}/calm/${roomId}`;
+  mqttClient.publish(pubTopic, JSON.stringify({ ...msg, from: myRole }), { qos: 0 });
 }
+
+function startPeerCheck() {
+  if (peerCheckInterval) clearInterval(peerCheckInterval);
+  peerCheckInterval = setInterval(() => {
+    sendMQTT({ type: 'ping' });
+    if (Date.now() - lastPeerPing > 10000 && peerOnline) {
+      peerOnline = false;
+      updatePeerStatus(false);
+      log('Собеседник отключился', 'warn');
+    }
+  }, 3500);
+}
+
+function handleMessage(msg) {
+  switch (msg.type) {
+    case 'hello':
+      log(`📩 Собеседник (${msg.from}) подключился`, 'ok');
+      lastPeerPing = Date.now();
+      if (!peerOnline) { peerOnline = true; updatePeerStatus(true); showApp(); }
+      sendMQTT({ type: 'welcome' });
+      break;
+    case 'welcome':
+    case 'ping':
+      lastPeerPing = Date.now();
+      if (!peerOnline) {
+        peerOnline = true; updatePeerStatus(true); showApp();
+        log('✅ Собеседник в сети', 'ok');
+      }
+      break;
+    case 'bye':
+      log('Собеседник вышел', 'info');
+      peerOnline = false; updatePeerStatus(false);
+      break;
+    case 'chat':
+      renderMessage({ text: msg.text, time: msg.time, mine: false });
+      break;
+    case 'typing':
+      $('typingIndicator').classList.toggle('hidden', !msg.on);
+      break;
+    case 'offer': handleOffer(msg.sdp, msg.callType); break;
+    case 'answer': handleAnswer(msg.sdp); break;
+    case 'ice': handleIce(msg.candidate); break;
+    case 'call-reject': log('Звонок отклонён', 'info'); endCall(true); break;
+    case 'call-end': log('Собеседник завершил звонок', 'info'); endCall(true); break;
+  }
+}
+
+function updatePeerStatus(online) {
+  $('peerDot').className = 'w-2 h-2 rounded-full ' + (online ? 'bg-green-400' : 'bg-gray-300');
+  $('headerPeerStatus').innerText = online ? 'Онлайн' : 'Не в сети';
+  $('headerPeerStatus').className = online ? 'text-xs text-green-500' : 'text-xs text-gray-500';
+  if (isHost) {
+    $('hostStatusDot').className = 'w-2 h-2 rounded-full ' + (online ? 'bg-green-400' : 'bg-yellow-400');
+    $('hostStatusText').innerText = online ? 'Собеседник подключился' : 'Ожидание собеседника…';
+  } else {
+    $('guestStatusDot').className = 'w-2 h-2 rounded-full ' + (online ? 'bg-green-400' : 'bg-yellow-400');
+    $('guestStatusText').innerText = online ? 'Подключено!' : 'Ищем хоста…';
+  }
+}
+
+function showApp() {
+  $('myNameLabel').innerText = myDisplay;
+  $('peerNameLabel').innerText = peerDisplay;
+  $('headerPeerName').innerText = peerDisplay;
+  const url = `https://i.pravatar.cc/150?u=${peerRole}`;
+  $('headerPeerAvatar').src = url;
+  $('callPeerAvatar').src = url;
+  $('incomingAvatar').src = url;
+  $('loginScreen').classList.add('hidden');
+  $('app').classList.remove('hidden');
+}
+
+function logout() {
+  sendMQTT({ type: 'bye' });
+  if (peerCheckInterval) clearInterval(peerCheckInterval);
+  if (mqttClient) mqttClient.end();
+  if (pc) pc.close();
+  if (localStream) localStream.getTracks().forEach(t => t.stop());
+  location.reload();
+}
+
+function sendMessage() {
+  const inp = $('messageInput');
+  const text = inp.value.trim();
+  if (!text) return;
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  sendMQTT({ type: 'chat', text, time });
+  renderMessage({ text, time, mine: true });
+  inp.value = '';
+}
+
+function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
+
+function handleTyping() {
+  sendMQTT({ type: 'typing', on: true });
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => sendMQTT({ type: 'typing', on: false }), 1200);
+}
+
+function renderMessage({ text, time, mine }) {
+  const c = $('messageContainer');
+  const d = document.createElement('div');
+  const esc = text.replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  if (mine) {
+    d.className = 'flex flex-col items-end self-end max-w-[75%] animate-message';
+    d.innerHTML = `<div class="bubble-me px-4 py-2 text-sm break-words">${esc}</div>
+      <div class="flex items-center gap-1 mt-1 mr-2"><span class="text-[10px] text-gray-400">${time}</span></div>`;
+  } else {
+    d.className = 'flex flex-col items-start max-w-[75%] animate-message';
+    d.innerHTML = `<div class="bubble-other px-4 py-2 text-sm break-words">${esc}</div>
+      <span class="text-[10px] text-gray-400 mt-1 ml-2">${time}</span>`;
+  }
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+
+async function getLocalStream(video) {
+  log(`Запрос ${video ? 'камеры и микрофона' : 'микрофона'}…`);
+  try {
+    return await navigator.mediaDevices.getUserMedia({
+      video: video ? { width: { ideal: 1280 }, height: { ideal: 720 } } : false,
+      audio: { echoCancellation: true, noiseSuppression: true }
+    });
+  } catch (e) {
+    log('❌ ' + e.message, 'err');
+    alert('Не удалось получить доступ: ' + e.message);
+    throw e;
+  }
+}
+
+function createPeerConnection() {
+  const conn = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+  conn.onicecandidate = (e) => { if (e.candidate) sendMQTT({ type: 'ice', candidate: e.candidate }); };
+  conn.ontrack = (e) => {
+    log('🎬 Поток получен', 'ok');
+    if (!remoteStream) remoteStream = new MediaStream();
+    e.streams[0].getTracks().forEach(t => { if (!remoteStream.getTracks().find(x => x.id === t.id)) remoteStream.addTrack(t); });
+    $('remoteVideo').srcObject = remoteStream;
+    $('remotePlaceholder').classList.add('hidden');
+    $('callStatusText').innerText = 'Соединение установлено';
+    startCallTimer();
+  };
+  conn.onconnectionstatechange = () => {
+    log(`Состояние: ${conn.connectionState}`, 'info');
+    if (conn.connectionState === 'failed') { log('Соединение не удалось', 'err'); endCall(true); }
+  };
+  return conn;
+}
+
+async function startCall(type) {
+  if (pc) return alert('Уже в звонке');
+  if (!peerOnline) return alert('Собеседник не в сети');
+  currentCallType = type;
+  isCaller = true;
+  log(`📞 Исходящий ${type}-звонок`, 'info');
+  try {
+    localStream = await getLocalStream(type === 'video');
+    $('localVideo').srcObject = localStream;
+    pc = createPeerConnection();
+    localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    sendMQTT({ type: 'offer', sdp: offer, callType: type });
+    $('callScreen').classList.remove('hidden');
+    $('remotePlaceholder').classList.remove('hidden');
+    $('callStatusText').innerText = 'Исходящий звонок…';
+    $('callDuration').classList.add('hidden');
+    $('btnCamera').style.display = type === 'video' ? 'flex' : 'none';
+  } catch (e) { endCall(true); }
+}
+
+async function handleOffer(sdp, callType) {
+  if (pc) { sendMQTT({ type: 'call-reject' }); return; }
+  currentCallType = callType;
+  isCaller = false;
+  incomingOffer = sdp;
+  log(`📩 Входящий ${callType}-звонок`, 'ok');
+  $('incomingType').innerText = callType === 'video' ? 'Входящий видеозвонок…' : 'Входящий аудиозвонок…';
+  $('incomingCallModal').classList.add('show');
+}
+
+async function acceptCall() {
+  $('incomingCallModal').classList.remove('show');
+  if (!incomingOffer) return;
+  try {
+    localStream = await getLocalStream(currentCallType === 'video');
+    $('localVideo').srcObject = localStream;
+    pc = createPeerConnection();
+    localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+    await pc.setRemoteDescription(new RTCSessionDescription(incomingOffer));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    sendMQTT({ type: 'answer', sdp: answer });
+    $('callScreen').classList.remove('hidden');
+    $('remotePlaceholder').classList.remove('hidden');
+    $('callStatusText').innerText = 'Соединение…';
+    $('btnCamera').style.display = currentCallType === 'video' ? 'flex' : 'none';
+    incomingOffer = null;
+  } catch (e) { endCall(true); }
+}
+
+async function handleAnswer(sdp) {
+  if (!pc) return;
+  try { await pc.setRemoteDescription(new RTCSessionDescription(sdp)); log('✅ Answer принят', 'ok'); } catch (e) {}
+}
+
+async function handleIce(candidate) {
+  if (!pc) return;
+  try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch (e) {}
+}
+
+function rejectCall() {
+  $('incomingCallModal').classList.remove('show');
+  sendMQTT({ type: 'call-reject' });
+  incomingOffer = null;
+}
+
+function endCall(silent = false) {
+  if (!silent) sendMQTT({ type: 'call-end' });
+  if (pc) { try { pc.close(); } catch(e){} pc = null; }
+  if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+  remoteStream = null;
+  $('callScreen').classList.add('hidden');
+  $('remoteVideo').srcObject = null;
+  $('localVideo').srcObject = null;
+  $('remotePlaceholder').classList.remove('hidden');
+  $('incomingCallModal').classList.remove('show');
+  stopCallTimer();
+  isMuted = false; isCameraOff = false; isCaller = false;
+  updateMuteUI(); updateCameraUI();
+}
+
+function toggleMute() {
+  if (!localStream) return;
+  isMuted = !isMuted;
+  localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
+  updateMuteUI();
+}
+function updateMuteUI() {
+  $('btnMute').classList.toggle('muted', isMuted);
+  $('iconMicOn').classList.toggle('hidden', isMuted);
+  $('iconMicOff').classList.toggle('hidden', !isMuted);
+}
+
+function toggleCamera() {
+  if (!localStream) return;
+  isCameraOff = !isCameraOff;
+  localStream.getVideoTracks().forEach(t => t.enabled = !isCameraOff);
+  updateCameraUI();
+}
+function updateCameraUI() {
+  $('btnCamera').classList.toggle('muted', isCameraOff);
+  $('iconCamOn').classList.toggle('hidden', isCameraOff);
+  $('iconCamOff').classList.toggle('hidden', !isCameraOff);
+}
+
+function startCallTimer() {
+  if (callTimerInterval) return;
+  callStartTime = Date.now();
+  $('callDuration').classList.remove('hidden');
+  callTimerInterval = setInterval(() => {
+    const s = Math.floor((Date.now() - callStartTime) / 1000);
+    $('callDuration').innerText = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  }, 1000);
+}
+function stopCallTimer() {
+  clearInterval(callTimerInterval); callTimerInterval = null;
+  $('callDuration').innerText = '00:00';
+  $('callDuration').classList.add('hidden');
+}
+
+initScreen();
+window.addEventListener('beforeunload', () => {
+  if (mqttClient && mqttClient.connected) sendMQTT({ type: 'bye' });
+});
 </script>
 </body>
 </html>
