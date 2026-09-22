@@ -60,7 +60,6 @@
   #logPanel .info { color: #60a5fa; }
   #logPanel .ok { color: #4ade80; }
 
-  /* Утилиты */
   .hidden { display: none !important; }
   .flex { display: flex; }
   .flex-col { flex-direction: column; }
@@ -85,7 +84,6 @@
   .text-center { text-align: center; }
   .text-xs { font-size: 12px; }
   .text-sm { font-size: 14px; }
-  .text-base { font-size: 16px; }
   .text-lg { font-size: 18px; }
   .text-xl { font-size: 20px; }
   .text-2xl { font-size: 24px; }
@@ -100,7 +98,6 @@
   .mt-2 { margin-top: 8px; }
   .mt-3 { margin-top: 12px; }
   .mt-4 { margin-top: 16px; }
-  .mt-5 { margin-top: 20px; }
   .mb-1 { margin-bottom: 4px; }
   .mb-2 { margin-bottom: 8px; }
   .mb-5 { margin-bottom: 20px; }
@@ -120,17 +117,15 @@
   .px-3 { padding-left: 12px; padding-right: 12px; }
   .px-4 { padding-left: 16px; padding-right: 16px; }
   .px-6 { padding-left: 24px; padding-right: 24px; }
-  .py-1\.5 { padding-top: 6px; padding-bottom: 6px; }
+  .py-1 { padding-top: 4px; padding-bottom: 4px; }
   .py-2 { padding-top: 8px; padding-bottom: 8px; }
   .py-3 { padding-top: 12px; padding-bottom: 12px; }
   .py-4 { padding-top: 16px; padding-bottom: 16px; }
   .py-6 { padding-top: 24px; padding-bottom: 24px; }
-  .pt-1 { padding-top: 4px; }
   .pb-1 { padding-bottom: 4px; }
   .pb-4 { padding-bottom: 16px; }
   .rounded-\[16px\] { border-radius: 16px; }
   .rounded-\[20px\] { border-radius: 20px; }
-  .rounded-\[22px\] { border-radius: 22px; }
   .rounded-\[28px\] { border-radius: 28px; }
   .rounded-\[32px\] { border-radius: 32px; }
   .rounded-full { border-radius: 9999px; }
@@ -141,13 +136,11 @@
   .border-white { border-color: #fff; }
   .border-white\/10 { border-color: rgba(255,255,255,0.1); }
   .border-white\/20 { border-color: rgba(255,255,255,0.2); }
-  .bg-white\/30 { background: rgba(255,255,255,0.3); }
   .bg-black\/30 { background: rgba(0,0,0,0.3); }
   .bg-black\/40 { background: rgba(0,0,0,0.4); }
   .bg-green-400 { background: #4ade80; }
   .bg-yellow-400 { background: #facc15; }
   .bg-gray-300 { background: #d1d5db; }
-  .bg-red-500 { background: #ef4444; }
   .text-white { color: #fff; }
   .text-gray-400 { color: #9ca3af; }
   .text-gray-500 { color: #6b7280; }
@@ -194,9 +187,6 @@
   .w-36 { width: 144px; }
   .h-36 { height: 144px; }
   .w-48 { width: 192px; }
-  .h-16 { height: 64px; }
-  .w-11 { width: 44px; }
-  .h-11 { height: 44px; }
   .top-6 { top: 24px; }
   .right-6 { right: 24px; }
   .left-6 { left: 24px; }
@@ -216,27 +206,21 @@
   .from-\[\#F472B6\] { --tw-from: #F472B6; }
   .to-\[\#EC4899\] { --tw-to: #EC4899; }
   .from-\[\#EEF2FF\] { --tw-from: #EEF2FF; }
-  .via-\[\#F8F9FA\] { --tw-via: #F8F9FA; }
   .to-\[\#FCE7F3\] { --tw-to: #FCE7F3; }
   .from-\[\#1E1B4B\] { --tw-from: #1E1B4B; }
-  .via-\[\#111827\] { --tw-via: #111827; }
   .to-\[\#0B0F1E\] { --tw-to: #0B0F1E; }
-  .via-\[\#111827\] { --tw-via: #111827; }
   .hover\:opacity-90:hover { opacity: 0.9; }
   .active\:scale-\[0\.98\]:active { transform: scale(0.98); }
-  .opacity-90 { opacity: 0.9; }
   .hover\:bg-\[\#DC2626\]:hover { background: #DC2626; }
   .hover\:bg-\[\#16A34A\]:hover { background: #16A34A; }
-  .hover\:text-brand:hover { color: #8B9AE0; }
 
-  /* Особые стили */
   body > #loginScreen { background: linear-gradient(135deg, #EEF2FF 0%, #F8F9FA 50%, #FCE7F3 100%); }
   #app { height: 100vh; width: 100vw; display: flex; overflow: hidden; }
   aside { width: 256px; display: flex; flex-direction: column; justify-content: space-between; padding: 24px 12px; margin: 16px; border-radius: 32px; }
   main { flex: 1; display: flex; gap: 16px; margin: 16px 16px 16px 0; overflow: hidden; }
   @media (max-width: 1024px) {
     aside { width: 80px; }
-    aside .hidden-lg { display: none; }
+    aside .hide-mobile { display: none; }
   }
 </style>
 </head>
@@ -290,13 +274,13 @@
     <div>
       <div class="flex items-center gap-3 px-3 mb-8 text-brand font-semibold text-lg">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-        <span>Calm</span>
+        <span class="hide-mobile">Calm</span>
       </div>
-      <div class="flex items-center gap-2 px-3 py-3 text-xs text-gray-500">
+      <div class="flex items-center gap-2 px-3 py-3 text-xs text-gray-500 hide-mobile">
         <span id="myDot" class="w-2 h-2 rounded-full bg-green-400"></span>
         <span>Вы: <span id="myNameLabel" class="font-medium">—</span></span>
       </div>
-      <div class="flex items-center gap-2 px-3 py-2 text-xs text-gray-500">
+      <div class="flex items-center gap-2 px-3 py-2 text-xs text-gray-500 hide-mobile">
         <span id="peerDot" class="w-2 h-2 rounded-full bg-gray-300"></span>
         <span>Собеседник: <span id="peerNameLabel" class="font-medium">—</span></span>
       </div>
@@ -388,11 +372,11 @@
     <div class="absolute bottom-8 left-1\/2 -translate-x-1\/2 flex items-center gap-4 px-6 py-4 rounded-full bg-black\/30 backdrop-blur-xl border-2 border-white\/10">
       <button id="btnMute" onclick="toggleMute()" class="call-ctrl" title="Микрофон">
         <svg id="iconMicOn" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
-        <svg id="iconMicOff" class="w-6 h-6 hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/><path d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
+        <svg id="iconMicOff" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/><path d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
       </button>
       <button id="btnCamera" onclick="toggleCamera()" class="call-ctrl" title="Камера">
         <svg id="iconCamOn" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-        <svg id="iconCamOff" class="w-6 h-6 hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/><path d="M3 3l18 18"/></svg>
+        <svg id="iconCamOff" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/><path d="M3 3l18 18"/></svg>
       </button>
       <button onclick="endCall()" class="call-ctrl end" title="Завершить">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"/></svg>
@@ -405,9 +389,9 @@
 
 <script>
 // ============================================================
-//  НАСТРОЙКИ
+//  НАСТРОЙКИ — MQTT-БРОКЕР WQTT.RU (работает в РФ)
 // ============================================================
-const MQTT_BROKER = 'wss://broker.emqx.io:8084/mqtt';
+const MQTT_BROKER = 'wss://wqtt.ru:8084/mqtt';
 const ICE_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
@@ -495,18 +479,28 @@ function copyLink(e) {
 }
 
 function connectMQTT() {
-  log('Подключение к серверу…', 'info');
-  mqttClient = mqtt.connect(MQTT_BROKER, {
-    clientId: 'cc_' + Math.random().toString(16).slice(2, 10),
-    clean: true,
-    connectTimeout: 15000,
-    reconnectPeriod: 3000,
-    keepalive: 30
-  });
+  log('Подключение к wqtt.ru…', 'info');
+  log(`URL: ${MQTT_BROKER}`, 'info');
+
+  try {
+    mqttClient = mqtt.connect(MQTT_BROKER, {
+      clientId: 'cc_' + Math.random().toString(16).slice(2, 12),
+      clean: true,
+      connectTimeout: 15000,
+      reconnectPeriod: 3000,
+      keepalive: 30,
+      protocolVersion: 4,
+      rejectUnauthorized: false
+    });
+  } catch (e) {
+    log('❌ Ошибка создания клиента: ' + e.message, 'err');
+    return;
+  }
 
   mqttClient.on('connect', () => {
-    log('✅ Сервер подключён', 'ok');
+    log('✅ MQTT подключён к wqtt.ru', 'ok');
     mqttClient.subscribe(`calm/${roomId}`, { qos: 0 });
+    log(`Подписка на calm/${roomId}`, 'info');
     sendMQTT({ type: 'hello', from: myRole });
     startPeerCheck();
   });
@@ -520,7 +514,19 @@ function connectMQTT() {
   });
 
   mqttClient.on('error', (err) => {
-    log('❌ Ошибка: ' + err.message, 'err');
+    log('❌ MQTT ошибка: ' + err.message, 'err');
+  });
+
+  mqttClient.on('offline', () => {
+    log('⚠️ MQTT offline — нет соединения', 'err');
+  });
+
+  mqttClient.on('reconnect', () => {
+    log('🔄 Переподключение…', 'info');
+  });
+
+  mqttClient.on('close', () => {
+    log('⚠️ MQTT закрыт', 'err');
   });
 }
 
@@ -647,7 +653,7 @@ function renderMessage({ text, time, mine }) {
 }
 
 async function getLocalStream(video) {
-  log(`Запрос ${video ? 'камеры' : 'микрофона'}…`);
+  log(`Запрос ${video ? 'камеры и микрофона' : 'микрофона'}…`);
   try {
     return await navigator.mediaDevices.getUserMedia({
       video: video ? { width: { ideal: 1280 }, height: { ideal: 720 } } : false,
@@ -673,6 +679,7 @@ function createPeerConnection() {
     startCallTimer();
   };
   conn.onconnectionstatechange = () => {
+    log(`Состояние: ${conn.connectionState}`, 'info');
     if (conn.connectionState === 'failed') { log('Соединение не удалось', 'err'); endCall(true); }
   };
   return conn;
@@ -732,7 +739,7 @@ async function acceptCall() {
 
 async function handleAnswer(sdp) {
   if (!pc) return;
-  try { await pc.setRemoteDescription(new RTCSessionDescription(sdp)); log('✅ Answer', 'ok'); } catch (e) {}
+  try { await pc.setRemoteDescription(new RTCSessionDescription(sdp)); log('✅ Answer принят', 'ok'); } catch (e) {}
 }
 
 async function handleIce(candidate) {
