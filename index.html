@@ -9,6 +9,7 @@
 <style>
   :root {
     --bg-1: #EEF2FF; --bg-2: #F8F9FA; --bg-3: #FCE7F3;
+    --solid-bg: #EEF2FF;
     --text: #1F2937; --text-muted: #6b7280; --text-dim: #9ca3af;
     --glass-bg: rgba(255,255,255,0.65); --glass-border: rgba(255,255,255,0.6);
     --glass-2-bg: rgba(255,255,255,0.5); --glass-2-border: rgba(255,255,255,0.5);
@@ -23,6 +24,7 @@
   }
   .dark {
     --bg-1: #0B0F1E; --bg-2: #111827; --bg-3: #1E1B4B;
+    --solid-bg: #0B0F1E;
     --text: #F9FAFB; --text-muted: #9ca3af; --text-dim: #6b7280;
     --glass-bg: rgba(31,41,55,0.7); --glass-border: rgba(255,255,255,0.08);
     --glass-2-bg: rgba(55,65,81,0.5); --glass-2-border: rgba(255,255,255,0.06);
@@ -43,21 +45,74 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  html, body { height: 100%; }
-  html { background: #EEF2FF; }
-  html.dark { background: #0B0F1E; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ============================================================
+     SAFARI THEME-COLOR FIX
+     html имеет СПЛОШНОЙ цвет — именно его Safari берёт для панелей.
+     body прозрачный, анимированный градиент лежит на .page-gradient-bg.
+     ============================================================ */
+  html { background-color: var(--solid-bg); transition: background-color 0.4s ease; }
+  html.dark { background-color: var(--solid-bg); }
+
   body {
-    background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
-    background-size: 200% 200%;
-    animation: bgShift 20s ease infinite;
+    background-color: transparent;
     color: var(--text);
     overflow: hidden;
     overscroll-behavior: none;
     transition: color 0.5s;
   }
+
+  /* Слой с анимированным градиентом */
+  .page-gradient-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
+    background-size: 200% 200%;
+    animation: bgShift 20s ease infinite;
+    transition: background 0.5s;
+    pointer-events: none;
+  }
   @keyframes bgShift {
     0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
+  }
+
+  /* Фиксация краёв под панели Safari */
+  .safari-top-fix,
+  .safari-bottom-fix {
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: 110px;
+    z-index: 1;
+    pointer-events: none;
+    transition: background 0.4s ease;
+  }
+  .safari-top-fix {
+    top: 0;
+    background: linear-gradient(to bottom, var(--solid-bg) 0%, rgba(238,242,255,0.5) 45%, transparent 100%);
+  }
+  .safari-bottom-fix {
+    bottom: 0;
+    background: linear-gradient(to top, var(--solid-bg) 0%, rgba(238,242,255,0.5) 45%, transparent 100%);
+  }
+  html.dark .safari-top-fix {
+    background: linear-gradient(to bottom, var(--solid-bg) 0%, rgba(11,15,30,0.5) 45%, transparent 100%);
+  }
+  html.dark .safari-bottom-fix {
+    background: linear-gradient(to top, var(--solid-bg) 0%, rgba(11,15,30,0.5) 45%, transparent 100%);
+  }
+  /* На десктопе фиксы не нужны */
+  @media (min-width: 900px) {
+    .safari-top-fix,
+    .safari-bottom-fix { display: none; }
   }
 
   .bg-blobs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
@@ -397,7 +452,7 @@
   }
 
   body > #loginScreen { position: relative; z-index: 10000; }
-  #app { height: 100vh; height: 100dvh; width: 100vw; display: flex; overflow: hidden; position: relative; z-index: 1; }
+  #app { height: 100vh; height: 100dvh; width: 100vw; display: flex; overflow: hidden; position: relative; z-index: 2; }
   aside { display: flex; flex-direction: column; justify-content: space-between; padding: 20px 14px; margin: 16px; border-radius: 32px; overflow: hidden; flex-shrink: 0; }
   main { flex: 1; display: flex; gap: 16px; margin: 16px 16px 16px 0; overflow: hidden; min-width: 0; }
 
@@ -1215,6 +1270,13 @@
 </style>
 </head>
 <body>
+
+<!-- Слой анимированного градиента (Safari берёт цвет панелей из html) -->
+<div class="page-gradient-bg"></div>
+
+<!-- Верхний/нижний фиксы для панелей Safari (только на мобильных) -->
+<div class="safari-top-fix"></div>
+<div class="safari-bottom-fix"></div>
 
 <div class="bg-blobs">
   <div class="blob blob-1"></div>
