@@ -541,7 +541,6 @@
   .call-ctrl.accept:hover { background: #16a34a; }
   .call-ctrl.muted { background: rgba(239,68,68,0.6); }
 
-  /* Кнопка демонстрации внутри звонка — активное состояние */
   .call-ctrl.sharing-active {
     background: linear-gradient(135deg, #ef4444, #dc2626) !important;
     color: #fff !important;
@@ -790,7 +789,12 @@
     width: 100%;
     max-width: 340px;
     padding: 0 20px;
-    transition: max-width 0.6s cubic-bezier(0.34, 1.15, 0.64, 1);
+    transition: max-width 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
+                opacity 0.3s ease;
+  }
+  .call-info-inner.overlay-hidden {
+    opacity: 0;
+    pointer-events: none;
   }
   #callScreen.minimized .call-info-inner { max-width: 220px; }
 
@@ -885,6 +889,30 @@
   .call-mini-topbar button:active {
     transform: scale(0.9);
   }
+
+  /* ===== Уголок для ручного ресайза мини-окна ===== */
+  .mini-resize-handle {
+    display: none;
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    width: 28px;
+    height: 28px;
+    z-index: 20;
+    cursor: nwse-resize;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    background:
+      linear-gradient(135deg,
+        transparent 45%,
+        rgba(255,255,255,0.35) 45%, rgba(255,255,255,0.35) 53%,
+        transparent 53%, transparent 62%,
+        rgba(255,255,255,0.55) 62%, rgba(255,255,255,0.55) 70%,
+        transparent 70%);
+    border-radius: 0 0 14px 0;
+    pointer-events: auto;
+  }
+  #callScreen.minimized .mini-resize-handle { display: block; }
 
   #callScreen.minimized .call-avatar-pulse {
     width: 72px !important;
@@ -1695,6 +1723,8 @@
       </div>
     </div>
 
+    <div id="miniResizeHandle" class="mini-resize-handle" title="Изменить размер"></div>
+
     <video id="remoteVideo" autoplay playsinline class="absolute inset-0 w-full h-full object-cover" style="z-index:1;"></video>
 
     <div id="remotePlaceholder" class="absolute inset-0" style="z-index:1;"></div>
@@ -2035,7 +2065,7 @@ function stopRingback() {
 function stopAllSounds() { stopRingtone(); stopRingback(); }
 
 // ============================================================
-//  УПРАВЛЕНИЕ АУДИОСЕССИЕЙ (iOS 16.4+)
+//  АУДИОСЕССИЯ
 // ============================================================
 function setIOSAudioSession(type) {
   if (!navigator.audioSession) return;
@@ -2046,12 +2076,8 @@ function setIOSAudioSession(type) {
     log(`⚠️ Аудиосессия: ${e.message}`, 'warn');
   }
 }
-function setupCallAudioSession() {
-  setIOSAudioSession('play-and-record');
-}
-function restoreAudioSession() {
-  setIOSAudioSession('auto');
-}
+function setupCallAudioSession() { setIOSAudioSession('play-and-record'); }
+function restoreAudioSession() { setIOSAudioSession('auto'); }
 
 // ============================================================
 //  МОБИЛЬНЫЙ РЕЖИМ
@@ -2432,20 +2458,24 @@ function handleMessage(msg) {
       peerIsScreenSharing = !!msg.on;
       updateScreenShareBadge();
 
-      // Меняем режим отображения remoteVideo:
-      // если идёт демонстрация — object-fit: contain (не обрезаем широкий экран)
       const rv = $('remoteVideo');
       if (rv) rv.classList.toggle('screen-share-mode', !!msg.on);
+
+      // Прячем аватар/имя/таймер — они мешают смотреть демонстрацию.
+      if (msg.on) {
+        setCallInfoOverlay(false);
+      } else {
+        const hasVideo = remoteStream &&
+                         remoteStream.getVideoTracks().some(t => t.enabled);
+        setCallInfoOverlay(!hasVideo);
+      }
 
       log(msg.on
         ? `🖥️ ${peerNick || 'Собеседник'} показывает экран`
         : `🖥️ ${peerNick || 'Собеседник'} остановил демонстрацию`,
         'info');
 
-      // 📱 На мобильной версии — автосворачиваем звонок в мини-окно,
-      // чтобы демонстрация не разворачивалась на весь экран.
-      // Пользователь в любой момент может нажать ⤢ в верхней панели
-      // мини-окна, чтобы развернуть её на весь экран.
+      // 📱 На телефоне — автосворачиваем звонок в мини-окно.
       if (msg.on && document.body.classList.contains('mobile-mode')) {
         const cs = $('callScreen');
         if (cs && !cs.classList.contains('hidden') && !callMinimized && !callHidden) {
@@ -2833,6 +2863,12 @@ function setCallStatus(text) {
   if (el) el.innerText = text;
 }
 
+function setCallInfoOverlay(show) {
+  const info = document.querySelector('#callScreen .call-info-inner');
+  if (!info) return;
+  info.classList.toggle('overlay-hidden', !show);
+}
+
 function stopVoiceWave() {
   if (voiceRafId) { cancelAnimationFrame(voiceRafId); voiceRafId = null; }
   if (audioSourceNode) { try { audioSourceNode.disconnect(); } catch(e){} audioSourceNode = null; }
@@ -2931,6 +2967,7 @@ function createPeerConnection() {
 
     if (e.track.kind === 'video') {
       $('remotePlaceholder').classList.add('hidden');
+      setCallInfoOverlay(false);
     }
 
     setCallStatus('Соединение установлено');
@@ -2972,6 +3009,7 @@ async function startCall(type) {
   $('callDuration').classList.add('hidden');
   $('voiceWave').classList.add('hidden');
   $('btnCamera').style.display = type === 'video' ? 'flex' : 'none';
+  setCallInfoOverlay(true);
 
   try { playRingback(); } catch (e) {}
 
@@ -3041,6 +3079,7 @@ async function acceptCall() {
   $('callDuration').classList.add('hidden');
   $('voiceWave').classList.add('hidden');
   $('btnCamera').style.display = currentCallType === 'video' ? 'flex' : 'none';
+  setCallInfoOverlay(true);
 
   try {
     localStream = await getLocalStream(currentCallType === 'video');
@@ -3096,6 +3135,7 @@ function endCall(silent = false) {
   const rv = $('remoteVideo');
   if (rv) rv.classList.remove('screen-share-mode');
   updateScreenShareBadge();
+  setCallInfoOverlay(true);
   $('callScreen').classList.add('hidden');
   $('remoteVideo').srcObject = null;
   $('localVideo').srcObject = null;
@@ -3480,17 +3520,27 @@ function minimizeCall() {
   cs.classList.add('minimized');
 
   const vw = window.innerWidth, vh = window.innerHeight;
+  const isMob = document.body.classList.contains('mobile-mode');
+
+  // На телефоне окно шире — чтобы широкий экран ПК не зажимался в узкую полоску.
+  const w = isMob
+    ? Math.min(vw - 24, 480)
+    : MINI_W;
+  const h = isMob
+    ? Math.min(Math.round(vh * 0.62), Math.round(w * 0.62) + 90)
+    : MINI_H;
+
   if (miniCallPos.x === null || miniCallPos.y === null) {
-    miniCallPos.x = vw - MINI_W - MINI_MARGIN;
-    miniCallPos.y = vh - MINI_H - MINI_MARGIN;
+    miniCallPos.x = Math.round((vw - w) / 2);
+    miniCallPos.y = isMob ? 40 : (vh - h - MINI_MARGIN);
   }
-  miniCallPos.x = Math.max(MINI_MARGIN, Math.min(vw - MINI_W - MINI_MARGIN, miniCallPos.x));
-  miniCallPos.y = Math.max(MINI_MARGIN, Math.min(vh - MINI_H - MINI_MARGIN, miniCallPos.y));
+  miniCallPos.x = Math.max(MINI_MARGIN, Math.min(vw - w - MINI_MARGIN, miniCallPos.x));
+  miniCallPos.y = Math.max(MINI_MARGIN, Math.min(vh - h - MINI_MARGIN, miniCallPos.y));
 
   cs.style.left = miniCallPos.x + 'px';
   cs.style.top = miniCallPos.y + 'px';
-  cs.style.width = MINI_W + 'px';
-  cs.style.height = MINI_H + 'px';
+  cs.style.width = w + 'px';
+  cs.style.height = h + 'px';
 
   const mpn = $('miniPeerName');
   if (mpn) mpn.textContent = peerNick || 'Собеседник';
@@ -3763,6 +3813,69 @@ function resetCallScreenState() {
       cs2.style.height = window.innerHeight + 'px';
     }
   });
+})();
+
+// ============================================================
+//  РУЧНОЙ РЕСАЙЗ МИНИ-ОКНА ЗВОНКА ЗА УГОЛ
+// ============================================================
+(function initMiniResize() {
+  const handle = $('miniResizeHandle');
+  const cs = $('callScreen');
+  if (!handle || !cs) return;
+
+  let resizing = false;
+  let startX = 0, startY = 0, startW = 0, startH = 0;
+  const pt = (e) => (e.touches && e.touches[0]) ? e.touches[0] : e;
+
+  function onDown(e) {
+    if (!callMinimized) return;
+    resizing = true;
+    const p = pt(e);
+    startX = p.clientX;
+    startY = p.clientY;
+    startW = cs.offsetWidth;
+    startH = cs.offsetHeight;
+    cs.classList.add('dragging');
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  function onMove(e) {
+    if (!resizing) return;
+    const p = pt(e);
+    let w = startW + (p.clientX - startX);
+    let h = startH + (p.clientY - startY);
+    w = Math.max(180, Math.min(window.innerWidth  - 16, w));
+    h = Math.max(140, Math.min(window.innerHeight - 16, h));
+
+    let x = cs.offsetLeft;
+    let y = cs.offsetTop;
+    if (x + w > window.innerWidth  - 8) x = window.innerWidth  - w - 8;
+    if (y + h > window.innerHeight - 8) y = window.innerHeight - h - 8;
+    if (x < 8) x = 8;
+    if (y < 8) y = 8;
+
+    cs.style.width  = w + 'px';
+    cs.style.height = h + 'px';
+    cs.style.left   = x + 'px';
+    cs.style.top    = y + 'px';
+    miniCallPos.x = x;
+    miniCallPos.y = y;
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  function onUp() {
+    if (!resizing) return;
+    resizing = false;
+    cs.classList.remove('dragging');
+  }
+
+  handle.addEventListener('mousedown', onDown);
+  handle.addEventListener('touchstart', onDown, { passive: false });
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('mouseup', onUp);
+  document.addEventListener('touchend', onUp);
+  document.addEventListener('touchcancel', onUp);
 })();
 
 // ============================================================
