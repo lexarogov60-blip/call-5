@@ -4,23 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <title>DianaCalm</title>
-<meta name="theme-color" content="#EEF2FF" id="themeColorMeta">
+<meta name="theme-color" content="#C8CCD2" id="themeColorMeta">
 <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <style>
   :root {
-    --bg-1: #EEF2FF; --bg-2: #F8F9FA; --bg-3: #FCE7F3;
-    --solid-bg: #EEF2FF;
-    --text: #1F2937; --text-muted: #6b7280; --text-dim: #9ca3af;
-    --glass-bg: rgba(255,255,255,0.65); --glass-border: rgba(255,255,255,0.6);
-    --glass-2-bg: rgba(255,255,255,0.5); --glass-2-border: rgba(255,255,255,0.5);
-    --input-bg: rgba(255,255,255,0.8); --input-border: rgba(0,0,0,0.06);
-    --bubble-other-bg: #fff; --bubble-other-text: #1F2937; --bubble-other-border: rgba(0,0,0,0.04);
-    --shadow-lg: 0 10px 40px rgba(139, 154, 224, 0.15);
-    --shadow-sm: 0 4px 16px rgba(0,0,0,0.04);
-    --border-bottom: rgba(0,0,0,0.05);
-    --blob-1: #A5B4FC; --blob-2: #FBCFE8; --blob-3: #BFDBFE; --blob-4: #DDD6FE;
-    --chat-area-bg: rgba(139, 154, 224, 0.05);
-    --divider: rgba(0,0,0,0.06);
+    --bg-1: #C8CCD2; --bg-2: #D3D6DB; --bg-3: #CCC7D2;
+    --solid-bg: #C8CCD2;
+    --text: #1F2937; --text-muted: #5f6875; --text-dim: #8a92a0;
+    --glass-bg: rgba(250,251,253,0.58); --glass-border: rgba(255,255,255,0.55);
+    --glass-2-bg: rgba(240,242,246,0.55); --glass-2-border: rgba(255,255,255,0.45);
+    --input-bg: rgba(247,248,251,0.85); --input-border: rgba(0,0,0,0.07);
+    --bubble-other-bg: #F4F5F8; --bubble-other-text: #1F2937; --bubble-other-border: rgba(0,0,0,0.05);
+    --shadow-lg: 0 10px 40px rgba(100, 110, 140, 0.15);
+    --shadow-sm: 0 4px 16px rgba(0,0,0,0.05);
+    --border-bottom: rgba(0,0,0,0.06);
+    --blob-1: #8F9BC4; --blob-2: #C99BB8; --blob-3: #94A9C7; --blob-4: #A79CC4;
+    --chat-area-bg: rgba(139, 154, 224, 0.035);
+    --divider: rgba(0,0,0,0.07);
   }
   .dark {
     --bg-1: #0B0F1E; --bg-2: #111827; --bg-3: #1E1B4B;
@@ -45,13 +45,13 @@
   .page-gradient-bg { position: fixed; inset: 0; z-index: -1; background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%); background-size: 200% 200%; animation: bgShift 20s ease infinite; transition: background 0.5s; pointer-events: none; }
   @keyframes bgShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
   .safari-top-fix, .safari-bottom-fix { position: fixed; left: 0; right: 0; height: 110px; z-index: 1; pointer-events: none; transition: background 0.4s ease; }
-  .safari-top-fix { top: 0; background: linear-gradient(to bottom, var(--solid-bg) 0%, rgba(238,242,255,0.5) 45%, transparent 100%); }
-  .safari-bottom-fix { bottom: 0; background: linear-gradient(to top, var(--solid-bg) 0%, rgba(238,242,255,0.5) 45%, transparent 100%); }
+  .safari-top-fix { top: 0; background: linear-gradient(to bottom, var(--solid-bg) 0%, rgba(200,204,210,0.55) 45%, transparent 100%); }
+  .safari-bottom-fix { bottom: 0; background: linear-gradient(to top, var(--solid-bg) 0%, rgba(200,204,210,0.55) 45%, transparent 100%); }
   html.dark .safari-top-fix { background: linear-gradient(to bottom, var(--solid-bg) 0%, rgba(11,15,30,0.5) 45%, transparent 100%); }
   html.dark .safari-bottom-fix { background: linear-gradient(to top, var(--solid-bg) 0%, rgba(11,15,30,0.5) 45%, transparent 100%); }
   @media (min-width: 900px) { .safari-top-fix, .safari-bottom-fix { display: none; } }
   .bg-blobs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-  .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; transition: opacity 0.5s; will-change: transform; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.25; transition: opacity 0.5s; will-change: transform; }
   .dark .blob { opacity: 0.35; }
   .blob-1 { width: 400px; height: 400px; background: var(--blob-1); top: -100px; left: -100px; animation: float1 18s ease-in-out infinite; }
   .blob-2 { width: 350px; height: 350px; background: var(--blob-2); bottom: -80px; right: -80px; animation: float2 22s ease-in-out infinite; }
@@ -61,7 +61,7 @@
   @keyframes float2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-80px,-60px) scale(1.1); } }
   @keyframes float3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-50px,70px) scale(1.2); } }
   @keyframes float4 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(70px,-50px) scale(1.05); } }
-  .glass { background: var(--glass-bg); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid var(--glass-border); box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.5); }
+  .glass { background: var(--glass-bg); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid var(--glass-border); box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.55); }
   .dark .glass { box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.05); }
   .glass-2 { background: var(--glass-2-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-2-border); }
   .bubble-me { display: inline-block; background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%); color: #fff; border-radius: 22px 22px 6px 22px; padding: 10px 16px; font-size: 15px; line-height: 1.45; letter-spacing: -0.01em; word-break: break-word; max-width: 100%; box-shadow: 0 4px 16px rgba(109,127,214,0.3), inset 0 1px 0 rgba(255,255,255,0.2); cursor: pointer; user-select: none; -webkit-user-select: none; transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease; will-change: transform; }
@@ -192,7 +192,7 @@
   body > #loginScreen { position: relative; z-index: 10000; }
   #app { height: 100vh; height: 100dvh; width: 100vw; display: flex; overflow: hidden; position: relative; z-index: 2; }
   aside { display: flex; flex-direction: column; justify-content: space-between; padding: 20px 14px; margin: 16px; border-radius: 32px; overflow: hidden; flex-shrink: 0; }
-  main { flex: 1; display: flex; gap: 16px; margin: 16px 16px 16px 0; overflow: hidden; min-width: 0; }
+  main { flex: 1; display: flex; gap: 16px; margin: 16px 16px 16px 0; overflow: hidden; min-width: 0; position: relative; }
   .resize-handle { width: 8px; cursor: col-resize; flex-shrink: 0; position: relative; align-self: stretch; z-index: 50; display: flex; align-items: center; justify-content: center; }
   .resize-handle::after { content: ''; width: 3px; height: 44px; background: rgba(139,154,224,0.5); border-radius: 3px; opacity: 0; transition: opacity 0.25s, height 0.25s; }
   .resize-handle:hover::after, .resize-handle.dragging::after { opacity: 1; height: 64px; }
@@ -200,6 +200,44 @@
   .resize-handle.dragging { background: rgba(139,154,224,0.15); }
   body.resizing { cursor: col-resize !important; user-select: none !important; }
   body.resizing * { cursor: col-resize !important; user-select: none !important; }
+
+  /* ПРАВЫЙ РЕСАЙЗ-ХЭНДЛ (внутри main, у правого края чата) */
+  .right-resize-handle {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 68px;
+    cursor: col-resize;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px 0 0 6px;
+    transition: background 0.2s ease;
+  }
+  .right-resize-handle::after {
+    content: '';
+    width: 3px;
+    height: 44px;
+    background: rgba(139,154,224,0.5);
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.25s, height 0.25s;
+  }
+  .right-resize-handle:hover::after,
+  .right-resize-handle.dragging::after {
+    opacity: 1;
+    height: 64px;
+  }
+  .right-resize-handle:hover { background: rgba(139,154,224,0.08); }
+  .right-resize-handle.dragging { background: rgba(139,154,224,0.15); }
+  @media (max-width: 1024px) {
+    .right-resize-handle { display: none; }
+  }
+  body.mobile-mode .right-resize-handle { display: none !important; }
+
   @media (max-width: 1024px) { .resize-handle { display: none; } aside { width: 84px !important; min-width: 84px !important; flex-basis: 84px !important; padding: 20px 8px; } aside .hide-mobile { display: none; } main { margin: 16px 12px 16px 0; } }
   .nick-form { animation: modalIn 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
   .logo-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; animation: logoFloat 4s ease-in-out infinite; box-shadow: 0 12px 32px rgba(109,127,214,0.4), 0 0 0 6px rgba(139,154,224,0.15); }
@@ -208,7 +246,21 @@
   .status-dot.online { background: #4ade80; box-shadow: 0 0 0 2px rgba(74,222,128,0.3); animation: onlinePulse 2s ease-in-out infinite; }
   @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
   .chat-area { background: var(--chat-area-bg); border-radius: 26px; margin: 0 16px; flex: 1; overflow-y: auto; position: relative; min-height: 0; }
-  .call-ctrl { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; background: rgba(255,255,255,0.15); color: white; backdrop-filter: blur(10px); flex-shrink: 0; transition: width 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), height 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), background 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+  /* ============ КНОПКА УПРАВЛЕНИЯ ЗВОНКОМ ============ */
+  .call-ctrl {
+    width: 60px; height: 60px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; border: none;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+    transition: width 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
+                height 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
+                background 0.25s ease,
+                transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
   .call-ctrl:hover { transform: scale(1.08); background: rgba(255,255,255,0.25); }
   .call-ctrl:active { transform: scale(0.95); }
   .call-ctrl.end { background: #ef4444; }
@@ -216,30 +268,81 @@
   .call-ctrl.accept { background: #22c55e; }
   .call-ctrl.accept:hover { background: #16a34a; }
   .call-ctrl.muted { background: rgba(239,68,68,0.6); }
-  .call-ctrl.sharing-active { background: linear-gradient(135deg, #ef4444, #dc2626) !important; color: #fff !important; animation: screenSharePulse 1.8s ease-in-out infinite; }
-  .call-ctrl.sharing-active:hover { background: linear-gradient(135deg, #dc2626, #b91c1c) !important; }
+
+  /* Скрытие/показ в зависимости от режима */
   #btnSpeaker { display: none !important; }
   body.mobile-mode #btnSpeaker { display: flex !important; }
-  body.mobile-mode #screenShareBtn { display: none !important; }
-  body.mobile-mode #btnScreenShareCall { display: none !important; }
-  #screenShareBtn.active { background: linear-gradient(135deg, rgba(239,68,68,0.85), rgba(220,38,38,0.85)) !important; color: #fff !important; box-shadow: 0 0 0 1px rgba(239,68,68,0.4), 0 4px 14px rgba(239,68,68,0.4) !important; animation: screenSharePulse 1.8s ease-in-out infinite; }
-  #screenShareBtn.active:hover { background: linear-gradient(135deg, #dc2626, #b91c1c) !important; transform: translateY(-2px) scale(1.04) !important; }
-  @keyframes screenSharePulse { 0%, 100% { box-shadow: 0 0 0 1px rgba(239,68,68,0.4), 0 4px 14px rgba(239,68,68,0.4); } 50% { box-shadow: 0 0 0 1px rgba(239,68,68,0.6), 0 4px 22px rgba(239,68,68,0.7); } }
 
-  /* ===== КНОПКА ВОЗОБНОВЛЕНИЯ / ОБНОВЛЕНИЯ ДЕМОНСТРАЦИИ ===== */
-  #btnResumeScreenShare {
-    display: none;
-    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
-    color: #fff !important;
+  /* Кнопка "Ещё" — теперь и на ПК, и на мобильном */
+  #btnMoreCall { display: flex; }
+
+  /* Кнопка "Свернуть в чат" (десктопная, мини-режим) */
+  body.mobile-mode #btnMinimizeCall { display: none !important; }
+
+  /* Пункт "Демонстрация экрана" в меню — только для десктопа */
+  body.mobile-mode #moreShareBtn { display: none !important; }
+
+  /* Меню "Ещё" */
+  #callMoreMenu {
+    position: absolute;
+    bottom: calc(100% + 14px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9) translateY(8px);
+    transform-origin: bottom center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    border-radius: 20px;
+    background: rgba(22, 24, 42, 0.96);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05) inset;
+    z-index: 20;
+    min-width: 220px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.24s ease, transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.24s;
   }
-  #btnResumeScreenShare.visible { display: flex !important; }
-  #btnResumeScreenShare.pulse { animation: resumePulse 1.6s ease-in-out infinite; }
-  #btnResumeScreenShare:hover { background: linear-gradient(135deg, #d97706, #b45309) !important; transform: scale(1.08); }
-  @keyframes resumePulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.7), 0 0 0 1px rgba(255,255,255,0.2) inset; }
-    50%      { box-shadow: 0 0 0 10px rgba(245,158,11,0), 0 0 0 1px rgba(255,255,255,0.2) inset; }
+  #callMoreMenu.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) scale(1) translateY(0);
   }
-  body.mobile-mode #btnResumeScreenShare.visible { display: flex !important; }
+  #callMoreMenu .call-more-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border: none; background: transparent;
+    border-radius: 12px; color: #fff; font-family: inherit;
+    font-size: 14px; font-weight: 500; letter-spacing: -0.005em;
+    cursor: pointer; text-align: left; width: 100%;
+    transition: background 0.18s ease, transform 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #callMoreMenu .call-more-item:hover { background: rgba(255,255,255,0.08); }
+  #callMoreMenu .call-more-item:active { background: rgba(255,255,255,0.14); transform: scale(0.97); }
+  #callMoreMenu .call-more-item .more-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 10px;
+    background: rgba(139,154,224,0.16); color: #A5B4FC;
+    flex-shrink: 0;
+    transition: background 0.18s ease, color 0.18s ease;
+  }
+  #callMoreMenu .call-more-item .more-icon svg { width: 16px; height: 16px; }
+  #callMoreMenu .call-more-item:hover .more-icon { background: rgba(139,154,224,0.28); color: #C7D2FE; }
+  #callMoreMenu .call-more-item .more-text { flex: 1; white-space: nowrap; }
+  #callMoreMenu .call-more-item.warn .more-icon { background: rgba(245,158,11,0.18); color: #FBBF24; }
+  #callMoreMenu .call-more-item.warn:hover .more-icon { background: rgba(245,158,11,0.3); color: #FCD34D; }
+  #btnMoreCall.active { background: rgba(255,255,255,0.28); transform: scale(1.05); }
+
+  /* Пульсация кнопки "Возобновить показ" в меню */
+  @keyframes resumeMenuPulse {
+    0%, 100% { background: rgba(245,158,11,0.18); }
+    50% { background: rgba(245,158,11,0.4); }
+  }
+  #moreResumeBtn.pulse .more-icon { animation: resumeMenuPulse 1.6s ease-in-out infinite; }
 
   #remoteVideo.screen-share-mode { object-fit: contain !important; background: #000; }
   #screenShareBadge { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); z-index: 7; display: flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: rgba(239,68,68,0.92); color: #fff; font-size: 13px; font-weight: 500; letter-spacing: 0.01em; box-shadow: 0 8px 24px rgba(239,68,68,0.45), 0 0 0 1px rgba(255,255,255,0.15) inset; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); animation: badgeIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; pointer-events: none; white-space: nowrap; transition: opacity 0.3s ease; }
@@ -272,7 +375,13 @@
   #callStatusText { transition: font-size 0.6s cubic-bezier(0.34, 1.15, 0.64, 1); }
   .local-video-pip { transition: width 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), height 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), top 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), right 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), border-radius 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), opacity 0.45s ease, transform 0.5s cubic-bezier(0.34, 1.15, 0.64, 1); }
   #callScreen.minimized .local-video-pip { opacity: 0; transform: scale(0.85); pointer-events: none; }
-  .call-controls-bar { transition: bottom 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), padding 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), gap 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), opacity 0.35s ease; }
+  /* ⚠️ ВАЖНО: НЕ добавлять position сюда — иначе сломается absolute из HTML */
+  .call-controls-bar {
+    transition: bottom 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
+                padding 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
+                gap 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
+                opacity 0.35s ease;
+  }
   .call-mini-topbar { position: absolute; top: 0; left: 0; right: 0; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0)); cursor: grab; user-select: none; -webkit-user-select: none; opacity: 0; pointer-events: none; transition: opacity 0.4s ease 0.15s; }
   #callScreen.minimized .call-mini-topbar { opacity: 1; pointer-events: auto; }
   .call-mini-topbar:active { cursor: grabbing; }
@@ -294,8 +403,8 @@
   #callScreen.minimized .call-ctrl { width: 42px; height: 42px; }
   #callScreen.minimized .call-ctrl svg { width: 18px !important; height: 18px !important; }
   #callScreen.minimized #btnMinimizeCall { display: none; }
-  #callScreen.minimized #btnHideCall { display: none; }
-  #callScreen.minimized #btnFullscreenVideo { display: none !important; }
+  #callScreen.minimized #btnMoreCall { display: none !important; }
+  #callScreen.minimized #callMoreMenu { display: none !important; }
   #callScreen.minimized #screenShareBadge { top: 8px; padding: 4px 9px; font-size: 10px; gap: 5px; }
   #callScreen.minimized .screen-share-dot { width: 6px; height: 6px; }
   @media (max-width: 640px) { #callScreen.minimized { border-radius: 22px; } #callScreen.minimized .call-avatar-pulse { width: 60px !important; height: 60px !important; } #callScreen.minimized #callPeerAvatar { font-size: 22px; } #callScreen.minimized .call-ctrl { width: 36px; height: 36px; } #callScreen.minimized .call-ctrl svg { width: 15px !important; height: 15px !important; } }
@@ -362,7 +471,7 @@
   body.mobile-mode #callScreen .call-controls-bar { padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important; bottom: 12px !important; }
   body.mobile-mode .call-ctrl { width: 48px; height: 48px; }
   body.mobile-mode .call-ctrl svg { width: 20px; height: 20px; }
-  body.mobile-mode .call-controls-bar { gap: 10px !important; padding: 8px 14px !important; }
+  body.mobile-mode .call-controls-bar { gap: 8px !important; padding: 8px 12px !important; }
   body.mobile-mode #callScreen.minimized .call-ctrl { width: 38px; height: 38px; }
   body.mobile-mode #callScreen.minimized .call-ctrl svg { width: 16px !important; height: 16px !important; }
   body.mobile-mode #callScreen.minimized .call-controls-bar { gap: 6px !important; padding: 6px 10px !important; }
@@ -388,10 +497,8 @@
   #callScreen.ui-hidden .local-video-pip,
   #callScreen.ui-hidden #screenShareBadge,
   #callScreen.ui-hidden .call-mini-topbar,
-  #callScreen.ui-hidden .mini-resize-handle { opacity: 0 !important; pointer-events: none !important; }
-  #btnFullscreenVideo { display: none; }
-  body.mobile-mode #btnFullscreenVideo { display: flex; }
-  #callScreen.minimized #btnFullscreenVideo { display: none !important; }
+  #callScreen.ui-hidden .mini-resize-handle,
+  #callScreen.ui-hidden #callMoreMenu { opacity: 0 !important; pointer-events: none !important; }
 </style>
 </head>
 <body>
@@ -576,15 +683,6 @@
           <button onclick="startCall('video')" class="btn-icon header-call-btn" title="Видеозвонок">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
           </button>
-          <button onclick="toggleScreenShare()" id="screenShareBtn" class="btn-icon header-call-btn" title="Демонстрация экрана">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="4" width="20" height="13" rx="2"/>
-              <path d="M8 20h8"/>
-              <path d="M12 17v3"/>
-              <polyline points="9 10 12 7 15 10"/>
-              <line x1="12" y1="7" x2="12" y2="14"/>
-            </svg>
-          </button>
           <button id="headerLogsBtn" onclick="toggleLogs()" class="btn-icon" title="Диагностика">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
           </button>
@@ -630,6 +728,7 @@
         </div>
       </div>
     </div>
+    <div id="rightResizeHandle" class="right-resize-handle" title="Перетащите, чтобы изменить ширину чата"></div>
   </main>
 </div>
 
@@ -724,6 +823,7 @@
       <video id="localVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
     </div>
 
+    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ: абсолютно по центру снизу -->
     <div class="call-controls-bar absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 px-8 py-4 rounded-full bg-black/30 backdrop-blur-xl border-2 border-white/10" style="z-index:6;">
       <button id="btnMute" onclick="toggleMute()" class="call-ctrl" title="Микрофон">
         <svg id="iconMicOn" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
@@ -732,32 +832,6 @@
       <button id="btnCamera" onclick="toggleCamera()" class="call-ctrl" title="Камера">
         <svg id="iconCamOn" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
         <svg id="iconCamOff" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/><path d="M3 3l18 18"/></svg>
-      </button>
-
-      <button id="btnScreenShareCall" onclick="toggleScreenShare()" class="call-ctrl" title="Демонстрация экрана">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="4" width="20" height="13" rx="2"/>
-          <path d="M8 20h8"/>
-          <path d="M12 17v3"/>
-          <polyline points="9 10 12 7 15 10"/>
-          <line x1="12" y1="7" x2="12" y2="14"/>
-        </svg>
-      </button>
-
-      <button id="btnResumeScreenShare" onclick="resumeScreenShare()" class="call-ctrl" title="Возобновить демонстрацию">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="1 4 1 10 7 10"/>
-          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-        </svg>
-      </button>
-
-      <button id="btnFullscreenVideo" onclick="toggleVideoFullscreen()" class="call-ctrl" title="Полный экран">
-        <svg id="iconFullscreenEnter" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
-        </svg>
-        <svg id="iconFullscreenExit" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
-        </svg>
       </button>
 
       <button id="btnSpeaker" onclick="toggleSpeaker()" class="call-ctrl" title="Громкая связь">
@@ -771,23 +845,66 @@
         </svg>
       </button>
 
-      <button id="btnMinimizeCall" onclick="toggleCallMinimize()" class="call-ctrl" title="Свернуть к чату">
+      <button id="btnMinimizeCall" onclick="toggleCallMinimize()" class="call-ctrl" title="Свернуть в чат">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
         </svg>
       </button>
-      <button id="btnHideCall" onclick="hideCall()" class="call-ctrl" title="Свернуть в чат">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.9"
-             stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"/>
-          <line x1="4" y1="20" x2="20" y2="20"/>
+
+      <button id="btnMoreCall" onclick="toggleCallMoreMenu(event)" class="call-ctrl" title="Ещё">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="1.2" fill="currentColor"/>
+          <circle cx="12" cy="5.5" r="1.2" fill="currentColor"/>
+          <circle cx="12" cy="18.5" r="1.2" fill="currentColor"/>
         </svg>
       </button>
+
       <button onclick="endCall()" class="call-ctrl end" title="Завершить">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"/></svg>
       </button>
+
+      <!-- Меню "Ещё" -->
+      <div id="callMoreMenu">
+        <button class="call-more-item" id="moreShareBtn" onclick="handleMoreAction('share')" type="button">
+          <span class="more-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="13" rx="2"/>
+              <path d="M8 20h8"/>
+              <path d="M12 17v3"/>
+              <polyline points="9 10 12 7 15 10"/>
+              <line x1="12" y1="7" x2="12" y2="14"/>
+            </svg>
+          </span>
+          <span class="more-text" id="moreShareText">Демонстрация экрана</span>
+        </button>
+        <button class="call-more-item" id="moreFullscreenBtn" onclick="handleMoreAction('fullscreen')" type="button">
+          <span class="more-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+            </svg>
+          </span>
+          <span class="more-text">На весь экран</span>
+        </button>
+        <button class="call-more-item warn" id="moreResumeBtn" onclick="handleMoreAction('resume')" type="button">
+          <span class="more-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1 4 1 10 7 10"/>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+            </svg>
+          </span>
+          <span class="more-text">Возобновить показ</span>
+        </button>
+        <button class="call-more-item" id="moreHideBtn" onclick="handleMoreAction('hide')" type="button">
+          <span class="more-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+              <line x1="4" y1="20" x2="20" y2="20"/>
+            </svg>
+          </span>
+          <span class="more-text">Свернуть в чат</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -890,7 +1007,6 @@ let lastPeerPing = 0;
 let callStateTimeout = null;
 let appStarted = false;
 
-// Демонстрация экрана
 let isScreenSharing = false;
 let screenStream = null;
 let savedCameraTrack = null;
@@ -901,13 +1017,11 @@ let peerIsScreenSharing = false;
 let shareInterrupted = false;
 let screenSharePollInterval = null;
 
-// Voice-wave
 let audioCtx = null;
 let audioSourceNode = null;
 let analyser = null;
 let voiceRafId = null;
 
-// Mini-call
 let callMinimized = false;
 let callHidden = false;
 let miniCallPos = { x: null, y: null };
@@ -916,14 +1030,9 @@ const MINI_H = 380;
 const MINI_MARGIN = 20;
 let miniUiHideTimer = null;
 
-// Pill position
 let pillPos = { x: null, y: null };
-
-// Reply
 let replyTo = null;
 let contextMenuMsg = null;
-
-// UI скрытие интерфейса
 let uiHidden = false;
 
 const $ = (id) => document.getElementById(id);
@@ -1104,6 +1213,14 @@ function applyMobileMode(on) {
         sb.style.flexBasis = w + 'px';
       }
     } catch(e) {}
+    // Восстанавливаем правый отступ чата
+    try {
+      const rm = parseInt(localStorage.getItem('cc-chat-right-margin') || '16', 10);
+      const mainEl = document.querySelector('main');
+      if (mainEl && window.innerWidth > 1024) {
+        mainEl.style.marginRight = rm + 'px';
+      }
+    } catch(e) {}
   }
 }
 
@@ -1121,8 +1238,8 @@ function toggleMobileMode() {
     if (sb) sb.classList.remove('open');
     if (ov) ov.classList.remove('open');
   }
-  updateScreenShareUI(isScreenSharing);
-  updateResumeShareButton();
+  closeCallMoreMenu();
+  updateMoreMenuVisibility();
 }
 
 function toggleSidebar() {
@@ -1180,7 +1297,7 @@ function applyTheme(isDark) {
     if ($('iconSun')) $('iconSun').classList.add('hidden');
   }
   const meta = document.getElementById('themeColorMeta');
-  if (meta) meta.setAttribute('content', isDark ? '#0B0F1E' : '#EEF2FF');
+  if (meta) meta.setAttribute('content', isDark ? '#0B0F1E' : '#C8CCD2');
 }
 function toggleTheme() {
   const isDark = !document.body.classList.contains('dark');
@@ -1448,8 +1565,7 @@ function handleMessage(msg) {
     case 'screen-share':
       peerIsScreenSharing = !!msg.on;
       updateScreenShareBadge();
-      updateScreenShareUI(isScreenSharing);
-      updateResumeShareButton();
+      updateMoreMenuVisibility();
 
       const rv = $('remoteVideo');
       if (rv) rv.classList.toggle('screen-share-mode', !!msg.on);
@@ -1996,6 +2112,7 @@ async function startCall(type) {
   resetCallScreenState();
   toggleCallUI(false);
   hideResumeShareButton();
+  closeCallMoreMenu();
   $('callScreen').classList.remove('hidden');
   $('remotePlaceholder').classList.remove('hidden');
   setCallStatus('Исходящий звонок…');
@@ -2068,6 +2185,7 @@ async function acceptCall() {
   resetCallScreenState();
   toggleCallUI(false);
   hideResumeShareButton();
+  closeCallMoreMenu();
   $('callScreen').classList.remove('hidden');
   $('remotePlaceholder').classList.remove('hidden');
   setCallStatus('Соединение…');
@@ -2124,6 +2242,7 @@ function endCall(silent = false) {
   resetCallScreenState();
   toggleCallUI(false);
   hideResumeShareButton();
+  closeCallMoreMenu();
   stopVoiceWave();
   hideCallPill();
   callHidden = false;
@@ -2134,7 +2253,6 @@ function endCall(silent = false) {
   const rv = $('remoteVideo');
   if (rv) rv.classList.remove('screen-share-mode');
   updateScreenShareBadge();
-  updateScreenShareUI(false);
   setCallInfoOverlay(true);
   $('callScreen').classList.add('hidden');
   $('remoteVideo').srcObject = null;
@@ -2263,12 +2381,7 @@ function toggleVideoFullscreen() {
 }
 
 function updateFullscreenIcon() {
-  const enterIcon = $('iconFullscreenEnter');
-  const exitIcon = $('iconFullscreenExit');
-  if (!enterIcon || !exitIcon) return;
-  const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.webkitDisplayingFullscreen);
-  enterIcon.classList.toggle('hidden', isFullscreen);
-  exitIcon.classList.toggle('hidden', !isFullscreen);
+  // Кнопки в панели больше нет, но функция оставлена для совместимости
 }
 
 // ============================================================
@@ -2279,7 +2392,6 @@ function refreshRemoteVideo() {
   if (!rv || !rv.srcObject) return;
   try {
     const stream = rv.srcObject;
-    // Переприсоединяем поток, чтобы форсировать перерисовку
     rv.srcObject = null;
     setTimeout(() => {
       rv.srcObject = stream;
@@ -2307,12 +2419,87 @@ document.addEventListener('webkitfullscreenchange', () => {
 document.addEventListener('webkitbeginfullscreen', updateFullscreenIcon);
 document.addEventListener('webkitendfullscreen', () => {
   updateFullscreenIcon();
-  // iOS: после выхода из fullscreen видео часто «зависает» — переприсоединяем
   setTimeout(refreshRemoteVideo, 250);
 });
 
 // ============================================================
-//  ДВОЙНОЙ ТАП — СКРЫТИЕ ИНТЕРФЕЙСА + ТАП В МИНИ-РЕЖИМЕ
+//  МЕНЮ "ЕЩЁ"
+// ============================================================
+function toggleCallMoreMenu(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const menu = $('callMoreMenu');
+  const btn = $('btnMoreCall');
+  if (!menu) return;
+  updateMoreMenuVisibility();
+  const willShow = !menu.classList.contains('show');
+  menu.classList.toggle('show', willShow);
+  if (btn) btn.classList.toggle('active', willShow);
+}
+
+function closeCallMoreMenu() {
+  const menu = $('callMoreMenu');
+  const btn = $('btnMoreCall');
+  if (menu) menu.classList.remove('show');
+  if (btn) btn.classList.remove('active');
+}
+
+function updateMoreMenuVisibility() {
+  const moreFullscreenBtn = $('moreFullscreenBtn');
+  const moreResumeBtn     = $('moreResumeBtn');
+  const moreHideBtn       = $('moreHideBtn');
+  const moreShareBtn      = $('moreShareBtn');
+  const moreShareText     = $('moreShareText');
+
+  const inCall = !!pc && pc.connectionState !== 'closed' && pc.connectionState !== 'failed';
+  const isMobile = document.body.classList.contains('mobile-mode');
+
+  if (moreShareBtn) {
+    moreShareBtn.classList.toggle('hidden', !inCall || isMobile);
+    if (moreShareText) {
+      moreShareText.textContent = isScreenSharing
+        ? 'Остановить демонстрацию'
+        : 'Демонстрация экрана';
+    }
+  }
+
+  if (moreFullscreenBtn) {
+    const show = (isScreenSharing || peerIsScreenSharing);
+    moreFullscreenBtn.classList.toggle('hidden', !show);
+  }
+  if (moreResumeBtn) {
+    const show = shareInterrupted || (peerIsScreenSharing && !isScreenSharing);
+    moreResumeBtn.classList.toggle('hidden', !show);
+    moreResumeBtn.classList.toggle('pulse', show && shareInterrupted);
+  }
+  if (moreHideBtn) {
+    moreHideBtn.classList.toggle('hidden', !isMobile);
+  }
+}
+
+function handleMoreAction(action) {
+  closeCallMoreMenu();
+  if (action === 'fullscreen') {
+    toggleVideoFullscreen();
+  } else if (action === 'resume') {
+    resumeScreenShare();
+  } else if (action === 'hide') {
+    hideCall();
+  } else if (action === 'share') {
+    toggleScreenShare();
+  }
+}
+
+document.addEventListener('click', (e) => {
+  const menu = $('callMoreMenu');
+  const btn = $('btnMoreCall');
+  if (!menu || !menu.classList.contains('show')) return;
+  if (menu.contains(e.target)) return;
+  if (btn && btn.contains(e.target)) return;
+  closeCallMoreMenu();
+});
+
+// ============================================================
+//  ДВОЙНОЙ ТАП — СКРЫТИЕ ИНТЕРФЕЙСА
 // ============================================================
 function toggleCallUI(forceState = null) {
   const cs = $('callScreen');
@@ -2323,6 +2510,7 @@ function toggleCallUI(forceState = null) {
     uiHidden = !uiHidden;
   }
   cs.classList.toggle('ui-hidden', uiHidden);
+  if (uiHidden) closeCallMoreMenu();
 }
 
 function scheduleMiniUiHide() {
@@ -2346,6 +2534,7 @@ function scheduleMiniUiHide() {
         e.target.closest('.call-mini-topbar') ||
         e.target.closest('.mini-resize-handle') ||
         e.target.closest('#screenShareBadge') ||
+        e.target.closest('#callMoreMenu') ||
         e.target.closest('.local-video-pip') ||
         e.target.closest('button')) return;
 
@@ -2389,75 +2578,25 @@ async function toggleScreenShare() {
   }
 }
 
-// ==== Кнопка возобновления ====
 function showResumeShareButton(pulse = true) {
   shareInterrupted = true;
-  const btn = $('btnResumeScreenShare');
-  if (!btn) return;
-  btn.classList.add('visible');
-  if (pulse) btn.classList.add('pulse');
-  else btn.classList.remove('pulse');
-  log('🔄 Кнопка возобновления демонстрации показана', 'info');
+  updateMoreMenuVisibility();
+  log('🔄 Возможность возобновить демонстрацию', 'info');
 }
 
 function hideResumeShareButton() {
   shareInterrupted = false;
-  const btn = $('btnResumeScreenShare');
-  if (!btn) return;
-  btn.classList.remove('visible');
-  btn.classList.remove('pulse');
-}
-
-// Управление видимостью кнопки в зависимости от ситуации
-function updateResumeShareButton() {
-  const btn = $('btnResumeScreenShare');
-  if (!btn) return;
-
-  const isMobile = document.body.classList.contains('mobile-mode');
-  const callActive = pc && pc.connectionState !== 'closed' && pc.connectionState !== 'failed';
-  const callScreenVisible = !$('callScreen').classList.contains('hidden');
-
-  if (!callActive || !callScreenVisible) {
-    btn.classList.remove('visible');
-    btn.classList.remove('pulse');
-    return;
-  }
-
-  // На мобильном: показываем только когда смотрим демку собеседника
-  // (для переприсоединения видео после заморозки)
-  if (isMobile) {
-    if (peerIsScreenSharing && !isScreenSharing) {
-      btn.classList.add('visible');
-      btn.classList.remove('pulse');
-    } else {
-      btn.classList.remove('visible');
-    }
-    return;
-  }
-
-  // На десктопе: показываем при `shareInterrupted` (реальная проблема с треком)
-  // + при `peerIsScreenSharing` (возможная заморозка)
-  if (shareInterrupted || (peerIsScreenSharing && !isScreenSharing)) {
-    btn.classList.add('visible');
-    if (shareInterrupted) btn.classList.add('pulse');
-    else btn.classList.remove('pulse');
-  } else {
-    btn.classList.remove('visible');
-    btn.classList.remove('pulse');
-  }
+  updateMoreMenuVisibility();
 }
 
 async function resumeScreenShare() {
-  // Случай 1: смотрим демку собеседника — переприсоединяем видео
   if (peerIsScreenSharing && !isScreenSharing) {
     log('🔄 Обновление видео собеседника');
     refreshRemoteVideo();
-    // Если сразу не помогло — попробуем ещё раз через 500мс
     setTimeout(refreshRemoteVideo, 500);
     return;
   }
 
-  // Случай 2: свой трек прервался — перезапускаем
   if (isScreenSharing) return;
   if (!pc || pc.connectionState === 'failed' || pc.connectionState === 'closed') {
     alert('Звонок завершён');
@@ -2469,7 +2608,6 @@ async function resumeScreenShare() {
   await startScreenShare();
 }
 
-// ==== Поллинг: проверяем, что наш локальный трек демонстрации жив ====
 function startScreenSharePolling() {
   stopScreenSharePolling();
   screenSharePollInterval = setInterval(() => {
@@ -2599,12 +2737,11 @@ async function startScreenShare() {
     if ($('localVideo')) $('localVideo').srcObject = screenStream;
 
     isScreenSharing = true;
-    updateScreenShareUI(true);
     updateScreenShareBadge();
+    updateMoreMenuVisibility();
     sendMQTT({ type: 'screen-share', on: true });
     log('🖥️ Демонстрация экрана запущена', 'ok');
 
-    // onended — на случай, если браузер сам завершит трек
     screenVideoTrack.onended = () => {
       log('🖥️ Демонстрация прервана браузером (onended)', 'warn');
       try { screenVideoTrack.onended = null; } catch(e){}
@@ -2613,7 +2750,6 @@ async function startScreenShare() {
       }
     };
 
-    // Запускаем поллинг как дублирующий канал детекта
     startScreenSharePolling();
 
   } catch (e) {
@@ -2691,8 +2827,8 @@ function stopScreenShare(silent = false, interrupted = false) {
   savedCameraTrack = null;
   savedMicTrack = null;
   isScreenSharing = false;
-  updateScreenShareUI(false);
   updateScreenShareBadge();
+  updateMoreMenuVisibility();
 
   if ($('localVideo')) {
     $('localVideo').srcObject = localStream;
@@ -2704,34 +2840,11 @@ function stopScreenShare(silent = false, interrupted = false) {
 
   log('🖥️ Демонстрация остановлена', 'info');
 
-  // Если прервано — показываем оранжевую кнопку
   if (interrupted && pc && pc.connectionState !== 'closed' && pc.connectionState !== 'failed') {
     showResumeShareButton(true);
   }
 
-  updateResumeShareButton();
-}
-
-function updateScreenShareUI(active) {
-  const btnHeader = $('screenShareBtn');
-  if (btnHeader) {
-    btnHeader.classList.toggle('active', !!active);
-    btnHeader.title = active ? 'Остановить демонстрацию экрана' : 'Демонстрация экрана';
-  }
-  const btnCall = $('btnScreenShareCall');
-  if (btnCall) {
-    btnCall.classList.toggle('sharing-active', !!active);
-    btnCall.title = active ? 'Остановить демонстрацию экрана' : 'Демонстрация экрана';
-  }
-
-  const btnFullscreen = $('btnFullscreenVideo');
-  if (btnFullscreen) {
-    const isMobile = document.body.classList.contains('mobile-mode');
-    const showFullscreen = isMobile && (isScreenSharing || peerIsScreenSharing);
-    btnFullscreen.style.display = showFullscreen ? 'flex' : 'none';
-  }
-
-  updateResumeShareButton();
+  updateMoreMenuVisibility();
 }
 
 function updateScreenShareBadge() {
@@ -2794,6 +2907,7 @@ function minimizeCall() {
   const cs = $('callScreen');
   if (!cs || callMinimized) return;
 
+  closeCallMoreMenu();
   setFullscreenDim();
   void cs.offsetWidth;
 
@@ -2844,6 +2958,7 @@ function expandCall() {
 
   clearTimeout(miniUiHideTimer);
   toggleCallUI(false);
+  closeCallMoreMenu();
 }
 
 function toggleCallMinimize() {
@@ -2902,6 +3017,7 @@ function hideCall() {
   const cs = $('callScreen');
   if (!cs || callHidden) return;
 
+  closeCallMoreMenu();
   cs.classList.add('hiding-anim');
 
   setTimeout(() => {
@@ -2936,6 +3052,7 @@ function resetCallScreenState() {
   callHidden = false;
   miniCallPos = { x: null, y: null };
   clearTimeout(miniUiHideTimer);
+  closeCallMoreMenu();
   const cs = $('callScreen');
   if (!cs) return;
   cs.classList.remove('minimized');
@@ -3170,7 +3287,7 @@ function resetCallScreenState() {
 })();
 
 // ============================================================
-//  РЕСАЙЗ САЙДБАРА
+//  РЕСАЙЗ САЙДБАРА (левый)
 // ============================================================
 (function initResize() {
   const handle = $('resizeHandle');
@@ -3232,6 +3349,69 @@ function resetCallScreenState() {
     } else {
       const w = parseInt(localStorage.getItem('cc-sidebar-width') || '280', 10);
       applyWidth(w);
+    }
+  });
+})();
+
+// ============================================================
+//  РЕСАЙЗ ЧАТА СПРАВА (правый margin у main)
+// ============================================================
+(function initRightResize() {
+  const handle = $('rightResizeHandle');
+  const mainEl = document.querySelector('main');
+  if (!handle || !mainEl) return;
+
+  const MIN = 0;   // минимум отступа (чат максимально широкий)
+  const MAX = 400; // максимум отступа (чат сильно сужен)
+
+  // Восстанавливаем сохранённую позицию
+  try {
+    const saved = parseInt(localStorage.getItem('cc-chat-right-margin') || '16', 10);
+    if (!isNaN(saved) && saved >= MIN && saved <= MAX && !document.body.classList.contains('mobile-mode') && window.innerWidth > 1024) {
+      mainEl.style.marginRight = saved + 'px';
+    }
+  } catch(e) {}
+
+  let dragging = false, startX = 0, startMargin = 16;
+
+  handle.addEventListener('mousedown', (e) => {
+    if (window.innerWidth <= 1024) return;
+    if (document.body.classList.contains('mobile-mode')) return;
+    dragging = true;
+    startX = e.clientX;
+    startMargin = parseInt(getComputedStyle(mainEl).marginRight, 10) || 16;
+    handle.classList.add('dragging');
+    document.body.classList.add('resizing');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    // тянем влево (dx<0) — margin растёт, чат сужается
+    let newMargin = startMargin - dx;
+    newMargin = Math.max(MIN, Math.min(MAX, newMargin));
+    mainEl.style.marginRight = newMargin + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    document.body.classList.remove('resizing');
+    try {
+      const m = parseInt(getComputedStyle(mainEl).marginRight, 10) || 16;
+      localStorage.setItem('cc-chat-right-margin', m);
+    } catch(e) {}
+  });
+
+  window.addEventListener('resize', () => {
+    if (document.body.classList.contains('mobile-mode')) return;
+    if (window.innerWidth <= 1024) {
+      mainEl.style.marginRight = '';
+    } else {
+      const saved = parseInt(localStorage.getItem('cc-chat-right-margin') || '16', 10);
+      if (!isNaN(saved)) mainEl.style.marginRight = saved + 'px';
     }
   });
 })();
