@@ -240,6 +240,10 @@
 
   @media (max-width: 1024px) { .resize-handle { display: none; } aside { width: 84px !important; min-width: 84px !important; flex-basis: 84px !important; padding: 20px 8px; } aside .hide-mobile { display: none; } main { margin: 16px 12px 16px 0; } }
   .nick-form { animation: modalIn 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
+  /* Больше воздуха между надписью «Ваш ник» и полем ввода */
+  #nickView .text-left > label { margin-bottom: 12px !important; }
+  #nickView .text-left { margin-bottom: 12px !important; }
+  #nickView .btn-primary { margin-top: 18px !important; }
   .logo-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; animation: logoFloat 4s ease-in-out infinite; box-shadow: 0 12px 32px rgba(109,127,214,0.4), 0 0 0 6px rgba(139,154,224,0.15); }
   @keyframes logoFloat { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(3deg); } }
   .status-dot { width: 8px; height: 8px; border-radius: 50%; position: relative; transition: background 0.3s; }
@@ -316,7 +320,7 @@
     display: flex; align-items: center; gap: 12px;
     padding: 11px 14px; border: none; background: transparent;
     border-radius: 12px; color: #fff; font-family: inherit;
-    font-size: 14px; font-weight: 500; letter-spacing: -0.005em;
+    font-size: 12px; font-weight: 500; letter-spacing: -0.005em;
     cursor: pointer; text-align: left; width: 100%;
     transition: background 0.18s ease, transform 0.12s ease;
     -webkit-tap-highlight-color: transparent;
@@ -534,9 +538,9 @@
 
   .dc-modal-card {
     position: relative;
-    width: min(390px, calc(100vw - 40px));
-    padding: 22px;
-    border-radius: 22px;
+    width: min(330px, calc(100vw - 44px));
+    padding: 16px;
+    border-radius: 18px;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     box-shadow:
@@ -574,35 +578,31 @@
   .dc-modal-row {
     position: relative;
     display: flex;
-    align-items: flex-start;
-    gap: 14px;
+    align-items: center;
+    gap: 12px;
   }
 
   .dc-modal-icon {
-    flex: 0 0 44px;
-    width: 44px;
-    height: 44px;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 15px;
+    border-radius: 13px;
     background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%);
     color: #fff;
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 700;
     box-shadow: 0 8px 24px rgba(109,127,214,.28);
   }
 
   .dc-modal-title {
-    margin-top: 2px;
-    font-size: 16px;
-    line-height: 1.25;
-    font-weight: 650;
-    letter-spacing: -.01em;
+    display: none;
   }
 
   .dc-modal-message {
-    margin-top: 6px;
+    margin-top: 0;
     color: var(--text-muted);
     font-size: 14px;
     line-height: 1.45;
@@ -613,13 +613,13 @@
     position: relative;
     display: flex;
     justify-content: flex-end;
-    margin-top: 20px;
+    margin-top: 14px;
   }
 
   .dc-modal-button {
-    min-width: 82px;
-    height: 38px;
-    padding: 0 17px;
+    min-width: 68px;
+    height: 34px;
+    padding: 0 14px;
     border: 0;
     border-radius: 12px;
     background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%);
@@ -643,9 +643,9 @@
 
   @media (max-width: 520px) {
     .dc-modal-card {
-      width: min(390px, calc(100vw - 28px));
-      padding: 18px;
-      border-radius: 19px;
+      width: min(330px, calc(100vw - 32px));
+      padding: 15px;
+      border-radius: 17px;
     }
   }
 
@@ -3595,7 +3595,7 @@ function resetCallScreenState() {
 // ============================================================
 let dcModalCloseHandler = null;
 
-function showCustomModal(message, title = 'DianaCalm', icon = '✓') {
+function showCustomModal(message, title = '', icon = '✓') {
   const modal = $('dcModal');
   const titleEl = $('dcModalTitle');
   const messageEl = $('dcModalMessage');
