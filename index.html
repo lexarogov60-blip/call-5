@@ -1161,7 +1161,7 @@ let appStarted = false;
 
 let isScreenSharing = false;
 let screenStream = null;
-let screenAudioSender = null;   // ← НОВЫЙ: отдельный сендер системного звука
+let screenAudioSender = null;
 let savedCameraTrack = null;
 let savedMicTrack = null;
 let peerIsScreenSharing = false;
@@ -2127,13 +2127,14 @@ function showTypingIndicator(show) {
 async function getLocalStream(video) {
   log(`Запрос ${video ? 'камеры и микрофона' : 'микрофона'}…`);
 
-  // ✅ ИСПРАВЛЕНО: отключены шумоподавление и автогейн, чтобы голос
-  // не «утопал» и не «качался». Echo cancellation оставляем.
+  // ✅ Моно, 48 кГц, без NS/AGC — чтобы голос не «утопал» и не «шакалился»
   const audioConstraints = {
     echoCancellation: true,
     noiseSuppression: false,
     autoGainControl: false,
-    channelCount: 1
+    channelCount: 1,
+    sampleRate: 48000,
+    sampleSize: 16
   };
 
   try {
@@ -2287,6 +2288,28 @@ function createPeerConnection() {
   return conn;
 }
 
+// ============================================================
+//  ПРИОРИТЕТ АУДИО-СЕНДЕРОВ
+//  Все аудио-треки получают высокий приоритет и капнутый битрейт,
+//  чтобы голос не «шакалился», когда рядом идёт видео + системный звук.
+// ============================================================
+function prioritizeAudioSenders() {
+  if (!pc) return;
+  pc.getSenders().forEach(s => {
+    if (!s.track || s.track.kind !== 'audio') return;
+    try {
+      const p = s.getParameters();
+      if (!p.encodings || p.encodings.length === 0) p.encodings = [{}];
+      p.encodings[0].priority = 'high';
+      p.encodings[0].networkPriority = 'high';
+      p.encodings[0].maxBitrate = 40000;
+      s.setParameters(p);
+    } catch (e) {
+      // некоторые браузеры не дают менять параметры — не критично
+    }
+  });
+}
+
 async function startCall(type) {
   if (pc) return showCustomModal('Вы уже находитесь в звонке.', 'Уже в звонке', 'i');
   if (!peerOnline) return showCustomModal('Собеседник не в сети. Подождите пару секунд.', 'Собеседник не в сети', 'i');
@@ -2320,6 +2343,7 @@ async function startCall(type) {
     $('localVideo').srcObject = localStream;
     pc = createPeerConnection();
     localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+    prioritizeAudioSenders();
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
     sendMQTT({ type: 'offer', sdp: offer, callType: type });
@@ -2339,6 +2363,7 @@ async function handleOffer(sdp, callType, renegotiate) {
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
       sendMQTT({ type: 'answer', sdp: answer });
+      prioritizeAudioSenders();
       log('✅ Ре-негоциация выполнена', 'ok');
     } catch (e) {
       log('Ошибка ре-негоциации: ' + e.message, 'err');
@@ -2391,6 +2416,7 @@ async function acceptCall() {
     $('localVideo').srcObject = localStream;
     pc = createPeerConnection();
     localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+    prioritizeAudioSenders();
     await pc.setRemoteDescription(new RTCSessionDescription(incomingOffer));
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
@@ -2403,6 +2429,7 @@ async function handleAnswer(sdp) {
   if (!pc) return;
   try {
     await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+    prioritizeAudioSenders();
     log('✅ Answer принят', 'ok');
     setCallStatus('Соединение…');
   } catch (e) { log('Ошибка answer: ' + e.message, 'err'); }
@@ -2860,7 +2887,7 @@ async function startScreenShare() {
   try {
     const preferred = {
       video: {
-        frameRate: { ideal: 60 },
+        frameRate: { ideal: 30, max: 30 },
         width:     { ideal: 1920 },
         height:    { ideal: 1080 },
         cursor: 'always'
@@ -2878,7 +2905,7 @@ async function startScreenShare() {
       log('⚠️ Расширенные constraints не приняты: ' + e1.message + ' — пробуем базовые', 'warn');
       try {
         screenStream = await navigator.mediaDevices.getDisplayMedia({
-          video: { frameRate: { ideal: 60 } },
+          video: { frameRate: { ideal: 30 } },
           audio: true
         });
       } catch (e2) {
@@ -2911,20 +2938,27 @@ async function startScreenShare() {
       if (videoSender && videoSender.setParameters) {
         const params = videoSender.getParameters();
         if (!params.encodings || params.encodings.length === 0) params.encodings = [{}];
-        params.encodings[0].maxFramerate = 60;
-        params.encodings[0].maxBitrate = 5000000;
-        params.degradationPreference = 'maintain-framerate';
+        params.encodings[0].maxFramerate = 30;
+        params.encodings[0].maxBitrate = 2500000;
+        params.encodings[0].priority = 'low';
+        params.encodings[0].networkPriority = 'low';
+        params.degradationPreference = 'maintain-resolution';
         await videoSender.setParameters(params);
-        log('⚙️ Кодек: 60 fps, 5 Мбит/с, maintain-framerate', 'ok');
+        log('⚙️ Кодек: 30 fps, 2.5 Мбит/с, maintain-resolution', 'ok');
       }
     } catch (e) {
       log('⚠️ Параметры кодирования: ' + e.message, 'warn');
     }
 
-    // ✅ ИСПРАВЛЕНО: системный звук добавляется ОТДЕЛЬНЫМ сендером,
-    // а не микшируется с микрофоном через AudioContext. Так WebRTC
-    // продолжает применять AEC/AGC к микрофону, и голос не дублируется.
+    // Системный звук добавляется ОТДЕЛЬНЫМ сендером и с моно-каналом
     if (screenAudioTrack) {
+      try {
+        await screenAudioTrack.applyConstraints({ channelCount: 1 });
+        log('🔊 Системный звук → моно', 'ok');
+      } catch (e) {
+        log('⚠️ Моно для системного звука не применилось: ' + e.message, 'warn');
+      }
+
       try {
         if (screenAudioSender && !screenAudioSender.track) {
           await screenAudioSender.replaceTrack(screenAudioTrack);
@@ -2933,6 +2967,7 @@ async function startScreenShare() {
           screenAudioSender = pc.addTrack(screenAudioTrack, screenStream);
           log('🔊 Системный звук добавлен отдельным треком', 'ok');
         }
+        prioritizeAudioSenders();
       } catch (e) {
         log('⚠️ Не удалось добавить системный звук: ' + e.message, 'warn');
       }
@@ -2975,7 +3010,6 @@ function stopScreenShare(silent = false, interrupted = false) {
     screenStream = null;
   }
 
-  // ✅ Удаляем отдельный сендер системного звука
   if (screenAudioSender && pc) {
     try {
       pc.removeTrack(screenAudioSender);
@@ -2986,7 +3020,6 @@ function stopScreenShare(silent = false, interrupted = false) {
     screenAudioSender = null;
   }
 
-  // Возвращаем камеру
   if (pc && savedCameraTrack) {
     savedCameraTrack.enabled = !isCameraOff;
     const videoSender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
@@ -2995,7 +3028,6 @@ function stopScreenShare(silent = false, interrupted = false) {
     }
   }
 
-  // Микрофон всё это время продолжал идти своим сендером — ничего не трогаем
   savedCameraTrack = null;
   savedMicTrack = null;
   isScreenSharing = false;
