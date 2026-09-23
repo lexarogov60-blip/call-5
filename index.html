@@ -201,7 +201,6 @@
   body.resizing { cursor: col-resize !important; user-select: none !important; }
   body.resizing * { cursor: col-resize !important; user-select: none !important; }
 
-  /* ПРАВЫЙ РЕСАЙЗ-ХЭНДЛ (внутри main, у правого края чата) */
   .right-resize-handle {
     position: absolute;
     right: 0;
@@ -247,7 +246,6 @@
   @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
   .chat-area { background: var(--chat-area-bg); border-radius: 26px; margin: 0 16px; flex: 1; overflow-y: auto; position: relative; min-height: 0; }
 
-  /* ============ КНОПКА УПРАВЛЕНИЯ ЗВОНКОМ ============ */
   .call-ctrl {
     width: 60px; height: 60px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -269,20 +267,15 @@
   .call-ctrl.accept:hover { background: #16a34a; }
   .call-ctrl.muted { background: rgba(239,68,68,0.6); }
 
-  /* Скрытие/показ в зависимости от режима */
   #btnSpeaker { display: none !important; }
   body.mobile-mode #btnSpeaker { display: flex !important; }
 
-  /* Кнопка "Ещё" — теперь и на ПК, и на мобильном */
   #btnMoreCall { display: flex; }
 
-  /* Кнопка "Свернуть в чат" (десктопная, мини-режим) */
   body.mobile-mode #btnMinimizeCall { display: none !important; }
 
-  /* Пункт "Демонстрация экрана" в меню — только для десктопа */
   body.mobile-mode #moreShareBtn { display: none !important; }
 
-  /* Меню "Ещё" */
   #callMoreMenu {
     position: absolute;
     bottom: calc(100% + 14px);
@@ -316,7 +309,7 @@
     display: flex; align-items: center; gap: 12px;
     padding: 11px 14px; border: none; background: transparent;
     border-radius: 12px; color: #fff; font-family: inherit;
-    font-size: 14px; font-weight: 500; letter-spacing: -0.005em;
+    font-size: 12px; font-weight: 500; letter-spacing: -0.005em;
     cursor: pointer; text-align: left; width: 100%;
     transition: background 0.18s ease, transform 0.12s ease;
     -webkit-tap-highlight-color: transparent;
@@ -337,7 +330,6 @@
   #callMoreMenu .call-more-item.warn:hover .more-icon { background: rgba(245,158,11,0.3); color: #FCD34D; }
   #btnMoreCall.active { background: rgba(255,255,255,0.28); transform: scale(1.05); }
 
-  /* Пульсация кнопки "Возобновить показ" в меню */
   @keyframes resumeMenuPulse {
     0%, 100% { background: rgba(245,158,11,0.18); }
     50% { background: rgba(245,158,11,0.4); }
@@ -375,12 +367,12 @@
   #callStatusText { transition: font-size 0.6s cubic-bezier(0.34, 1.15, 0.64, 1); }
   .local-video-pip { transition: width 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), height 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), top 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), right 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), border-radius 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), opacity 0.45s ease, transform 0.5s cubic-bezier(0.34, 1.15, 0.64, 1); }
   #callScreen.minimized .local-video-pip { opacity: 0; transform: scale(0.85); pointer-events: none; }
-  /* ⚠️ ВАЖНО: НЕ добавлять position сюда — иначе сломается absolute из HTML */
   .call-controls-bar {
     transition: bottom 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
                 padding 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
                 gap 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
-                opacity 0.35s ease;
+                opacity 0.32s ease,
+                transform 0.42s cubic-bezier(0.34, 1.4, 0.64, 1);
   }
   .call-mini-topbar { position: absolute; top: 0; left: 0; right: 0; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0)); cursor: grab; user-select: none; -webkit-user-select: none; opacity: 0; pointer-events: none; transition: opacity 0.4s ease 0.15s; }
   #callScreen.minimized .call-mini-topbar { opacity: 1; pointer-events: auto; }
@@ -408,6 +400,77 @@
   #callScreen.minimized #screenShareBadge { top: 8px; padding: 4px 9px; font-size: 10px; gap: 5px; }
   #callScreen.minimized .screen-share-dot { width: 6px; height: 6px; }
   @media (max-width: 640px) { #callScreen.minimized { border-radius: 22px; } #callScreen.minimized .call-avatar-pulse { width: 60px !important; height: 60px !important; } #callScreen.minimized #callPeerAvatar { font-size: 22px; } #callScreen.minimized .call-ctrl { width: 36px; height: 36px; } #callScreen.minimized .call-ctrl svg { width: 15px !important; height: 15px !important; } }
+
+  /* ============ МИНИ-ОКНО НА ПК: инфо видно, контролы по наведению ============ */
+  @media (min-width: 1025px) {
+    body:not(.mobile-mode) #callScreen.minimized .call-avatar-pulse {
+      width: 88px !important;
+      height: 88px !important;
+    }
+    body:not(.mobile-mode) #callScreen.minimized #callPeerAvatar {
+      font-size: 34px;
+    }
+    body:not(.mobile-mode) #callScreen.minimized #callPeerName {
+      font-size: 16px !important;
+      margin-top: 14px !important;
+      margin-bottom: 3px !important;
+    }
+    body:not(.mobile-mode) #callScreen.minimized #callStatusText {
+      font-size: 12px !important;
+    }
+    body:not(.mobile-mode) #callScreen.minimized #callDuration {
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    body:not(.mobile-mode) #callScreen.minimized .voice-wave {
+      height: 24px;
+      margin: 10px auto 0;
+      gap: 4px;
+    }
+    body:not(.mobile-mode) #callScreen.minimized .voice-wave span {
+      width: 3px;
+      height: 8px;
+    }
+
+    body:not(.mobile-mode) #callScreen.minimized .call-controls-bar {
+      opacity: 0;
+      transform: translateX(-50%) translateY(24px);
+      pointer-events: none;
+    }
+
+    body:not(.mobile-mode) #callScreen.minimized:hover .call-controls-bar {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+  }
+
+  /* ================= SETTINGS MODAL ================= */
+  .settings-select { width: 100%; background: transparent; border: none; outline: none; font-size: 14px; color: var(--text); font-family: inherit; cursor: pointer; padding: 2px 0; -webkit-appearance: none; appearance: none; }
+  .settings-select option { background: var(--input-bg); color: var(--text); padding: 8px; }
+  .input-field.settings-field { position: relative; }
+  .input-field.settings-field::after {
+    content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent;
+    border-top: 5px solid var(--text-dim); pointer-events: none;
+  }
+
+  .settings-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--divider); }
+  .settings-toggle-row:last-child { border-bottom: none; }
+
+  .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .slider { position: absolute; cursor: pointer; inset: 0; background: rgba(120,130,160,0.35); border-radius: 24px; transition: background 0.25s; }
+  .switch .slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+  .switch input:checked + .slider { background: linear-gradient(135deg, #8B9AE0, #6D7FD6); }
+  .switch input:checked + .slider::before { transform: translateX(20px); }
+
+  .mic-level-bar { height: 8px; border-radius: 4px; background: rgba(120,130,160,0.2); overflow: hidden; }
+  #micLevelFill { height: 100%; width: 0%; border-radius: 4px; background: linear-gradient(90deg, #4ade80, #22c55e 60%, #facc15 90%); transition: width 0.06s linear; }
+
+  .settings-hint { font-size: 12px; line-height: 1.55; color: var(--text-dim); background: rgba(139,154,224,0.09); border: 1px solid rgba(139,154,224,0.18); border-radius: 12px; padding: 10px 12px; }
+  .dark .settings-hint { background: rgba(139,154,224,0.14); border-color: rgba(165,180,252,0.2); }
+
   .bubble-reply-quote { border-left: 2.5px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.14); border-radius: 8px; padding: 5px 10px; margin-bottom: 6px; font-size: 12px; line-height: 1.35; max-width: 260px; overflow: hidden; }
   .bubble-other .bubble-reply-quote { border-left-color: rgba(109,127,214,0.75); background: rgba(139,154,224,0.1); }
   .bubble-reply-author { font-weight: 600; margin-bottom: 2px; font-size: 11.5px; letter-spacing: 0.01em; }
@@ -500,10 +563,6 @@
   #callScreen.ui-hidden .mini-resize-handle,
   #callScreen.ui-hidden #callMoreMenu { opacity: 0 !important; pointer-events: none !important; }
 
-  /* ============================================================
-     DIANACALM — CUSTOM MODAL
-     Replaces native browser/Electron alert() windows.
-     ============================================================ */
   .dc-modal {
     position: fixed;
     inset: 0;
@@ -517,439 +576,26 @@
     pointer-events: none;
     transition: opacity .18s ease, visibility .18s ease;
   }
-
-  .dc-modal.show {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-  }
-
-  .dc-modal-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(6, 10, 22, .34);
-    backdrop-filter: blur(10px) saturate(120%);
-    -webkit-backdrop-filter: blur(10px) saturate(120%);
-  }
-
-  .dc-modal-card {
-    position: relative;
-    width: min(390px, calc(100vw - 40px));
-    padding: 22px;
-    border-radius: 22px;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    box-shadow:
-      0 22px 70px rgba(0, 0, 0, .25),
-      inset 0 1px 0 rgba(255,255,255,.28);
-    color: var(--text);
-    transform: translateY(8px) scale(.97);
-    transition: transform .18s ease;
-    overflow: hidden;
-  }
-
-  .dark .dc-modal-card {
-    box-shadow:
-      0 22px 70px rgba(0, 0, 0, .55),
-      inset 0 1px 0 rgba(255,255,255,.06);
-  }
-
-  .dc-modal.show .dc-modal-card {
-    transform: translateY(0) scale(1);
-  }
-
-  .dc-modal-glow {
-    position: absolute;
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    top: -90px;
-    left: -70px;
-    background: var(--blob-3);
-    filter: blur(45px);
-    opacity: .22;
-    pointer-events: none;
-  }
-
-  .dc-modal-row {
-    position: relative;
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-  }
-
-  .dc-modal-icon {
-    flex: 0 0 44px;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 15px;
-    background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%);
-    color: #fff;
-    font-size: 20px;
-    font-weight: 700;
-    box-shadow: 0 8px 24px rgba(109,127,214,.28);
-  }
-
-  .dc-modal-title {
-    margin-top: 2px;
-    font-size: 16px;
-    line-height: 1.25;
-    font-weight: 650;
-    letter-spacing: -.01em;
-  }
-
-  .dc-modal-message {
-    margin-top: 6px;
-    color: var(--text-muted);
-    font-size: 14px;
-    line-height: 1.45;
-    white-space: pre-line;
-  }
-
-  .dc-modal-actions {
-    position: relative;
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-  }
-
-  .dc-modal-button {
-    min-width: 82px;
-    height: 38px;
-    padding: 0 17px;
-    border: 0;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%);
-    color: #fff;
-    font: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 7px 18px rgba(109,127,214,.24);
-    transition: transform .15s ease, filter .15s ease;
-  }
-
-  .dc-modal-button:hover {
-    filter: brightness(1.06);
-    transform: translateY(-1px);
-  }
-
-  .dc-modal-button:active {
-    transform: translateY(0);
-  }
-
-  @media (max-width: 520px) {
-    .dc-modal-card {
-      width: min(390px, calc(100vw - 28px));
-      padding: 18px;
-      border-radius: 19px;
-    }
-  }
-
-
-
-
-  /* ============================================================
-     DIANACALM — SMALL COPY TOAST
-     ============================================================ */
-  .dc-copy-toast {
-    position: fixed;
-    left: 50%;
-    bottom: 28px;
-    z-index: 1000000;
-    transform: translate(-50%, 14px) scale(.96);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    padding: 10px 16px;
-    border-radius: 13px;
-    background: rgba(24, 33, 55, .92);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,.12);
-    box-shadow: 0 14px 40px rgba(0,0,0,.28);
-    backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: .01em;
-    transition: opacity .22s ease, transform .28s cubic-bezier(.34,1.56,.64,1), visibility .22s ease;
-  }
-  .dc-copy-toast.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(-50%, 0) scale(1);
-  }
-  .dc-copy-toast::before {
-    content: '✓';
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
-    border-radius: 50%;
-    background: linear-gradient(135deg,#8B9AE0,#6D7FD6);
-    font-size: 12px;
-  }
-
-  /* ============================================================
-     PC SETTINGS — CUSTOM MICROPHONE PICKER
-     ============================================================ */
-  .dc-mic-picker {
-    position: relative;
-    width: 100%;
-    margin-bottom: 6px;
-  }
-  #pcMicSelect {
-    position: absolute !important;
-    width: 1px !important;
-    height: 1px !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-  .dc-mic-picker-button {
-    width: 100%;
-    min-height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 0 14px;
-    border: 1px solid rgba(139,154,224,.34);
-    border-radius: 14px;
-    background: linear-gradient(145deg, rgba(255,255,255,.10), rgba(255,255,255,.045));
-    color: var(--text);
-    font: inherit;
-    font-size: 14px;
-    cursor: pointer;
-    text-align: left;
-    transition: border-color .2s ease, background .2s ease, box-shadow .25s ease, transform .18s ease;
-  }
-  .dark .dc-mic-picker-button {
-    background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.035));
-    color: #f5f7ff;
-    border-color: rgba(165,180,252,.26);
-  }
-  .dc-mic-picker-button:hover,
-  .dc-mic-picker.open .dc-mic-picker-button {
-    border-color: rgba(139,154,224,.72);
-    background: linear-gradient(145deg, rgba(139,154,224,.16), rgba(255,255,255,.06));
-    box-shadow: 0 0 0 4px rgba(139,154,224,.10), 0 10px 28px rgba(0,0,0,.10);
-  }
-  .dc-mic-picker-button:active {
-    transform: scale(.992);
-  }
-  .dc-mic-picker-chevron {
-    width: 18px;
-    height: 18px;
-    flex: 0 0 auto;
-    transition: transform .25s cubic-bezier(.34,1.56,.64,1);
-    opacity: .72;
-  }
-  .dc-mic-picker.open .dc-mic-picker-chevron {
-    transform: rotate(180deg);
-  }
-  .dc-mic-options {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: calc(100% + 8px);
-    z-index: 10040;
-    padding: 6px;
-    border-radius: 16px;
-    background: rgba(25,34,55,.96);
-    border: 1px solid rgba(165,180,252,.22);
-    box-shadow: 0 20px 55px rgba(0,0,0,.38);
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-6px) scale(.985);
-    transform-origin: top center;
-    pointer-events: none;
-    transition: opacity .18s ease, transform .24s cubic-bezier(.34,1.2,.64,1), visibility .18s ease;
-    max-height: 250px;
-    overflow-y: auto;
-  }
-  .dc-mic-picker.open .dc-mic-options {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0) scale(1);
-    pointer-events: auto;
-  }
-  .dc-mic-option {
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 11px;
-    border-radius: 11px;
-    color: rgba(255,255,255,.82);
-    font-size: 13px;
-    cursor: pointer;
-    transition: background .16s ease, color .16s ease, transform .16s ease;
-  }
-  .dc-mic-option::before {
-    content: '🎙';
-    font-size: 14px;
-    opacity: .72;
-  }
-  .dc-mic-option:hover {
-    background: linear-gradient(90deg, rgba(139,154,224,.24), rgba(139,154,224,.10));
-    color: #fff;
-    transform: translateX(2px);
-  }
-  .dc-mic-option.selected {
-    background: linear-gradient(90deg, rgba(139,154,224,.30), rgba(139,154,224,.13));
-    color: #fff;
-  }
-  .dc-mic-option.selected::after {
-    content: '✓';
-    margin-left: auto;
-    color: #AEBBFF;
-    font-weight: 700;
-  }
-
-  /* ============================================================
-     PC MINI CALL — keep avatar/name/status/timer visible.
-     Controls disappear until the mouse enters the mini window.
-     ============================================================ */
-  @media (min-width: 641px) {
-    #callScreen.minimized .call-controls-bar {
-      opacity: 0;
-      pointer-events: none;
-      transform: translate(-50%, 14px) scale(.90);
-      filter: blur(2px);
-      transition:
-        opacity .22s ease,
-        transform .28s cubic-bezier(.34,1.35,.64,1),
-        filter .22s ease;
-    }
-    #callScreen.minimized:hover .call-controls-bar,
-    #callScreen.minimized:focus-within .call-controls-bar {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translate(-50%, 0) scale(1);
-      filter: blur(0);
-    }
-    #callScreen.minimized .call-info-inner {
-      opacity: 1 !important;
-      pointer-events: none;
-    }
-    #callScreen.minimized .call-avatar-pulse {
-      opacity: 1 !important;
-    }
-    #callScreen.minimized #callPeerName,
-    #callScreen.minimized #callStatusText,
-    #callScreen.minimized #callDuration,
-    #callScreen.minimized .voice-wave {
-      opacity: 1 !important;
-    }
-  }
-
-  /* ============================================================
-     PC SETTINGS — MICROPHONE
-     ============================================================ */
-  #pcSettingsButton { display: none; }
-  #pcSettingsModal {
-    position: fixed;
-    inset: 0;
-    z-index: 10020;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background: rgba(8, 12, 28, .46);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-  }
-  #pcSettingsModal.show { display: flex; }
-  .pc-settings-card {
-    width: min(460px, calc(100vw - 32px));
-    padding: 24px;
-    border-radius: 24px;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 24px 80px rgba(0,0,0,.28);
-    color: var(--text);
-    animation: dcSettingsIn .18s ease-out;
-  }
-  @keyframes dcSettingsIn {
-    from { opacity: 0; transform: translateY(8px) scale(.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  .pc-settings-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 20px;
-  }
-  .pc-settings-title { font-size: 18px; font-weight: 650; }
-  .pc-settings-subtitle { margin-top: 4px; font-size: 13px; color: var(--text-muted); }
-  .pc-settings-close {
-    width: 36px; height: 36px; border: 0; border-radius: 12px;
-    background: var(--glass-2-bg); color: var(--text-muted); cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .pc-settings-close:hover { color: var(--text); background: rgba(139,154,224,.16); }
-  .pc-settings-label {
-    display: block; margin: 0 0 8px; font-size: 13px; font-weight: 600;
-    color: var(--text-muted);
-  }
-  .pc-settings-select {
-    width: 100%; height: 46px; padding: 0 40px 0 14px;
-    border: 1px solid var(--glass-2-border); border-radius: 14px;
-    background: var(--input-bg); color: var(--text); font: inherit; outline: none;
-  }
-  .pc-settings-select:focus { border-color: rgba(109,127,214,.6); box-shadow: 0 0 0 3px rgba(109,127,214,.12); }
-  .pc-settings-row {
-    margin-top: 14px; padding: 13px 14px; border-radius: 15px;
-    background: var(--glass-2-bg); border: 1px solid var(--glass-2-border);
-    display: flex; align-items: center; justify-content: space-between; gap: 14px;
-  }
-  .pc-settings-row-title { font-size: 14px; font-weight: 550; }
-  .pc-settings-row-text { margin-top: 3px; font-size: 12px; color: var(--text-muted); line-height: 1.35; }
-  .pc-switch {
-    position: relative; width: 42px; height: 24px; flex: 0 0 auto;
-  }
-  .pc-switch input { opacity: 0; width: 0; height: 0; }
-  .pc-switch-slider {
-    position: absolute; inset: 0; border-radius: 999px; cursor: pointer;
-    background: rgba(127,127,140,.28); transition: .2s;
-  }
-  .pc-switch-slider::before {
-    content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px;
-    border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,.2); transition: .2s;
-  }
-  .pc-switch input:checked + .pc-switch-slider { background: #7185dc; }
-  .pc-switch input:checked + .pc-switch-slider::before { transform: translateX(18px); }
-  .pc-settings-note {
-    margin-top: 14px; padding: 11px 13px; border-radius: 13px;
-    color: var(--text-muted); background: rgba(139,154,224,.08); font-size: 12px; line-height: 1.45;
-  }
-  .pc-settings-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-  .pc-settings-btn {
-    height: 40px; padding: 0 17px; border: 0; border-radius: 12px; font: inherit;
-    font-size: 13px; font-weight: 600; cursor: pointer;
-  }
-  .pc-settings-btn.secondary { background: var(--glass-2-bg); color: var(--text); }
-  .pc-settings-btn.primary { background: linear-gradient(135deg,#8B9AE0,#6D7FD6); color: #fff; box-shadow: 0 7px 18px rgba(109,127,214,.24); }
-  .pc-settings-btn:active { transform: scale(.98); }
-  #pcMicStatus { margin-top: 8px; min-height: 18px; font-size: 12px; color: var(--text-muted); }
-  @media (max-width: 520px) {
-    #pcSettingsModal { padding: 14px; }
-    .pc-settings-card { padding: 19px; border-radius: 20px; }
-  }
+  .dc-modal.show { opacity: 1; visibility: visible; pointer-events: auto; }
+  .dc-modal-backdrop { position: absolute; inset: 0; background: rgba(6, 10, 22, .34); backdrop-filter: blur(10px) saturate(120%); -webkit-backdrop-filter: blur(10px) saturate(120%); }
+  .dc-modal-card { position: relative; width: min(280px, calc(100vw - 40px)); padding: 12px 12px 10px; border-radius: 16px; background: var(--glass-bg); border: 1px solid var(--glass-border); box-shadow: 0 22px 70px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255,255,255,.28); color: var(--text); transform: translateY(8px) scale(.97); transition: transform .18s ease; overflow: hidden; }
+  .dark .dc-modal-card { box-shadow: 0 22px 70px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255,255,255,.06); }
+  .dc-modal.show .dc-modal-card { transform: translateY(0) scale(1); }
+  .dc-modal-glow { position: absolute; width: 120px; height: 120px; border-radius: 50%; top: -75px; left: -55px; background: var(--blob-3); filter: blur(40px); opacity: .22; pointer-events: none; }
+  .dc-modal-row { position: relative; display: flex; align-items: center; gap: 10px; }
+  .dc-modal-title { display: none !important; }
+  .dc-modal-icon { flex: 0 0 34px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 11px; background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%); color: #fff; font-size: 16px; font-weight: 700; box-shadow: 0 6px 18px rgba(109,127,214,.28); }
+  .dc-modal-message { margin-top: 0; color: var(--text-muted); font-size: 13px; line-height: 1.4; white-space: pre-line; }
+  .dc-modal-actions { position: relative; display: flex; justify-content: flex-end; margin-top: 8px; }
+  .dc-modal-button { min-width: 56px; height: 28px; padding: 0 12px; border: 0; border-radius: 10px; background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%); color: #fff; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: 0 6px 16px rgba(109,127,214,.24); transition: transform .15s ease, filter .15s ease; }
+  .dc-modal-button:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .dc-modal-button:active { transform: translateY(0); }
+  @media (max-width: 520px) { .dc-modal-card { width: min(280px, calc(100vw - 32px)); padding: 11px; border-radius: 15px; } }
 
 </style>
 </head>
 <body>
 
-  <!-- DianaCalm custom modal -->
   <div id="dcModal" class="dc-modal" role="dialog" aria-modal="true" aria-labelledby="dcModalTitle">
     <div class="dc-modal-backdrop" data-dc-modal-close></div>
     <div class="dc-modal-card">
@@ -966,8 +612,6 @@
       </div>
     </div>
   </div>
-
-  <div id="dcCopyToast" class="dc-copy-toast" role="status" aria-live="polite">Ссылка скопирована</div>
 
 <div class="page-gradient-bg"></div>
 <div class="safari-top-fix"></div>
@@ -1114,12 +758,12 @@
         </svg>
         <span class="hide-mobile" id="mobileToggleLabel">Мобильная версия</span>
       </button>
-      <button onclick="openPcSettings()" class="sidebar-action" id="pcSettingsButton" title="Настройки">
+      <button onclick="openSettings()" class="sidebar-action" title="Настройки звука">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.4 1.4-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V20h-2v-.08a1.7 1.7 0 0 0-1.04-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-1.4-1.4.06-.06A1.7 1.7 0 0 0 8.6 15a1.7 1.7 0 0 0-1.56-1.04H7v-2h.04A1.7 1.7 0 0 0 8.6 10a1.7 1.7 0 0 0-.34-1.88L8.2 8.06l1.4-1.4.06.06A1.7 1.7 0 0 0 11.54 7 1.7 1.7 0 0 0 12.58 5.44V5h2v.44A1.7 1.7 0 0 0 15.62 7a1.7 1.7 0 0 0 1.88-.28l.06-.06 1.4 1.4-.06.06A1.7 1.7 0 0 0 18.56 10a1.7 1.7 0 0 0 1.56 1.04h.44v2h-.44A1.7 1.7 0 0 0 19.4 15z"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
-        <span class="hide-mobile">Настройки</span>
+        <span class="hide-mobile">Настройки звука</span>
       </button>
       <button onclick="logout()" class="sidebar-action danger">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
@@ -1218,79 +862,6 @@
   </div>
 </div>
 
-<div id="pcSettingsModal" aria-hidden="true" onclick="if(event.target===this)closePcSettings()">
-  <div class="pc-settings-card" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="pcSettingsTitle">
-    <div class="pc-settings-head">
-      <div>
-        <div class="pc-settings-title" id="pcSettingsTitle">Настройки</div>
-        <div class="pc-settings-subtitle">Настройки микрофона для версии ПК</div>
-      </div>
-      <button class="pc-settings-close" onclick="closePcSettings()" title="Закрыть" type="button">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M6 6l12 12M18 6L6 18"/>
-        </svg>
-      </button>
-    </div>
-
-    <label class="pc-settings-label" for="pcMicPickerButton">Микрофон</label>
-    <div class="dc-mic-picker" id="pcMicPicker">
-      <button class="dc-mic-picker-button" id="pcMicPickerButton" type="button" aria-haspopup="listbox" aria-expanded="false">
-        <span id="pcMicSelectedLabel">Микрофон по умолчанию</span>
-        <svg class="dc-mic-picker-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m6 9 6 6 6-6"/>
-        </svg>
-      </button>
-      <div class="dc-mic-options" id="pcMicOptions" role="listbox"></div>
-      <select id="pcMicSelect" aria-hidden="true" tabindex="-1">
-        <option value="">Микрофон по умолчанию</option>
-      </select>
-    </div>
-    <div id="pcMicStatus"></div>
-
-    <div class="pc-settings-row">
-      <div>
-        <div class="pc-settings-row-title">Эхоподавление</div>
-        <div class="pc-settings-row-text">Помогает не передавать звук собеседника обратно в микрофон.</div>
-      </div>
-      <label class="pc-switch">
-        <input type="checkbox" id="pcEchoCancellation">
-        <span class="pc-switch-slider"></span>
-      </label>
-    </div>
-
-    <div class="pc-settings-row">
-      <div>
-        <div class="pc-settings-row-title">Шумоподавление</div>
-        <div class="pc-settings-row-text">Отключено по умолчанию, чтобы голос не становился «глубоким» или глухим.</div>
-      </div>
-      <label class="pc-switch">
-        <input type="checkbox" id="pcNoiseSuppression">
-        <span class="pc-switch-slider"></span>
-      </label>
-    </div>
-
-    <div class="pc-settings-row">
-      <div>
-        <div class="pc-settings-row-title">Автоматическая громкость</div>
-        <div class="pc-settings-row-text">Автоматически меняет уровень микрофона.</div>
-      </div>
-      <label class="pc-switch">
-        <input type="checkbox" id="pcAutoGainControl">
-        <span class="pc-switch-slider"></span>
-      </label>
-    </div>
-
-    <div class="pc-settings-note">
-      Изменения сохраняются на этом ПК. Если звонок уже идёт, новый микрофон применяется сразу без перезапуска звонка.
-    </div>
-
-    <div class="pc-settings-actions">
-      <button class="pc-settings-btn secondary" onclick="closePcSettings()" type="button">Отмена</button>
-      <button class="pc-settings-btn primary" onclick="savePcSettings()" type="button">Сохранить</button>
-    </div>
-  </div>
-</div>
-
 <div id="incomingCallModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background: rgba(20,20,40,0.5); backdrop-filter: blur(8px);">
   <div class="glass rounded-[28px] p-8 w-full max-w-sm text-center animate-modal">
     <div class="calling-pulse call-avatar-pulse mx-auto mb-5" style="width:112px; height:112px;">
@@ -1305,6 +876,74 @@
       <button onclick="acceptCall()" class="call-ctrl accept" title="Принять">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
       </button>
+    </div>
+  </div>
+</div>
+
+<div id="settingsModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background: rgba(20,20,40,0.5); backdrop-filter: blur(8px);">
+  <div class="glass rounded-[28px] p-6 w-full max-w-md animate-modal" style="max-height: 92vh; overflow-y: auto;">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-lg font-semibold">Настройки звука</h3>
+      <button onclick="closeSettings()" class="reply-preview-close" type="button" title="Закрыть">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="mb-5">
+      <label class="block text-sm font-medium mb-2" style="color:var(--text-muted);">Микрофон</label>
+      <div class="dc-mic-picker" id="pcMicPicker">
+        <button class="dc-mic-picker-button" id="pcMicPickerButton" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span id="pcMicSelectedLabel">Микрофон по умолчанию</span>
+          <svg class="dc-mic-picker-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="dc-mic-options" id="pcMicOptions" role="listbox"></div>
+        <select id="pcMicSelect" aria-hidden="true" tabindex="-1">
+          <option value="">Микрофон по умолчанию</option>
+        </select>
+      </div>
+      <div id="pcMicStatus" style="min-height:14px; font-size:12px; color:var(--text-dim); margin-top:6px;"></div>
+    </div>
+
+    <div class="mb-4">
+      <div class="mic-level-bar"><div id="micLevelFill"></div></div>
+      <div class="text-xs mt-1" style="color:var(--text-dim);">Уровень сигнала — говорите, чтобы проверить</div>
+    </div>
+
+    <div class="settings-toggle-row">
+      <div style="flex:1; min-width:0;">
+        <div class="text-sm">Эхоподавление (AEC)</div>
+        <div class="text-xs" style="color:var(--text-dim);">Убирает эхо, если вы без наушников. Может «пригибать» голос</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="pcEchoCancellation"><span class="slider"></span></label>
+    </div>
+
+    <div class="settings-toggle-row">
+      <div style="flex:1; min-width:0;">
+        <div class="text-sm">Шумоподавление (NS)</div>
+        <div class="text-xs" style="color:var(--text-dim);">Убирает фоновый шум (вентилятор, клавиатура)</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="pcNoiseSuppression"><span class="slider"></span></label>
+    </div>
+
+    <div class="settings-toggle-row">
+      <div style="flex:1; min-width:0;">
+        <div class="text-sm">Автогромкость (AGC)</div>
+        <div class="text-xs" style="color:var(--text-dim);">Автоматически подстраивает громкость микрофона</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="pcAutoGainControl"><span class="slider"></span></label>
+    </div>
+
+    <div class="settings-hint mt-4 mb-5">
+      💡 Если голос «плавает» или пропадает, когда собеседник говорит — попробуйте <b>выключить эхоподавление</b> и надеть наушники. Тогда AEC не будет душить ваш голос.
+    </div>
+
+    <div class="flex gap-3">
+      <button onclick="resetAudioSettings()" class="flex-1 py-3 rounded-[16px] glass-2 font-medium text-sm cursor-pointer" style="border:none;color:var(--text);">Сбросить</button>
+      <button onclick="saveSettings()" class="btn-primary flex-1 py-3 text-sm">Готово</button>
     </div>
   </div>
 </div>
@@ -1369,7 +1008,6 @@
       <video id="localVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
     </div>
 
-    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ: абсолютно по центру снизу -->
     <div class="call-controls-bar absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 px-8 py-4 rounded-full bg-black/30 backdrop-blur-xl border-2 border-white/10" style="z-index:6;">
       <button id="btnMute" onclick="toggleMute()" class="call-ctrl" title="Микрофон">
         <svg id="iconMicOn" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
@@ -1410,7 +1048,6 @@
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"/></svg>
       </button>
 
-      <!-- Меню "Ещё" -->
       <div id="callMoreMenu">
         <button class="call-more-item" id="moreShareBtn" onclick="handleMoreAction('share')" type="button">
           <span class="more-icon">
@@ -1440,6 +1077,24 @@
             </svg>
           </span>
           <span class="more-text">Возобновить показ</span>
+        </button>
+        <button class="call-more-item" id="moreDisconnectShareBtn" onclick="handleMoreAction('disconnect-share')" type="button">
+          <span class="more-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
+              <line x1="12" y1="2" x2="12" y2="12"/>
+            </svg>
+          </span>
+          <span class="more-text">Отключиться от демонстрации</span>
+        </button>
+        <button class="call-more-item" id="moreReconnectShareBtn" onclick="handleMoreAction('reconnect-share')" type="button">
+          <span class="more-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
+          <span class="more-text">Смотреть демонстрацию</span>
         </button>
         <button class="call-more-item" id="moreHideBtn" onclick="handleMoreAction('hide')" type="button">
           <span class="more-icon">
@@ -1557,11 +1212,16 @@ let isScreenSharing = false;
 let screenStream = null;
 let savedCameraTrack = null;
 let savedMicTrack = null;
-let mixAudioCtx = null;
-let mixAudioSources = null;
+let screenAudioSender = null;
 let peerIsScreenSharing = false;
 let shareInterrupted = false;
 let screenSharePollInterval = null;
+
+// Discord-style: отдельный канал для звука демонстрации
+let remoteScreenAudioStream = null;
+let remoteScreenAudioEl = null;
+let mainRemoteStreamId = null;
+let peerWatchingShare = true;
 
 let audioCtx = null;
 let audioSourceNode = null;
@@ -1581,12 +1241,17 @@ let replyTo = null;
 let contextMenuMsg = null;
 let uiHidden = false;
 
-// PC audio settings
-const isElectronApp = /Electron\//i.test(navigator.userAgent);
+// Настройки звука
 let selectedMicId = localStorage.getItem('dc-mic-device') || '';
 let micEchoCancellation = localStorage.getItem('dc-mic-echo') !== 'false';
 let micNoiseSuppression = localStorage.getItem('dc-mic-noise') === 'true';
 let micAutoGainControl = localStorage.getItem('dc-mic-agc') === 'true';
+
+// Панель уровня сигнала в настройках
+let settingsStream = null;
+let settingsAudioCtx = null;
+let settingsAnalyser = null;
+let settingsLevelRaf = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -1637,6 +1302,29 @@ function playNotifySound() {
     osc.frequency.value = n.f;
     gain.gain.setValueAtTime(0, t + n.at);
     gain.gain.linearRampToValueAtTime(n.vol, t + n.at + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + n.at + n.dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t + n.at);
+    osc.stop(t + n.at + n.dur + 0.03);
+  });
+}
+
+function playHangupSound() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const tones = [
+    { f: 740, at: 0.00, dur: 0.14, vol: 0.16 },
+    { f: 520, at: 0.17, dur: 0.26, vol: 0.14 }
+  ];
+  tones.forEach(n => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(n.f, t + n.at);
+    gain.gain.setValueAtTime(0, t + n.at);
+    gain.gain.linearRampToValueAtTime(n.vol, t + n.at + 0.010);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + n.at + n.dur);
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -1766,7 +1454,6 @@ function applyMobileMode(on) {
         sb.style.flexBasis = w + 'px';
       }
     } catch(e) {}
-    // Восстанавливаем правый отступ чата
     try {
       const rm = parseInt(localStorage.getItem('cc-chat-right-margin') || '16', 10);
       const mainEl = document.querySelector('main');
@@ -1974,18 +1661,18 @@ function saveNickEdit() {
 }
 
 // ============================================================
-//  НАСТРОЙКИ МИКРОФОНА (ПК)
+//  НАСТРОЙКИ ЗВУКА
 // ============================================================
 function getMicConstraints() {
   const audio = {
     echoCancellation: micEchoCancellation,
     noiseSuppression: micNoiseSuppression,
     autoGainControl: micAutoGainControl,
-    channelCount: { ideal: 1 },
-    sampleRate: { ideal: 48000 },
-    sampleSize: { ideal: 16 }
+    channelCount: 1
   };
-  if (selectedMicId) audio.deviceId = { exact: selectedMicId };
+  if (selectedMicId && selectedMicId !== 'default') {
+    audio.deviceId = { exact: selectedMicId };
+  }
   return audio;
 }
 
@@ -1994,7 +1681,6 @@ async function ensureMicPermissionForSettings() {
     const devices = await navigator.mediaDevices.enumerateDevices();
     const hasLabels = devices.some(d => d.kind === 'audioinput' && d.label);
     if (hasLabels) return;
-
     const temp = await navigator.mediaDevices.getUserMedia({ audio: true });
     temp.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
   } catch (e) {
@@ -2107,33 +1793,78 @@ async function refreshMicrophoneList() {
   });
 })();
 
-
-function openPcSettings() {
-  if (!isElectronApp) return;
+async function openSettings() {
   closeSidebarIfMobile();
-
-  const modal = $('pcSettingsModal');
+  const modal = $('settingsModal');
   if (!modal) return;
 
-  $('pcEchoCancellation').checked = micEchoCancellation;
-  $('pcNoiseSuppression').checked = micNoiseSuppression;
-  $('pcAutoGainControl').checked = micAutoGainControl;
-  closeMicPicker();
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden', 'false');
-  refreshMicrophoneList();
+  if ($('pcEchoCancellation')) $('pcEchoCancellation').checked = micEchoCancellation;
+  if ($('pcNoiseSuppression')) $('pcNoiseSuppression').checked = micNoiseSuppression;
+  if ($('pcAutoGainControl')) $('pcAutoGainControl').checked = micAutoGainControl;
+
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+
+  await refreshMicrophoneList();
+  await startSettingsLevelMeter();
 }
 
-function closePcSettings() {
-  const modal = $('pcSettingsModal');
+function closeSettings() {
+  const modal = $('settingsModal');
   if (!modal) return;
-  modal.classList.remove('show');
-  modal.setAttribute('aria-hidden', 'true');
+  modal.classList.add('hidden');
+  modal.style.display = '';
+  closeMicPicker();
+  stopSettingsLevelMeter();
+}
+
+async function startSettingsLevelMeter() {
+  stopSettingsLevelMeter();
+  try {
+    settingsStream = await navigator.mediaDevices.getUserMedia({ audio: getMicConstraints() });
+    if (!settingsAudioCtx) {
+      settingsAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (settingsAudioCtx.state === 'suspended') {
+      try { settingsAudioCtx.resume(); } catch (e) {}
+    }
+    const source = settingsAudioCtx.createMediaStreamSource(settingsStream);
+    settingsAnalyser = settingsAudioCtx.createAnalyser();
+    settingsAnalyser.fftSize = 128;
+    settingsAnalyser.smoothingTimeConstant = 0.6;
+    source.connect(settingsAnalyser);
+    tickSettingsLevelMeter();
+  } catch (e) {
+    log('⚠️ Уровень микрофона: ' + e.message, 'warn');
+  }
+}
+
+function tickSettingsLevelMeter() {
+  if (!settingsAnalyser) return;
+  const data = new Uint8Array(settingsAnalyser.frequencyBinCount);
+  settingsAnalyser.getByteFrequencyData(data);
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
+  const rms = Math.sqrt(sum / data.length);
+  const percent = Math.min(100, (rms / 90) * 100);
+  const fill = $('micLevelFill');
+  if (fill) fill.style.width = percent + '%';
+  settingsLevelRaf = requestAnimationFrame(tickSettingsLevelMeter);
+}
+
+function stopSettingsLevelMeter() {
+  if (settingsLevelRaf) { cancelAnimationFrame(settingsLevelRaf); settingsLevelRaf = null; }
+  if (settingsStream) {
+    settingsStream.getTracks().forEach(t => { try { t.stop(); } catch(e){} });
+    settingsStream = null;
+  }
+  settingsAnalyser = null;
+  const fill = $('micLevelFill');
+  if (fill) fill.style.width = '0%';
 }
 
 async function applyMicrophoneSettingsToCall() {
   if (!pc || pc.connectionState === 'closed' || pc.connectionState === 'failed') return;
-
   try {
     const newStream = await navigator.mediaDevices.getUserMedia({ audio: getMicConstraints() });
     const newTrack = newStream.getAudioTracks()[0];
@@ -2148,17 +1879,12 @@ async function applyMicrophoneSettingsToCall() {
     const oldTrack = localStream && localStream.getAudioTracks()[0];
     if (oldTrack && oldTrack !== newTrack) {
       try { oldTrack.stop(); } catch (e) {}
+      try { localStream.removeTrack(oldTrack); } catch (e) {}
     }
-
     if (localStream) {
-      const videoTracks = localStream.getVideoTracks();
-      localStream = new MediaStream([...videoTracks, newTrack]);
+      localStream.addTrack(newTrack);
     } else {
       localStream = new MediaStream([newTrack]);
-    }
-
-    if (isScreenSharing) {
-      log('ℹ️ Микрофон применён. Если сейчас идёт демонстрация с системным звуком, перезапустите демонстрацию для обновления микса.', 'info');
     }
 
     log('🎤 Новый микрофон применён без перезапуска звонка', 'ok');
@@ -2169,10 +1895,9 @@ async function applyMicrophoneSettingsToCall() {
   }
 }
 
-async function savePcSettings() {
-  closeMicPicker();
+async function saveSettings() {
   const select = $('pcMicSelect');
-  selectedMicId = select ? select.value : '';
+  if (select) selectedMicId = select.value;
   micEchoCancellation = !!$('pcEchoCancellation')?.checked;
   micNoiseSuppression = !!$('pcNoiseSuppression')?.checked;
   micAutoGainControl = !!$('pcAutoGainControl')?.checked;
@@ -2184,30 +1909,39 @@ async function savePcSettings() {
 
   try {
     await applyMicrophoneSettingsToCall();
-  } catch (e) {
-    // Error already shown/logged; keep the saved settings for the next call.
-  }
+  } catch (e) {}
 
   const status = $('pcMicStatus');
   if (status) status.textContent = 'Настройки сохранены';
-  closePcSettings();
+  closeSettings();
 }
 
-(function initPcSettings() {
-  if (!isElectronApp) return;
-  const button = $('pcSettingsButton');
-  if (button) button.style.display = 'flex';
+function resetAudioSettings() {
+  micEchoCancellation = true;
+  micNoiseSuppression = false;
+  micAutoGainControl = false;
+  selectedMicId = '';
+  localStorage.setItem('dc-mic-device', '');
+  localStorage.setItem('dc-mic-echo', 'true');
+  localStorage.setItem('dc-mic-noise', 'false');
+  localStorage.setItem('dc-mic-agc', 'false');
 
-  navigator.mediaDevices?.addEventListener?.('devicechange', () => {
-    if ($('pcSettingsModal')?.classList.contains('show')) refreshMicrophoneList();
-  });
+  if ($('pcEchoCancellation')) $('pcEchoCancellation').checked = true;
+  if ($('pcNoiseSuppression')) $('pcNoiseSuppression').checked = false;
+  if ($('pcAutoGainControl')) $('pcAutoGainControl').checked = false;
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && $('pcSettingsModal')?.classList.contains('show')) {
-      closePcSettings();
-    }
+  refreshMicrophoneList();
+  startSettingsLevelMeter();
+  applyMicrophoneSettingsToCall();
+  log('Настройки звука сброшены', 'info');
+}
+
+if (navigator.mediaDevices && 'ondevicechange' in navigator.mediaDevices) {
+  navigator.mediaDevices.addEventListener('devicechange', () => {
+    const modal = $('settingsModal');
+    if (modal && !modal.classList.contains('hidden')) refreshMicrophoneList();
   });
-})();
+}
 
 // ============================================================
 //  ИНИЦИАЛИЗАЦИЯ
@@ -2236,35 +1970,18 @@ function initScreen() {
   connectMQTT();
 }
 
-function showCopyToast() {
-  const toast = $('dcCopyToast');
-  if (!toast) return;
-  toast.classList.add('show');
-  clearTimeout(window.__dcCopyToastTimer);
-  window.__dcCopyToastTimer = setTimeout(() => toast.classList.remove('show'), 1700);
-}
-
 function copyLink(e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   const input = $('shareLink');
   if (!input) return;
   input.select();
   input.setSelectionRange(0, 99999);
-
-  const done = () => {
-    log('✅ Ссылка скопирована', 'ok');
-    showCopyToast();
-  };
-
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(input.value).then(done).catch(() => {
-      document.execCommand('copy');
-      done();
-    });
-  } else {
-    document.execCommand('copy');
-    done();
-  }
+    navigator.clipboard.writeText(input.value).then(() => {
+      log('✅ Ссылка скопирована', 'ok');
+      showCustomModal('Ссылка скопирована! Отправьте её другу.');
+    }).catch(() => { document.execCommand('copy'); showCustomModal('Ссылка скопирована!'); });
+  } else { document.execCommand('copy'); showCustomModal('Ссылка скопирована!'); }
 }
 
 // ============================================================
@@ -2377,18 +2094,22 @@ function handleMessage(msg) {
       if (rv) rv.classList.toggle('screen-share-mode', !!msg.on);
 
       if (msg.on) {
+        peerWatchingShare = true;
         setCallInfoOverlay(false);
       } else {
+        peerWatchingShare = true;
+        removeRemoteScreenAudio();
+
         const hasVideo = remoteStream &&
                          remoteStream.getVideoTracks().some(t => t.enabled);
         setCallInfoOverlay(!hasVideo);
 
-        // The sender restores the camera with replaceTrack(). Reattach the
-        // remote stream after the change so mobile clients don't keep the
-        // last screen frame frozen.
-        if (rv && rv.srcObject) {
-          setTimeout(refreshRemoteVideo, 180);
-          setTimeout(refreshRemoteVideo, 650);
+        if (rv && remoteStream) {
+          if (rv.srcObject !== remoteStream) rv.srcObject = remoteStream;
+          rv.classList.remove('screen-share-mode');
+          refreshRemoteVideo(true);
+          setTimeout(() => refreshRemoteVideo(true), 350);
+          setTimeout(() => refreshRemoteVideo(true), 900);
         }
       }
 
@@ -2768,27 +2489,13 @@ function showTypingIndicator(show) {
 async function getLocalStream(video) {
   log(`Запрос ${video ? 'камеры и микрофона' : 'микрофона'}…`);
   try {
-    const audio = {
-      echoCancellation: micEchoCancellation,
-      noiseSuppression: micNoiseSuppression,
-      autoGainControl: micAutoGainControl,
-      channelCount: { ideal: 1 },
-      sampleRate: { ideal: 48000 },
-      sampleSize: { ideal: 16 }
-    };
-
-    if (selectedMicId) {
-      audio.deviceId = { exact: selectedMicId };
-    }
-
     return await navigator.mediaDevices.getUserMedia({
       video: video ? { width: { ideal: 1280 }, height: { ideal: 720 } } : false,
-      audio
+      audio: getMicConstraints()
     });
   } catch (e) {
-    // If a saved device disappeared, retry once with the default microphone.
     if (selectedMicId && (e.name === 'OverconstrainedError' || e.name === 'NotFoundError')) {
-      log('⚠️ Выбранный микрофон недоступен — используем микрофон по умолчанию', 'warn');
+      log('⚠️ Выбранный микрофон недоступен — используем по умолчанию', 'warn');
       selectedMicId = '';
       localStorage.removeItem('dc-mic-device');
       return getLocalStream(video);
@@ -2899,20 +2606,36 @@ function createPeerConnection() {
   };
 
   conn.ontrack = (e) => {
-    log(`🎬 Трек: ${e.track.kind}`, 'ok');
-    if (!remoteStream) remoteStream = new MediaStream();
-    if (!remoteStream.getTracks().find(x => x.id === e.track.id)) {
-      remoteStream.addTrack(e.track);
-    }
-    $('remoteVideo').srcObject = remoteStream;
+    const track = e.track;
+    const streamId = (e.streams && e.streams[0] && e.streams[0].id) || 'default';
+    log(`🎬 Трек: ${track.kind} (stream=${streamId.slice(0,6)})`, 'ok');
 
-    if (e.track.kind === 'video') {
-      $('remotePlaceholder').classList.add('hidden');
-      setCallInfoOverlay(false);
-    }
+    if (!mainRemoteStreamId) mainRemoteStreamId = streamId;
 
-    setCallStatus('Соединение установлено');
-    startCallTimer();
+    if (streamId === mainRemoteStreamId) {
+      if (!remoteStream) remoteStream = new MediaStream();
+      if (!remoteStream.getTracks().find(x => x.id === track.id)) {
+        remoteStream.addTrack(track);
+      }
+      const rv = $('remoteVideo');
+      if (rv && peerWatchingShare && !isScreenSharing) rv.srcObject = remoteStream;
+
+      if (track.kind === 'video') {
+        $('remotePlaceholder').classList.add('hidden');
+        setCallInfoOverlay(false);
+        track.addEventListener('unmute', () => {
+          setTimeout(() => refreshRemoteVideo(true), 80);
+          setTimeout(() => refreshRemoteVideo(true), 400);
+        });
+      }
+
+      setCallStatus('Соединение установлено');
+      startCallTimer();
+    } else {
+      if (track.kind === 'audio') {
+        handleRemoteScreenAudioTrack(track);
+      }
+    }
   };
   conn.onconnectionstatechange = () => {
     const st = conn.connectionState;
@@ -2928,6 +2651,51 @@ function createPeerConnection() {
     }
   };
   return conn;
+}
+
+// ============================================================
+//  ОТДЕЛЬНЫЙ КАНАЛ ЗВУКА ДЕМОНСТРАЦИИ (Discord-style)
+// ============================================================
+function handleRemoteScreenAudioTrack(track) {
+  if (!remoteScreenAudioStream) remoteScreenAudioStream = new MediaStream();
+  if (!remoteScreenAudioStream.getTracks().find(t => t.id === track.id)) {
+    remoteScreenAudioStream.addTrack(track);
+  }
+
+  ensureRemoteScreenAudioElement();
+  if (remoteScreenAudioEl) {
+    remoteScreenAudioEl.srcObject = remoteScreenAudioStream;
+    remoteScreenAudioEl.play().catch(() => {});
+  }
+
+  log('🔊 Звук демонстрации подключён отдельным каналом', 'ok');
+
+  track.addEventListener('ended', () => {
+    log('🔊 Экранный звук завершён (ended)', 'info');
+    removeRemoteScreenAudio();
+  });
+}
+
+function ensureRemoteScreenAudioElement() {
+  if (remoteScreenAudioEl) return;
+  remoteScreenAudioEl = document.createElement('audio');
+  remoteScreenAudioEl.autoplay = true;
+  remoteScreenAudioEl.style.display = 'none';
+  remoteScreenAudioEl.setAttribute('playsinline', '');
+  document.body.appendChild(remoteScreenAudioEl);
+}
+
+function removeRemoteScreenAudio() {
+  if (remoteScreenAudioEl) {
+    try { remoteScreenAudioEl.pause(); } catch (e) {}
+    remoteScreenAudioEl.srcObject = null;
+    try { remoteScreenAudioEl.remove(); } catch (e) {}
+    remoteScreenAudioEl = null;
+  }
+  if (remoteScreenAudioStream) {
+    remoteScreenAudioStream.getTracks().forEach(t => { try { t.stop(); } catch(e){} });
+    remoteScreenAudioStream = null;
+  }
 }
 
 async function startCall(type) {
@@ -3063,6 +2831,7 @@ function rejectCall() {
   $('incomingCallModal').style.display = '';
   sendMQTT({ type: 'call-reject' });
   incomingOffer = null;
+  try { playHangupSound(); } catch (e) {}
 }
 
 function endCall(silent = false) {
@@ -3071,6 +2840,7 @@ function endCall(silent = false) {
   if (isScreenSharing || screenStream) stopScreenShare();
   if (!silent) sendMQTT({ type: 'call-end' });
   stopAllSounds();
+  try { playHangupSound(); } catch (e) {}
   clearTimeout(callStateTimeout);
   clearTimeout(miniUiHideTimer);
   resetCallScreenState();
@@ -3084,6 +2854,10 @@ function endCall(silent = false) {
   if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
   remoteStream = null;
   peerIsScreenSharing = false;
+  peerWatchingShare = true;
+  mainRemoteStreamId = null;
+  screenAudioSender = null;
+  removeRemoteScreenAudio();
   const rv = $('remoteVideo');
   if (rv) rv.classList.remove('screen-share-mode');
   updateScreenShareBadge();
@@ -3214,25 +2988,25 @@ function toggleVideoFullscreen() {
   }
 }
 
-function updateFullscreenIcon() {
-  // Кнопки в панели больше нет, но функция оставлена для совместимости
-}
+function updateFullscreenIcon() {}
 
 // ============================================================
-//  ВОССТАНОВЛЕНИЕ УДАЛЁННОГО ВИДЕО (после fullscreen)
+//  ВОССТАНОВЛЕНИЕ УДАЛЁННОГО ВИДЕО
 // ============================================================
-function refreshRemoteVideo() {
+function refreshRemoteVideo(aggressive = false) {
   const rv = $('remoteVideo');
   if (!rv || !rv.srcObject) return;
   try {
     const stream = rv.srcObject;
+    try { rv.pause(); } catch (e) {}
     rv.srcObject = null;
+    if (aggressive) { void rv.offsetHeight; }
     setTimeout(() => {
       rv.srcObject = stream;
       const p = rv.play();
       if (p && p.catch) p.catch(() => {});
-      log('🔄 Удалённое видео переприсоединено', 'info');
-    }, 80);
+      log('🔄 Удалённое видео переприсоединено' + (aggressive ? ' (aggressive)' : ''), 'info');
+    }, aggressive ? 120 : 80);
   } catch (e) {
     log('⚠️ Ошибка refresh: ' + e.message, 'warn');
   }
@@ -3240,15 +3014,11 @@ function refreshRemoteVideo() {
 
 document.addEventListener('fullscreenchange', () => {
   updateFullscreenIcon();
-  if (!document.fullscreenElement) {
-    setTimeout(refreshRemoteVideo, 200);
-  }
+  if (!document.fullscreenElement) setTimeout(refreshRemoteVideo, 200);
 });
 document.addEventListener('webkitfullscreenchange', () => {
   updateFullscreenIcon();
-  if (!document.webkitFullscreenElement) {
-    setTimeout(refreshRemoteVideo, 200);
-  }
+  if (!document.webkitFullscreenElement) setTimeout(refreshRemoteVideo, 200);
 });
 document.addEventListener('webkitbeginfullscreen', updateFullscreenIcon);
 document.addEventListener('webkitendfullscreen', () => {
@@ -3283,6 +3053,8 @@ function updateMoreMenuVisibility() {
   const moreHideBtn       = $('moreHideBtn');
   const moreShareBtn      = $('moreShareBtn');
   const moreShareText     = $('moreShareText');
+  const moreDisconnectShareBtn = $('moreDisconnectShareBtn');
+  const moreReconnectShareBtn  = $('moreReconnectShareBtn');
 
   const inCall = !!pc && pc.connectionState !== 'closed' && pc.connectionState !== 'failed';
   const isMobile = document.body.classList.contains('mobile-mode');
@@ -3297,7 +3069,7 @@ function updateMoreMenuVisibility() {
   }
 
   if (moreFullscreenBtn) {
-    const show = (isScreenSharing || peerIsScreenSharing);
+    const show = (isScreenSharing || peerIsScreenSharing) && peerWatchingShare;
     moreFullscreenBtn.classList.toggle('hidden', !show);
   }
   if (moreResumeBtn) {
@@ -3307,6 +3079,14 @@ function updateMoreMenuVisibility() {
   }
   if (moreHideBtn) {
     moreHideBtn.classList.toggle('hidden', !isMobile);
+  }
+  if (moreDisconnectShareBtn) {
+    const show = peerIsScreenSharing && peerWatchingShare;
+    moreDisconnectShareBtn.classList.toggle('hidden', !show);
+  }
+  if (moreReconnectShareBtn) {
+    const show = peerIsScreenSharing && !peerWatchingShare;
+    moreReconnectShareBtn.classList.toggle('hidden', !show);
   }
 }
 
@@ -3320,7 +3100,49 @@ function handleMoreAction(action) {
     hideCall();
   } else if (action === 'share') {
     toggleScreenShare();
+  } else if (action === 'disconnect-share') {
+    disconnectFromShare();
+  } else if (action === 'reconnect-share') {
+    reconnectToShare();
   }
+}
+
+function disconnectFromShare() {
+  peerWatchingShare = false;
+  const rv = $('remoteVideo');
+  if (rv) {
+    rv.classList.remove('screen-share-mode');
+    rv.srcObject = null;
+  }
+  removeRemoteScreenAudio();
+  const ph = $('remotePlaceholder');
+  if (ph) ph.classList.remove('hidden');
+  setCallInfoOverlay(true);
+  updateMoreMenuVisibility();
+  log('🚫 Отключились от просмотра демонстрации', 'info');
+}
+
+function reconnectToShare() {
+  peerWatchingShare = true;
+  const rv = $('remoteVideo');
+  if (rv && remoteStream) {
+    rv.srcObject = remoteStream;
+    rv.classList.add('screen-share-mode');
+    const p = rv.play();
+    if (p && p.catch) p.catch(() => {});
+  }
+  if (remoteScreenAudioStream) {
+    ensureRemoteScreenAudioElement();
+    if (remoteScreenAudioEl) {
+      remoteScreenAudioEl.srcObject = remoteScreenAudioStream;
+      remoteScreenAudioEl.play().catch(() => {});
+    }
+  }
+  const ph = $('remotePlaceholder');
+  if (ph) ph.classList.add('hidden');
+  setCallInfoOverlay(false);
+  updateMoreMenuVisibility();
+  log('👀 Возобновили просмотр демонстрации', 'info');
 }
 
 document.addEventListener('click', (e) => {
@@ -3351,9 +3173,7 @@ function scheduleMiniUiHide() {
   clearTimeout(miniUiHideTimer);
   if (!document.body.classList.contains('mobile-mode')) return;
   miniUiHideTimer = setTimeout(() => {
-    if (callMinimized) {
-      toggleCallUI(true);
-    }
+    if (callMinimized) toggleCallUI(true);
   }, 2000);
 }
 
@@ -3374,9 +3194,7 @@ function scheduleMiniUiHide() {
         e.target.closest('button')) return;
 
     if (callMinimized) {
-      if (uiHidden) {
-        toggleCallUI(false);
-      }
+      if (uiHidden) toggleCallUI(false);
       scheduleMiniUiHide();
       return;
     }
@@ -3427,8 +3245,8 @@ function hideResumeShareButton() {
 async function resumeScreenShare() {
   if (peerIsScreenSharing && !isScreenSharing) {
     log('🔄 Обновление видео собеседника');
-    refreshRemoteVideo();
-    setTimeout(refreshRemoteVideo, 500);
+    refreshRemoteVideo(true);
+    setTimeout(() => refreshRemoteVideo(true), 500);
     return;
   }
 
@@ -3446,20 +3264,13 @@ async function resumeScreenShare() {
 function startScreenSharePolling() {
   stopScreenSharePolling();
   screenSharePollInterval = setInterval(() => {
-    if (!isScreenSharing) {
-      stopScreenSharePolling();
-      return;
-    }
+    if (!isScreenSharing) { stopScreenSharePolling(); return; }
     if (!screenStream) return;
-
     const track = screenStream.getVideoTracks()[0];
     if (!track || track.readyState === 'ended') {
-      log('🖥️ Поллинг: трек демонстрации завершён (readyState=' + (track ? track.readyState : 'none') + ')', 'warn');
+      log('🖥️ Поллинг: трек демонстрации завершён', 'warn');
       stopScreenSharePolling();
-      const wasActive = isScreenSharing;
-      if (wasActive) {
-        stopScreenShare(false, true);
-      }
+      if (isScreenSharing) stopScreenShare(false, true);
     }
   }, 1000);
 }
@@ -3475,21 +3286,16 @@ async function startScreenShare() {
   log('▶️ startScreenShare() вызван', 'info');
 
   if (!pc) {
-    log('⚠️ Нет активного звонка — pc = null', 'warn');
+    log('⚠️ Нет активного звонка', 'warn');
     showCustomModal('Сначала начните звонок.', 'Нужен активный звонок', 'i');
     return;
   }
-  if (isScreenSharing) {
-    log('ℹ️ Уже демонстрирую', 'info');
-    return;
-  }
+  if (isScreenSharing) return;
   if (!navigator.mediaDevices) {
-    log('❌ navigator.mediaDevices недоступен (нужен HTTPS или localhost)', 'err');
-    showCustomModal('Демонстрация экрана требует защищённого HTTPS-соединения. Откройте страницу по адресу https://', 'Демонстрация экрана', '!');
+    showCustomModal('Демонстрация экрана требует HTTPS.', 'Демонстрация экрана', '!');
     return;
   }
   if (typeof navigator.mediaDevices.getDisplayMedia !== 'function') {
-    log('❌ getDisplayMedia не поддерживается этим браузером/устройством', 'err');
     showCustomModal(
       'Ваш браузер не поддерживает демонстрацию экрана.\n\n' +
       'На мобильных (Chrome Android, iOS Safari) этой функции нет — ' +
@@ -3501,10 +3307,6 @@ async function startScreenShare() {
   }
 
   try {
-    // PC/Electron: просим также системный звук.
-    // В main.js Electron он приходит как loopback, а restrictOwnAudio
-    // исключает звук самого DianaCalm из loopback, чтобы голос собеседника
-    // не возвращался ему эхом.
     const preferred = {
       video: {
         frameRate: { ideal: 60 },
@@ -3512,22 +3314,20 @@ async function startScreenShare() {
         height:    { ideal: 1080 },
         cursor: 'always'
       },
-      audio: {
-        restrictOwnAudio: true
-      }
+      audio: true
     };
 
     try {
       screenStream = await navigator.mediaDevices.getDisplayMedia(preferred);
     } catch (e1) {
-      log('⚠️ Расширенные constraints не приняты: ' + e1.message + ' — пробуем базовые', 'warn');
+      log('⚠️ Расширенные constraints: ' + e1.message + ' — базовые', 'warn');
       try {
         screenStream = await navigator.mediaDevices.getDisplayMedia({
           video: { frameRate: { ideal: 60 } },
           audio: true
         });
       } catch (e2) {
-        log('⚠️ Fallback 2: ' + e2.message + ' — пробуем только видео', 'warn');
+        log('⚠️ Fallback: ' + e2.message + ' — только видео', 'warn');
         screenStream = await navigator.mediaDevices.getDisplayMedia({
           video: true,
           audio: false
@@ -3559,25 +3359,24 @@ async function startScreenShare() {
         params.encodings[0].maxBitrate = 5000000;
         params.degradationPreference = 'maintain-framerate';
         await videoSender.setParameters(params);
-        log('⚙️ Кодек: 60 fps, 5 Мбит/с, maintain-framerate', 'ok');
       }
-    } catch (e) {
-      log('⚠️ Параметры кодирования: ' + e.message, 'warn');
-    }
+    } catch (e) {}
 
-    // Микрофон + звук демонстрируемого источника.
-    // В Electron звук самого DianaCalm исключён через restrictOwnAudio,
-    // поэтому голос собеседника не попадает обратно в звонок.
-    if (screenAudioTrack && savedMicTrack) {
-      await mixMicAndScreenAudio(savedMicTrack, screenAudioTrack);
-      log('🔊 Звук демонстрации включён; звук DianaCalm исключён', 'ok');
-    } else if (screenAudioTrack && !savedMicTrack) {
-      const audioSender = pc.getSenders().find(s => s.track && s.track.kind === 'audio');
-      if (audioSender) await audioSender.replaceTrack(screenAudioTrack);
-      else pc.addTrack(screenAudioTrack, screenStream);
-      log('🔊 Передаётся звук демонстрации', 'ok');
+    // Discord-style: звук демонстрации идёт ОТДЕЛЬНЫМ каналом (своим stream'ом).
+    if (screenAudioTrack) {
+      try {
+        await screenAudioTrack.applyConstraints({ channelCount: 1 });
+      } catch (e) {}
+
+      try {
+        screenAudioSender = pc.addTrack(screenAudioTrack, screenStream);
+        log('🔊 Звук демонстрации добавлен отдельным каналом', 'ok');
+      } catch (e) {
+        log('⚠️ Не удалось добавить звук демонстрации: ' + e.message, 'warn');
+        screenAudioSender = null;
+      }
     } else {
-      log('ℹ️ Источник не предоставил аудио — передаётся только видео', 'info');
+      log('ℹ️ Источник не предоставил аудио — только видео', 'info');
     }
 
     if ($('localVideo')) $('localVideo').srcObject = screenStream;
@@ -3589,11 +3388,9 @@ async function startScreenShare() {
     log('🖥️ Демонстрация экрана запущена', 'ok');
 
     screenVideoTrack.onended = () => {
-      log('🖥️ Демонстрация прервана браузером (onended)', 'warn');
+      log('🖥️ Демонстрация прервана браузером', 'warn');
       try { screenVideoTrack.onended = null; } catch(e){}
-      if (isScreenSharing) {
-        stopScreenShare(false, true);
-      }
+      if (isScreenSharing) stopScreenShare(false, true);
     };
 
     startScreenSharePolling();
@@ -3601,37 +3398,6 @@ async function startScreenShare() {
   } catch (e) {
     log('❌ Демонстрация: ' + e.message, 'err');
     stopScreenShare();
-  }
-}
-
-async function mixMicAndScreenAudio(micTrack, screenAudioTrack) {
-  try {
-    if (!mixAudioCtx) {
-      mixAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (mixAudioCtx.state === 'suspended') await mixAudioCtx.resume();
-
-    const micSrc    = mixAudioCtx.createMediaStreamSource(new MediaStream([micTrack]));
-    const screenSrc = mixAudioCtx.createMediaStreamSource(new MediaStream([screenAudioTrack]));
-    const dest      = mixAudioCtx.createMediaStreamDestination();
-
-    const screenGain = mixAudioCtx.createGain();
-    screenGain.gain.value = 0.85;
-
-    micSrc.connect(dest);
-    screenSrc.connect(screenGain);
-    screenGain.connect(dest);
-
-    const mixedTrack = dest.stream.getAudioTracks()[0];
-
-    const audioSender = pc.getSenders().find(s => s.track && s.track.kind === 'audio');
-    if (audioSender) await audioSender.replaceTrack(mixedTrack);
-    else pc.addTrack(mixedTrack, dest.stream);
-
-    mixAudioSources = { micSrc, screenSrc, screenGain, dest };
-    log('🎚️ Микрофон + системный звук смикшированы', 'ok');
-  } catch (e) {
-    log('⚠️ Микс аудио не удался: ' + e.message, 'warn');
   }
 }
 
@@ -3644,6 +3410,14 @@ function stopScreenShare(silent = false, interrupted = false) {
     screenStream.getVideoTracks().forEach(t => { try { t.onended = null; } catch(e){} });
     screenStream.getTracks().forEach(t => { try { t.stop(); } catch(e){} });
     screenStream = null;
+  }
+
+  if (screenAudioSender && pc) {
+    try {
+      pc.removeTrack(screenAudioSender);
+      log('🔇 Экранный звук отключён', 'ok');
+    } catch (e) {}
+    screenAudioSender = null;
   }
 
   const restorePromises = [];
@@ -3664,14 +3438,6 @@ function stopScreenShare(silent = false, interrupted = false) {
     }
   }
 
-  if (mixAudioSources) {
-    try { mixAudioSources.micSrc.disconnect(); } catch(e){}
-    try { mixAudioSources.screenSrc.disconnect(); } catch(e){}
-    try { mixAudioSources.screenGain.disconnect(); } catch(e){}
-    try { mixAudioSources.dest.disconnect(); } catch(e){}
-    mixAudioSources = null;
-  }
-
   savedCameraTrack = null;
   savedMicTrack = null;
   isScreenSharing = false;
@@ -3686,11 +3452,8 @@ function stopScreenShare(silent = false, interrupted = false) {
     if (!silent && mqttClient && mqttClient.connected) {
       sendMQTT({ type: 'screen-share', on: false });
     }
-    // Give the receiver a moment to receive the restored camera track.
-    if (typeof refreshRemoteVideo === 'function') {
-      setTimeout(refreshRemoteVideo, 180);
-      setTimeout(refreshRemoteVideo, 650);
-    }
+    setTimeout(() => refreshRemoteVideo(true), 180);
+    setTimeout(() => refreshRemoteVideo(true), 650);
   };
 
   Promise.allSettled(restorePromises).then(notifyStopped);
@@ -3707,7 +3470,7 @@ function stopScreenShare(silent = false, interrupted = false) {
 function updateScreenShareBadge() {
   const badge = $('screenShareBadge');
   if (!badge) return;
-  const show = !!(isScreenSharing || peerIsScreenSharing);
+  const show = !!(isScreenSharing || (peerIsScreenSharing && peerWatchingShare));
   badge.classList.toggle('hidden', !show);
 
   const label = badge.querySelector('span:last-child');
@@ -3774,12 +3537,8 @@ function minimizeCall() {
   const vw = window.innerWidth, vh = window.innerHeight;
   const isMob = document.body.classList.contains('mobile-mode');
 
-  const w = isMob
-    ? Math.min(vw - 24, 480)
-    : MINI_W;
-  const h = isMob
-    ? Math.min(Math.round(vh * 0.62), Math.round(w * 0.62) + 90)
-    : MINI_H;
+  const w = isMob ? Math.min(vw - 24, 480) : MINI_W;
+  const h = isMob ? Math.min(Math.round(vh * 0.62), Math.round(w * 0.62) + 90) : MINI_H;
 
   if (miniCallPos.x === null || miniCallPos.y === null) {
     miniCallPos.x = Math.round((vw - w) / 2);
@@ -3796,14 +3555,8 @@ function minimizeCall() {
   const mpn = $('miniPeerName');
   if (mpn) mpn.textContent = peerNick || 'Собеседник';
 
-  // In the PC mini-window the avatar, name, status and timer remain visible.
-  // Only the control bar fades out until the pointer enters the mini-window.
-  if (!isMob) {
-    toggleCallUI(false);
-  } else {
-    toggleCallUI(false);
-    scheduleMiniUiHide();
-  }
+  toggleCallUI(false);
+  if (isMob) scheduleMiniUiHide();
 }
 
 function expandCall() {
@@ -3990,9 +3743,7 @@ function resetCallScreenState() {
     if (!dragging) return;
     dragging = false;
     pill.classList.remove('dragging');
-    if (!moved) {
-      restoreCallFromPill();
-    }
+    if (!moved) restoreCallFromPill();
   }
 
   pill.addEventListener('mousedown', onDown);
@@ -4087,7 +3838,7 @@ function resetCallScreenState() {
 })();
 
 // ============================================================
-//  РУЧНОЙ РЕСАЙЗ МИНИ-ОКНА ЗВОНКА ЗА УГОЛ
+//  РУЧНОЙ РЕСАЙЗ МИНИ-ОКНА
 // ============================================================
 (function initMiniResize() {
   const handle = $('miniResizeHandle');
@@ -4150,16 +3901,14 @@ function resetCallScreenState() {
 })();
 
 // ============================================================
-//  РЕСАЙЗ САЙДБАРА (левый)
+//  РЕСАЙЗ САЙДБАРА
 // ============================================================
 (function initResize() {
   const handle = $('resizeHandle');
   const sidebar = $('sidebar');
   if (!handle || !sidebar) return;
 
-  const MIN = 220;
-  const MAX = 480;
-
+  const MIN = 220, MAX = 480;
   const saved = parseInt(localStorage.getItem('cc-sidebar-width') || '280', 10);
   if (!isNaN(saved) && saved >= MIN && saved <= MAX && !document.body.classList.contains('mobile-mode')) applyWidth(saved);
   else if (!document.body.classList.contains('mobile-mode')) applyWidth(280);
@@ -4217,17 +3966,15 @@ function resetCallScreenState() {
 })();
 
 // ============================================================
-//  РЕСАЙЗ ЧАТА СПРАВА (правый margin у main)
+//  РЕСАЙЗ ЧАТА СПРАВА
 // ============================================================
 (function initRightResize() {
   const handle = $('rightResizeHandle');
   const mainEl = document.querySelector('main');
   if (!handle || !mainEl) return;
 
-  const MIN = 0;   // минимум отступа (чат максимально широкий)
-  const MAX = 400; // максимум отступа (чат сильно сужен)
+  const MIN = 0, MAX = 400;
 
-  // Восстанавливаем сохранённую позицию
   try {
     const saved = parseInt(localStorage.getItem('cc-chat-right-margin') || '16', 10);
     if (!isNaN(saved) && saved >= MIN && saved <= MAX && !document.body.classList.contains('mobile-mode') && window.innerWidth > 1024) {
@@ -4251,7 +3998,6 @@ function resetCallScreenState() {
   document.addEventListener('mousemove', (e) => {
     if (!dragging) return;
     const dx = e.clientX - startX;
-    // тянем влево (dx<0) — margin растёт, чат сужается
     let newMargin = startMargin - dx;
     newMargin = Math.max(MIN, Math.min(MAX, newMargin));
     mainEl.style.marginRight = newMargin + 'px';
@@ -4279,13 +4025,12 @@ function resetCallScreenState() {
   });
 })();
 
-
 // ============================================================
-//  КАСТОМНЫЕ УВЕДОМЛЕНИЯ DIANACALM
+//  КАСТОМНЫЕ УВЕДОМЛЕНИЯ
 // ============================================================
 let dcModalCloseHandler = null;
 
-function showCustomModal(message, title = 'DianaCalm', icon = '✓') {
+function showCustomModal(message, title = '', icon = '✓') {
   const modal = $('dcModal');
   const titleEl = $('dcModalTitle');
   const messageEl = $('dcModalMessage');
@@ -4294,7 +4039,9 @@ function showCustomModal(message, title = 'DianaCalm', icon = '✓') {
 
   if (!modal || !titleEl || !messageEl || !button) return;
 
-  titleEl.textContent = title;
+  titleEl.textContent = '';
+  titleEl.style.display = 'none';
+
   messageEl.textContent = message;
   if (iconEl) iconEl.textContent = icon;
 
