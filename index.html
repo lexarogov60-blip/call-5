@@ -201,7 +201,6 @@
   body.resizing { cursor: col-resize !important; user-select: none !important; }
   body.resizing * { cursor: col-resize !important; user-select: none !important; }
 
-  /* ПРАВЫЙ РЕСАЙЗ-ХЭНДЛ (внутри main, у правого края чата) */
   .right-resize-handle {
     position: absolute;
     right: 0;
@@ -240,7 +239,6 @@
 
   @media (max-width: 1024px) { .resize-handle { display: none; } aside { width: 84px !important; min-width: 84px !important; flex-basis: 84px !important; padding: 20px 8px; } aside .hide-mobile { display: none; } main { margin: 16px 12px 16px 0; } }
   .nick-form { animation: modalIn 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
-  /* Больше воздуха между надписью «Ваш ник» и полем ввода */
   #nickView .text-left > label { margin-bottom: 20px !important; }
   #nickView .text-left { margin-bottom: 12px !important; }
   #nickView .btn-primary { margin-top: 18px !important; }
@@ -251,7 +249,6 @@
   @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
   .chat-area { background: var(--chat-area-bg); border-radius: 26px; margin: 0 16px; flex: 1; overflow-y: auto; position: relative; min-height: 0; }
 
-  /* ============ КНОПКА УПРАВЛЕНИЯ ЗВОНКОМ ============ */
   .call-ctrl {
     width: 60px; height: 60px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -273,20 +270,15 @@
   .call-ctrl.accept:hover { background: #16a34a; }
   .call-ctrl.muted { background: rgba(239,68,68,0.6); }
 
-  /* Скрытие/показ в зависимости от режима */
   #btnSpeaker { display: none !important; }
   body.mobile-mode #btnSpeaker { display: flex !important; }
 
-  /* Кнопка "Ещё" — теперь и на ПК, и на мобильном */
   #btnMoreCall { display: flex; }
 
-  /* Кнопка "Свернуть в чат" (десктопная, мини-режим) */
   body.mobile-mode #btnMinimizeCall { display: none !important; }
 
-  /* Пункт "Демонстрация экрана" в меню — только для десктопа */
   body.mobile-mode #moreShareBtn { display: none !important; }
 
-  /* Меню "Ещё" */
   #callMoreMenu {
     position: absolute;
     bottom: calc(100% + 14px);
@@ -341,7 +333,6 @@
   #callMoreMenu .call-more-item.warn:hover .more-icon { background: rgba(245,158,11,0.3); color: #FCD34D; }
   #btnMoreCall.active { background: rgba(255,255,255,0.28); transform: scale(1.05); }
 
-  /* Пульсация кнопки "Возобновить показ" в меню */
   @keyframes resumeMenuPulse {
     0%, 100% { background: rgba(245,158,11,0.18); }
     50% { background: rgba(245,158,11,0.4); }
@@ -379,7 +370,6 @@
   #callStatusText { transition: font-size 0.6s cubic-bezier(0.34, 1.15, 0.64, 1); }
   .local-video-pip { transition: width 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), height 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), top 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), right 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), border-radius 0.6s cubic-bezier(0.34, 1.15, 0.64, 1), opacity 0.45s ease, transform 0.5s cubic-bezier(0.34, 1.15, 0.64, 1); }
   #callScreen.minimized .local-video-pip { opacity: 0; transform: scale(0.85); pointer-events: none; }
-  /* ⚠️ ВАЖНО: НЕ добавлять position сюда — иначе сломается absolute из HTML */
   .call-controls-bar {
     transition: bottom 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
                 padding 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
@@ -504,9 +494,6 @@
   #callScreen.ui-hidden .mini-resize-handle,
   #callScreen.ui-hidden #callMoreMenu { opacity: 0 !important; pointer-events: none !important; }
 
-  /* ============================================================
-     DIANACALM — CUSTOM MODAL (компактный)
-     ============================================================ */
   .dc-modal {
     position: fixed;
     inset: 0;
@@ -581,7 +568,6 @@
     gap: 10px;
   }
 
-  /* Заголовок полностью убран */
   .dc-modal-title {
     display: none !important;
   }
@@ -653,7 +639,6 @@
 </head>
 <body>
 
-  <!-- DianaCalm custom modal -->
   <div id="dcModal" class="dc-modal" role="dialog" aria-modal="true" aria-labelledby="dcModalTitle">
     <div class="dc-modal-backdrop" data-dc-modal-close></div>
     <div class="dc-modal-card">
@@ -992,7 +977,6 @@
       <video id="localVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
     </div>
 
-    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ: абсолютно по центру снизу -->
     <div class="call-controls-bar absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 px-8 py-4 rounded-full bg-black/30 backdrop-blur-xl border-2 border-white/10" style="z-index:6;">
       <button id="btnMute" onclick="toggleMute()" class="call-ctrl" title="Микрофон">
         <svg id="iconMicOn" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
@@ -1033,7 +1017,6 @@
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"/></svg>
       </button>
 
-      <!-- Меню "Ещё" -->
       <div id="callMoreMenu">
         <button class="call-more-item" id="moreShareBtn" onclick="handleMoreAction('share')" type="button">
           <span class="more-icon">
@@ -1178,10 +1161,9 @@ let appStarted = false;
 
 let isScreenSharing = false;
 let screenStream = null;
+let screenAudioSender = null;   // ← НОВЫЙ: отдельный сендер системного звука
 let savedCameraTrack = null;
 let savedMicTrack = null;
-let mixAudioCtx = null;
-let mixAudioSources = null;
 let peerIsScreenSharing = false;
 let shareInterrupted = false;
 let screenSharePollInterval = null;
@@ -1261,7 +1243,6 @@ function playNotifySound() {
   });
 }
 
-// ✅ ЗВУК СБРАСЫВАНИЯ ТРУБКИ — два коротких нисходящих тона
 function playHangupSound() {
   const ctx = getAudioCtx();
   if (!ctx) return;
@@ -2145,15 +2126,33 @@ function showTypingIndicator(show) {
 // ============================================================
 async function getLocalStream(video) {
   log(`Запрос ${video ? 'камеры и микрофона' : 'микрофона'}…`);
+
+  // ✅ ИСПРАВЛЕНО: отключены шумоподавление и автогейн, чтобы голос
+  // не «утопал» и не «качался». Echo cancellation оставляем.
+  const audioConstraints = {
+    echoCancellation: true,
+    noiseSuppression: false,
+    autoGainControl: false,
+    channelCount: 1
+  };
+
   try {
     return await navigator.mediaDevices.getUserMedia({
       video: video ? { width: { ideal: 1280 }, height: { ideal: 720 } } : false,
-      audio: { echoCancellation: true, noiseSuppression: true }
+      audio: audioConstraints
     });
   } catch (e) {
-    log('❌ ' + e.message, 'err');
-    showCustomModal('Не удалось получить доступ: ' + e.message, 'Не удалось получить доступ', '!');
-    throw e;
+    log('⚠️ Constraints не приняты (' + e.message + '), пробуем базовые', 'warn');
+    try {
+      return await navigator.mediaDevices.getUserMedia({
+        video: video ? { width: { ideal: 1280 }, height: { ideal: 720 } } : false,
+        audio: true
+      });
+    } catch (e2) {
+      log('❌ ' + e2.message, 'err');
+      showCustomModal('Не удалось получить доступ: ' + e2.message, 'Не удалось получить доступ', '!');
+      throw e2;
+    }
   }
 }
 
@@ -2421,7 +2420,6 @@ function rejectCall() {
   $('incomingCallModal').style.display = '';
   sendMQTT({ type: 'call-reject' });
   incomingOffer = null;
-  // Звук сбрасывания трубки при отклонении входящего
   try { playHangupSound(); } catch (e) {}
 }
 
@@ -2431,7 +2429,6 @@ function endCall(silent = false) {
   if (isScreenSharing || screenStream) stopScreenShare();
   if (!silent) sendMQTT({ type: 'call-end' });
   stopAllSounds();
-  // ✅ Звук сбрасывания трубки
   try { playHangupSound(); } catch (e) {}
   clearTimeout(callStateTimeout);
   clearTimeout(miniUiHideTimer);
@@ -2446,6 +2443,7 @@ function endCall(silent = false) {
   if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
   remoteStream = null;
   peerIsScreenSharing = false;
+  screenAudioSender = null;
   const rv = $('remoteVideo');
   if (rv) rv.classList.remove('screen-share-mode');
   updateScreenShareBadge();
@@ -2576,12 +2574,10 @@ function toggleVideoFullscreen() {
   }
 }
 
-function updateFullscreenIcon() {
-  // Кнопки в панели больше нет, но функция оставлена для совместимости
-}
+function updateFullscreenIcon() {}
 
 // ============================================================
-//  ВОССТАНОВЛЕНИЕ УДАЛЁННОГО ВИДЕО (после fullscreen)
+//  ВОССТАНОВЛЕНИЕ УДАЛЁННОГО ВИДЕО
 // ============================================================
 function refreshRemoteVideo() {
   const rv = $('remoteVideo');
@@ -2870,7 +2866,7 @@ async function startScreenShare() {
         cursor: 'always'
       },
       audio: {
-        echoCancellation: false,
+        echoCancellation: true,
         noiseSuppression: false,
         autoGainControl: false
       }
@@ -2902,6 +2898,7 @@ async function startScreenShare() {
     savedCameraTrack = (localStream && localStream.getVideoTracks()[0]) || null;
     savedMicTrack    = (localStream && localStream.getAudioTracks()[0]) || null;
 
+    // Замена видео-трека
     let videoSender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
     if (videoSender) {
       await videoSender.replaceTrack(screenVideoTrack);
@@ -2924,12 +2921,21 @@ async function startScreenShare() {
       log('⚠️ Параметры кодирования: ' + e.message, 'warn');
     }
 
-    if (screenAudioTrack && savedMicTrack) {
-      await mixMicAndScreenAudio(savedMicTrack, screenAudioTrack);
-    } else if (screenAudioTrack && !savedMicTrack) {
-      const audioSender = pc.getSenders().find(s => s.track && s.track.kind === 'audio');
-      if (audioSender) await audioSender.replaceTrack(screenAudioTrack);
-      else pc.addTrack(screenAudioTrack, screenStream);
+    // ✅ ИСПРАВЛЕНО: системный звук добавляется ОТДЕЛЬНЫМ сендером,
+    // а не микшируется с микрофоном через AudioContext. Так WebRTC
+    // продолжает применять AEC/AGC к микрофону, и голос не дублируется.
+    if (screenAudioTrack) {
+      try {
+        if (screenAudioSender && !screenAudioSender.track) {
+          await screenAudioSender.replaceTrack(screenAudioTrack);
+          log('🔊 Системный звук обновлён (existing sender)', 'ok');
+        } else {
+          screenAudioSender = pc.addTrack(screenAudioTrack, screenStream);
+          log('🔊 Системный звук добавлен отдельным треком', 'ok');
+        }
+      } catch (e) {
+        log('⚠️ Не удалось добавить системный звук: ' + e.message, 'warn');
+      }
     } else {
       log('ℹ️ Системный звук не выбран — только видео', 'info');
     }
@@ -2958,37 +2964,6 @@ async function startScreenShare() {
   }
 }
 
-async function mixMicAndScreenAudio(micTrack, screenAudioTrack) {
-  try {
-    if (!mixAudioCtx) {
-      mixAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (mixAudioCtx.state === 'suspended') await mixAudioCtx.resume();
-
-    const micSrc    = mixAudioCtx.createMediaStreamSource(new MediaStream([micTrack]));
-    const screenSrc = mixAudioCtx.createMediaStreamSource(new MediaStream([screenAudioTrack]));
-    const dest      = mixAudioCtx.createMediaStreamDestination();
-
-    const screenGain = mixAudioCtx.createGain();
-    screenGain.gain.value = 0.85;
-
-    micSrc.connect(dest);
-    screenSrc.connect(screenGain);
-    screenGain.connect(dest);
-
-    const mixedTrack = dest.stream.getAudioTracks()[0];
-
-    const audioSender = pc.getSenders().find(s => s.track && s.track.kind === 'audio');
-    if (audioSender) await audioSender.replaceTrack(mixedTrack);
-    else pc.addTrack(mixedTrack, dest.stream);
-
-    mixAudioSources = { micSrc, screenSrc, screenGain, dest };
-    log('🎚️ Микрофон + системный звук смикшированы', 'ok');
-  } catch (e) {
-    log('⚠️ Микс аудио не удался: ' + e.message, 'warn');
-  }
-}
-
 function stopScreenShare(silent = false, interrupted = false) {
   if (!isScreenSharing && !screenStream) return;
 
@@ -3000,6 +2975,18 @@ function stopScreenShare(silent = false, interrupted = false) {
     screenStream = null;
   }
 
+  // ✅ Удаляем отдельный сендер системного звука
+  if (screenAudioSender && pc) {
+    try {
+      pc.removeTrack(screenAudioSender);
+      log('🔇 Системный звук отключён', 'ok');
+    } catch (e) {
+      log('⚠️ removeTrack: ' + e.message, 'warn');
+    }
+    screenAudioSender = null;
+  }
+
+  // Возвращаем камеру
   if (pc && savedCameraTrack) {
     savedCameraTrack.enabled = !isCameraOff;
     const videoSender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
@@ -3008,22 +2995,7 @@ function stopScreenShare(silent = false, interrupted = false) {
     }
   }
 
-  if (pc && savedMicTrack) {
-    savedMicTrack.enabled = !isMuted;
-    const audioSender = pc.getSenders().find(s => s.track && s.track.kind === 'audio');
-    if (audioSender) {
-      audioSender.replaceTrack(savedMicTrack).catch(() => {});
-    }
-  }
-
-  if (mixAudioSources) {
-    try { mixAudioSources.micSrc.disconnect(); } catch(e){}
-    try { mixAudioSources.screenSrc.disconnect(); } catch(e){}
-    try { mixAudioSources.screenGain.disconnect(); } catch(e){}
-    try { mixAudioSources.dest.disconnect(); } catch(e){}
-    mixAudioSources = null;
-  }
-
+  // Микрофон всё это время продолжал идти своим сендером — ничего не трогаем
   savedCameraTrack = null;
   savedMicTrack = null;
   isScreenSharing = false;
@@ -3554,7 +3526,7 @@ function resetCallScreenState() {
 })();
 
 // ============================================================
-//  РЕСАЙЗ ЧАТА СПРАВА (правый margin у main)
+//  РЕСАЙЗ ЧАТА СПРАВА
 // ============================================================
 (function initRightResize() {
   const handle = $('rightResizeHandle');
@@ -3629,7 +3601,6 @@ function showCustomModal(message, title = '', icon = '✓') {
 
   if (!modal || !titleEl || !messageEl || !button) return;
 
-  // Заголовок принудительно скрыт — не пишем в него текст
   titleEl.textContent = '';
   titleEl.style.display = 'none';
 
