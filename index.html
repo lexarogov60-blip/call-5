@@ -651,6 +651,205 @@
 
 
 
+
+  /* ============================================================
+     DIANACALM — SMALL COPY TOAST
+     ============================================================ */
+  .dc-copy-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    z-index: 1000000;
+    transform: translate(-50%, 14px) scale(.96);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    padding: 10px 16px;
+    border-radius: 13px;
+    background: rgba(24, 33, 55, .92);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 14px 40px rgba(0,0,0,.28);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    transition: opacity .22s ease, transform .28s cubic-bezier(.34,1.56,.64,1), visibility .22s ease;
+  }
+  .dc-copy-toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0) scale(1);
+  }
+  .dc-copy-toast::before {
+    content: '✓';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#8B9AE0,#6D7FD6);
+    font-size: 12px;
+  }
+
+  /* ============================================================
+     PC SETTINGS — CUSTOM MICROPHONE PICKER
+     ============================================================ */
+  .dc-mic-picker {
+    position: relative;
+    width: 100%;
+    margin-bottom: 6px;
+  }
+  #pcMicSelect {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  .dc-mic-picker-button {
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 14px;
+    border: 1px solid rgba(139,154,224,.34);
+    border-radius: 14px;
+    background: linear-gradient(145deg, rgba(255,255,255,.10), rgba(255,255,255,.045));
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .2s ease, background .2s ease, box-shadow .25s ease, transform .18s ease;
+  }
+  .dark .dc-mic-picker-button {
+    background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.035));
+    color: #f5f7ff;
+    border-color: rgba(165,180,252,.26);
+  }
+  .dc-mic-picker-button:hover,
+  .dc-mic-picker.open .dc-mic-picker-button {
+    border-color: rgba(139,154,224,.72);
+    background: linear-gradient(145deg, rgba(139,154,224,.16), rgba(255,255,255,.06));
+    box-shadow: 0 0 0 4px rgba(139,154,224,.10), 0 10px 28px rgba(0,0,0,.10);
+  }
+  .dc-mic-picker-button:active {
+    transform: scale(.992);
+  }
+  .dc-mic-picker-chevron {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+    opacity: .72;
+  }
+  .dc-mic-picker.open .dc-mic-picker-chevron {
+    transform: rotate(180deg);
+  }
+  .dc-mic-options {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 8px);
+    z-index: 10040;
+    padding: 6px;
+    border-radius: 16px;
+    background: rgba(25,34,55,.96);
+    border: 1px solid rgba(165,180,252,.22);
+    box-shadow: 0 20px 55px rgba(0,0,0,.38);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px) scale(.985);
+    transform-origin: top center;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .24s cubic-bezier(.34,1.2,.64,1), visibility .18s ease;
+    max-height: 250px;
+    overflow-y: auto;
+  }
+  .dc-mic-picker.open .dc-mic-options {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .dc-mic-option {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 11px;
+    border-radius: 11px;
+    color: rgba(255,255,255,.82);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .16s ease, color .16s ease, transform .16s ease;
+  }
+  .dc-mic-option::before {
+    content: '🎙';
+    font-size: 14px;
+    opacity: .72;
+  }
+  .dc-mic-option:hover {
+    background: linear-gradient(90deg, rgba(139,154,224,.24), rgba(139,154,224,.10));
+    color: #fff;
+    transform: translateX(2px);
+  }
+  .dc-mic-option.selected {
+    background: linear-gradient(90deg, rgba(139,154,224,.30), rgba(139,154,224,.13));
+    color: #fff;
+  }
+  .dc-mic-option.selected::after {
+    content: '✓';
+    margin-left: auto;
+    color: #AEBBFF;
+    font-weight: 700;
+  }
+
+  /* ============================================================
+     PC MINI CALL — keep avatar/name/status/timer visible.
+     Controls disappear until the mouse enters the mini window.
+     ============================================================ */
+  @media (min-width: 641px) {
+    #callScreen.minimized .call-controls-bar {
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 14px) scale(.90);
+      filter: blur(2px);
+      transition:
+        opacity .22s ease,
+        transform .28s cubic-bezier(.34,1.35,.64,1),
+        filter .22s ease;
+    }
+    #callScreen.minimized:hover .call-controls-bar,
+    #callScreen.minimized:focus-within .call-controls-bar {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, 0) scale(1);
+      filter: blur(0);
+    }
+    #callScreen.minimized .call-info-inner {
+      opacity: 1 !important;
+      pointer-events: none;
+    }
+    #callScreen.minimized .call-avatar-pulse {
+      opacity: 1 !important;
+    }
+    #callScreen.minimized #callPeerName,
+    #callScreen.minimized #callStatusText,
+    #callScreen.minimized #callDuration,
+    #callScreen.minimized .voice-wave {
+      opacity: 1 !important;
+    }
+  }
+
   /* ============================================================
      PC SETTINGS — MICROPHONE
      ============================================================ */
@@ -768,6 +967,7 @@
     </div>
   </div>
 
+  <div id="dcCopyToast" class="dc-copy-toast" role="status" aria-live="polite">Ссылка скопирована</div>
 
 <div class="page-gradient-bg"></div>
 <div class="safari-top-fix"></div>
@@ -1032,10 +1232,19 @@
       </button>
     </div>
 
-    <label class="pc-settings-label" for="pcMicSelect">Микрофон</label>
-    <select id="pcMicSelect" class="pc-settings-select">
-      <option value="">Микрофон по умолчанию</option>
-    </select>
+    <label class="pc-settings-label" for="pcMicPickerButton">Микрофон</label>
+    <div class="dc-mic-picker" id="pcMicPicker">
+      <button class="dc-mic-picker-button" id="pcMicPickerButton" type="button" aria-haspopup="listbox" aria-expanded="false">
+        <span id="pcMicSelectedLabel">Микрофон по умолчанию</span>
+        <svg class="dc-mic-picker-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      </button>
+      <div class="dc-mic-options" id="pcMicOptions" role="listbox"></div>
+      <select id="pcMicSelect" aria-hidden="true" tabindex="-1">
+        <option value="">Микрофон по умолчанию</option>
+      </select>
+    </div>
     <div id="pcMicStatus"></div>
 
     <div class="pc-settings-row">
@@ -1793,22 +2002,61 @@ async function ensureMicPermissionForSettings() {
   }
 }
 
+function closeMicPicker() {
+  const picker = $('pcMicPicker');
+  const btn = $('pcMicPickerButton');
+  if (picker) picker.classList.remove('open');
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
+function setSelectedMic(deviceId, label) {
+  selectedMicId = deviceId || '';
+  const select = $('pcMicSelect');
+  const labelEl = $('pcMicSelectedLabel');
+  if (select) select.value = selectedMicId;
+  if (labelEl) labelEl.textContent = label || 'Микрофон по умолчанию';
+
+  document.querySelectorAll('.dc-mic-option').forEach(opt => {
+    opt.classList.toggle('selected', opt.dataset.deviceId === selectedMicId);
+  });
+}
+
+function toggleMicPicker() {
+  const picker = $('pcMicPicker');
+  const btn = $('pcMicPickerButton');
+  if (!picker) return;
+  const open = !picker.classList.contains('open');
+  picker.classList.toggle('open', open);
+  if (btn) btn.setAttribute('aria-expanded', String(open));
+}
+
 async function refreshMicrophoneList() {
   const select = $('pcMicSelect');
-  if (!select) return;
+  const optionsBox = $('pcMicOptions');
+  const labelEl = $('pcMicSelectedLabel');
+  if (!select || !optionsBox) return;
 
   await ensureMicPermissionForSettings();
 
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
     const inputs = devices.filter(d => d.kind === 'audioinput');
+
     select.innerHTML = '';
+    optionsBox.innerHTML = '';
 
     if (!inputs.length) {
       const option = document.createElement('option');
       option.value = '';
       option.textContent = 'Микрофон не найден';
       select.appendChild(option);
+      const empty = document.createElement('div');
+      empty.className = 'dc-mic-option';
+      empty.textContent = 'Микрофон не найден';
+      empty.style.opacity = '.55';
+      empty.style.cursor = 'default';
+      optionsBox.appendChild(empty);
+      if (labelEl) labelEl.textContent = 'Микрофон не найден';
       return;
     }
 
@@ -1817,15 +2065,48 @@ async function refreshMicrophoneList() {
       option.value = device.deviceId;
       option.textContent = device.label || `Микрофон ${index + 1}`;
       select.appendChild(option);
+
+      const item = document.createElement('div');
+      item.className = 'dc-mic-option';
+      item.dataset.deviceId = device.deviceId;
+      item.setAttribute('role', 'option');
+      item.textContent = device.label || `Микрофон ${index + 1}`;
+      item.addEventListener('click', () => {
+        setSelectedMic(device.deviceId, device.label || `Микрофон ${index + 1}`);
+        closeMicPicker();
+      });
+      optionsBox.appendChild(item);
     });
 
     const exists = inputs.some(d => d.deviceId === selectedMicId);
-    select.value = exists ? selectedMicId : '';
     if (!exists) selectedMicId = '';
+
+    const selected = inputs.find(d => d.deviceId === selectedMicId);
+    setSelectedMic(selectedMicId, selected?.label || (selectedMicId ? 'Выбранный микрофон' : 'Микрофон по умолчанию'));
   } catch (e) {
     log('⚠️ Список микрофонов: ' + e.message, 'warn');
   }
 }
+
+(function initMicPicker() {
+  const btn = $('pcMicPickerButton');
+  const picker = $('pcMicPicker');
+  if (!btn || !picker) return;
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMicPicker();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!picker.contains(e.target)) closeMicPicker();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMicPicker();
+  });
+})();
+
 
 function openPcSettings() {
   if (!isElectronApp) return;
@@ -1837,6 +2118,7 @@ function openPcSettings() {
   $('pcEchoCancellation').checked = micEchoCancellation;
   $('pcNoiseSuppression').checked = micNoiseSuppression;
   $('pcAutoGainControl').checked = micAutoGainControl;
+  closeMicPicker();
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
   refreshMicrophoneList();
@@ -1888,6 +2170,7 @@ async function applyMicrophoneSettingsToCall() {
 }
 
 async function savePcSettings() {
+  closeMicPicker();
   const select = $('pcMicSelect');
   selectedMicId = select ? select.value : '';
   micEchoCancellation = !!$('pcEchoCancellation')?.checked;
@@ -1953,18 +2236,35 @@ function initScreen() {
   connectMQTT();
 }
 
+function showCopyToast() {
+  const toast = $('dcCopyToast');
+  if (!toast) return;
+  toast.classList.add('show');
+  clearTimeout(window.__dcCopyToastTimer);
+  window.__dcCopyToastTimer = setTimeout(() => toast.classList.remove('show'), 1700);
+}
+
 function copyLink(e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   const input = $('shareLink');
   if (!input) return;
   input.select();
   input.setSelectionRange(0, 99999);
+
+  const done = () => {
+    log('✅ Ссылка скопирована', 'ok');
+    showCopyToast();
+  };
+
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(input.value).then(() => {
-      log('✅ Ссылка скопирована', 'ok');
-      showCustomModal('Ссылка скопирована! Отправьте её другу.');
-    }).catch(() => { document.execCommand('copy'); showCustomModal('Ссылка скопирована!'); });
-  } else { document.execCommand('copy'); showCustomModal('Ссылка скопирована!'); }
+    navigator.clipboard.writeText(input.value).then(done).catch(() => {
+      document.execCommand('copy');
+      done();
+    });
+  } else {
+    document.execCommand('copy');
+    done();
+  }
 }
 
 // ============================================================
@@ -2082,6 +2382,14 @@ function handleMessage(msg) {
         const hasVideo = remoteStream &&
                          remoteStream.getVideoTracks().some(t => t.enabled);
         setCallInfoOverlay(!hasVideo);
+
+        // The sender restores the camera with replaceTrack(). Reattach the
+        // remote stream after the change so mobile clients don't keep the
+        // last screen frame frozen.
+        if (rv && rv.srcObject) {
+          setTimeout(refreshRemoteVideo, 180);
+          setTimeout(refreshRemoteVideo, 650);
+        }
       }
 
       log(msg.on
@@ -3041,6 +3349,7 @@ function toggleCallUI(forceState = null) {
 
 function scheduleMiniUiHide() {
   clearTimeout(miniUiHideTimer);
+  if (!document.body.classList.contains('mobile-mode')) return;
   miniUiHideTimer = setTimeout(() => {
     if (callMinimized) {
       toggleCallUI(true);
@@ -3192,6 +3501,10 @@ async function startScreenShare() {
   }
 
   try {
+    // PC/Electron: просим также системный звук.
+    // В main.js Electron он приходит как loopback, а restrictOwnAudio
+    // исключает звук самого DianaCalm из loopback, чтобы голос собеседника
+    // не возвращался ему эхом.
     const preferred = {
       video: {
         frameRate: { ideal: 60 },
@@ -3200,9 +3513,7 @@ async function startScreenShare() {
         cursor: 'always'
       },
       audio: {
-        echoCancellation: false,
-        noiseSuppression: false,
-        autoGainControl: false
+        restrictOwnAudio: true
       }
     };
 
@@ -3216,16 +3527,16 @@ async function startScreenShare() {
           audio: true
         });
       } catch (e2) {
-        log('⚠️ Fallback 2: ' + e2.message + ' — пробуем минимальные', 'warn');
+        log('⚠️ Fallback 2: ' + e2.message + ' — пробуем только видео', 'warn');
         screenStream = await navigator.mediaDevices.getDisplayMedia({
           video: true,
-          audio: true
+          audio: false
         });
       }
     }
 
     const screenVideoTrack = screenStream.getVideoTracks()[0];
-    const screenAudioTrack = screenStream.getAudioTracks()[0];
+    const screenAudioTrack = screenStream.getAudioTracks()[0] || null;
 
     if (!screenVideoTrack) throw new Error('нет видео-трека');
 
@@ -3254,14 +3565,19 @@ async function startScreenShare() {
       log('⚠️ Параметры кодирования: ' + e.message, 'warn');
     }
 
+    // Микрофон + звук демонстрируемого источника.
+    // В Electron звук самого DianaCalm исключён через restrictOwnAudio,
+    // поэтому голос собеседника не попадает обратно в звонок.
     if (screenAudioTrack && savedMicTrack) {
       await mixMicAndScreenAudio(savedMicTrack, screenAudioTrack);
+      log('🔊 Звук демонстрации включён; звук DianaCalm исключён', 'ok');
     } else if (screenAudioTrack && !savedMicTrack) {
       const audioSender = pc.getSenders().find(s => s.track && s.track.kind === 'audio');
       if (audioSender) await audioSender.replaceTrack(screenAudioTrack);
       else pc.addTrack(screenAudioTrack, screenStream);
+      log('🔊 Передаётся звук демонстрации', 'ok');
     } else {
-      log('ℹ️ Системный звук не выбран — только видео', 'info');
+      log('ℹ️ Источник не предоставил аудио — передаётся только видео', 'info');
     }
 
     if ($('localVideo')) $('localVideo').srcObject = screenStream;
@@ -3330,11 +3646,13 @@ function stopScreenShare(silent = false, interrupted = false) {
     screenStream = null;
   }
 
+  const restorePromises = [];
+
   if (pc && savedCameraTrack) {
     savedCameraTrack.enabled = !isCameraOff;
     const videoSender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
     if (videoSender) {
-      videoSender.replaceTrack(savedCameraTrack).catch(() => {});
+      restorePromises.push(videoSender.replaceTrack(savedCameraTrack).catch(() => {}));
     }
   }
 
@@ -3342,7 +3660,7 @@ function stopScreenShare(silent = false, interrupted = false) {
     savedMicTrack.enabled = !isMuted;
     const audioSender = pc.getSenders().find(s => s.track && s.track.kind === 'audio');
     if (audioSender) {
-      audioSender.replaceTrack(savedMicTrack).catch(() => {});
+      restorePromises.push(audioSender.replaceTrack(savedMicTrack).catch(() => {}));
     }
   }
 
@@ -3364,9 +3682,18 @@ function stopScreenShare(silent = false, interrupted = false) {
     $('localVideo').srcObject = localStream;
   }
 
-  if (!silent && mqttClient && mqttClient.connected) {
-    sendMQTT({ type: 'screen-share', on: false });
-  }
+  const notifyStopped = () => {
+    if (!silent && mqttClient && mqttClient.connected) {
+      sendMQTT({ type: 'screen-share', on: false });
+    }
+    // Give the receiver a moment to receive the restored camera track.
+    if (typeof refreshRemoteVideo === 'function') {
+      setTimeout(refreshRemoteVideo, 180);
+      setTimeout(refreshRemoteVideo, 650);
+    }
+  };
+
+  Promise.allSettled(restorePromises).then(notifyStopped);
 
   log('🖥️ Демонстрация остановлена', 'info');
 
@@ -3469,8 +3796,14 @@ function minimizeCall() {
   const mpn = $('miniPeerName');
   if (mpn) mpn.textContent = peerNick || 'Собеседник';
 
-  toggleCallUI(false);
-  scheduleMiniUiHide();
+  // In the PC mini-window the avatar, name, status and timer remain visible.
+  // Only the control bar fades out until the pointer enters the mini-window.
+  if (!isMob) {
+    toggleCallUI(false);
+  } else {
+    toggleCallUI(false);
+    scheduleMiniUiHide();
+  }
 }
 
 function expandCall() {
