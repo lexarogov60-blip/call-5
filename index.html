@@ -499,9 +499,178 @@
   #callScreen.ui-hidden .call-mini-topbar,
   #callScreen.ui-hidden .mini-resize-handle,
   #callScreen.ui-hidden #callMoreMenu { opacity: 0 !important; pointer-events: none !important; }
+
+  /* ============================================================
+     DIANACALM — CUSTOM MODAL
+     Replaces native browser/Electron alert() windows.
+     ============================================================ */
+  .dc-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .18s ease, visibility .18s ease;
+  }
+
+  .dc-modal.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .dc-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 10, 22, .34);
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+  }
+
+  .dc-modal-card {
+    position: relative;
+    width: min(390px, calc(100vw - 40px));
+    padding: 22px;
+    border-radius: 22px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      0 22px 70px rgba(0, 0, 0, .25),
+      inset 0 1px 0 rgba(255,255,255,.28);
+    color: var(--text);
+    transform: translateY(8px) scale(.97);
+    transition: transform .18s ease;
+    overflow: hidden;
+  }
+
+  .dark .dc-modal-card {
+    box-shadow:
+      0 22px 70px rgba(0, 0, 0, .55),
+      inset 0 1px 0 rgba(255,255,255,.06);
+  }
+
+  .dc-modal.show .dc-modal-card {
+    transform: translateY(0) scale(1);
+  }
+
+  .dc-modal-glow {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    top: -90px;
+    left: -70px;
+    background: var(--blob-3);
+    filter: blur(45px);
+    opacity: .22;
+    pointer-events: none;
+  }
+
+  .dc-modal-row {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .dc-modal-icon {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%);
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(109,127,214,.28);
+  }
+
+  .dc-modal-title {
+    margin-top: 2px;
+    font-size: 16px;
+    line-height: 1.25;
+    font-weight: 650;
+    letter-spacing: -.01em;
+  }
+
+  .dc-modal-message {
+    margin-top: 6px;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.45;
+    white-space: pre-line;
+  }
+
+  .dc-modal-actions {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+
+  .dc-modal-button {
+    min-width: 82px;
+    height: 38px;
+    padding: 0 17px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%);
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 7px 18px rgba(109,127,214,.24);
+    transition: transform .15s ease, filter .15s ease;
+  }
+
+  .dc-modal-button:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+  }
+
+  .dc-modal-button:active {
+    transform: translateY(0);
+  }
+
+  @media (max-width: 520px) {
+    .dc-modal-card {
+      width: min(390px, calc(100vw - 28px));
+      padding: 18px;
+      border-radius: 19px;
+    }
+  }
+
 </style>
 </head>
 <body>
+
+  <!-- DianaCalm custom modal -->
+  <div id="dcModal" class="dc-modal" role="dialog" aria-modal="true" aria-labelledby="dcModalTitle">
+    <div class="dc-modal-backdrop" data-dc-modal-close></div>
+    <div class="dc-modal-card">
+      <div class="dc-modal-glow"></div>
+      <div class="dc-modal-row">
+        <div id="dcModalIcon" class="dc-modal-icon">✓</div>
+        <div>
+          <div id="dcModalTitle" class="dc-modal-title">Готово</div>
+          <div id="dcModalMessage" class="dc-modal-message"></div>
+        </div>
+      </div>
+      <div class="dc-modal-actions">
+        <button id="dcModalButton" class="dc-modal-button" type="button">OK</button>
+      </div>
+    </div>
+  </div>
+
 
 <div class="page-gradient-bg"></div>
 <div class="safari-top-fix"></div>
@@ -1456,9 +1625,9 @@ function copyLink(e) {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(input.value).then(() => {
       log('✅ Ссылка скопирована', 'ok');
-      alert('Ссылка скопирована! Отправьте её другу.');
-    }).catch(() => { document.execCommand('copy'); alert('Ссылка скопирована!'); });
-  } else { document.execCommand('copy'); alert('Ссылка скопирована!'); }
+      showCustomModal('Ссылка скопирована! Отправьте её другу.');
+    }).catch(() => { document.execCommand('copy'); showCustomModal('Ссылка скопирована!'); });
+  } else { document.execCommand('copy'); showCustomModal('Ссылка скопирована!'); }
 }
 
 // ============================================================
@@ -1960,7 +2129,7 @@ async function getLocalStream(video) {
     });
   } catch (e) {
     log('❌ ' + e.message, 'err');
-    alert('Не удалось получить доступ: ' + e.message);
+    showCustomModal('Не удалось получить доступ: ' + e.message, 'Не удалось получить доступ', '!');
     throw e;
   }
 }
@@ -2097,9 +2266,9 @@ function createPeerConnection() {
 }
 
 async function startCall(type) {
-  if (pc) return alert('Уже в звонке');
-  if (!peerOnline) return alert('Собеседник не в сети. Подождите пару секунд.');
-  if (!mqttClient || !mqttClient.connected) return alert('Нет связи с сервером');
+  if (pc) return showCustomModal('Вы уже находитесь в звонке.', 'Уже в звонке', 'i');
+  if (!peerOnline) return showCustomModal('Собеседник не в сети. Подождите пару секунд.', 'Собеседник не в сети', 'i');
+  if (!mqttClient || !mqttClient.connected) return showCustomModal('Нет связи с сервером.', 'Нет соединения', '!');
 
   currentCallType = type;
   isCaller = true;
@@ -2599,7 +2768,7 @@ async function resumeScreenShare() {
 
   if (isScreenSharing) return;
   if (!pc || pc.connectionState === 'failed' || pc.connectionState === 'closed') {
-    alert('Звонок завершён');
+    showCustomModal('Звонок завершён.', 'Звонок завершён', 'i');
     hideResumeShareButton();
     return;
   }
@@ -2641,7 +2810,7 @@ async function startScreenShare() {
 
   if (!pc) {
     log('⚠️ Нет активного звонка — pc = null', 'warn');
-    alert('Сначала начните звонок');
+    showCustomModal('Сначала начните звонок.', 'Нужен активный звонок', 'i');
     return;
   }
   if (isScreenSharing) {
@@ -2650,14 +2819,18 @@ async function startScreenShare() {
   }
   if (!navigator.mediaDevices) {
     log('❌ navigator.mediaDevices недоступен (нужен HTTPS или localhost)', 'err');
-    alert('Демонстрация экрана требует HTTPS-соединения. Откройте страницу по https://');
+    showCustomModal('Демонстрация экрана требует защищённого HTTPS-соединения. Откройте страницу по адресу https://', 'Демонстрация экрана', '!');
     return;
   }
   if (typeof navigator.mediaDevices.getDisplayMedia !== 'function') {
     log('❌ getDisplayMedia не поддерживается этим браузером/устройством', 'err');
-    alert('Ваш браузер не поддерживает демонстрацию экрана.\n\n' +
-          'На мобильных (Chrome Android, iOS Safari) этой функции нет — ' +
-          'используйте компьютер.');
+    showCustomModal(
+      'Ваш браузер не поддерживает демонстрацию экрана.\n\n' +
+      'На мобильных (Chrome Android, iOS Safari) этой функции нет — ' +
+      'используйте компьютер.',
+      'Демонстрация экрана',
+      '!'
+    );
     return;
   }
 
@@ -3415,6 +3588,52 @@ function resetCallScreenState() {
     }
   });
 })();
+
+
+// ============================================================
+//  КАСТОМНЫЕ УВЕДОМЛЕНИЯ DIANACALM
+// ============================================================
+let dcModalCloseHandler = null;
+
+function showCustomModal(message, title = 'DianaCalm', icon = '✓') {
+  const modal = $('dcModal');
+  const titleEl = $('dcModalTitle');
+  const messageEl = $('dcModalMessage');
+  const iconEl = $('dcModalIcon');
+  const button = $('dcModalButton');
+
+  if (!modal || !titleEl || !messageEl || !button) return;
+
+  titleEl.textContent = title;
+  messageEl.textContent = message;
+  if (iconEl) iconEl.textContent = icon;
+
+  modal.classList.add('show');
+  document.body.classList.add('dc-modal-open');
+
+  const closeModal = () => {
+    modal.classList.remove('show');
+    document.body.classList.remove('dc-modal-open');
+    if (dcModalCloseHandler) {
+      document.removeEventListener('keydown', dcModalCloseHandler);
+      dcModalCloseHandler = null;
+    }
+  };
+
+  button.onclick = closeModal;
+
+  if (dcModalCloseHandler) {
+    document.removeEventListener('keydown', dcModalCloseHandler);
+  }
+
+  dcModalCloseHandler = (event) => {
+    if (event.key === 'Escape') closeModal();
+  };
+
+  document.addEventListener('keydown', dcModalCloseHandler);
+
+  setTimeout(() => button.focus(), 0);
+}
 
 // ============================================================
 //  СТАРТ
