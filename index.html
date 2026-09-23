@@ -115,7 +115,6 @@
   .dark .glass { box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.05); }
   .glass-2 { background: var(--glass-2-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-2-border); }
 
-  /* ====== BUBBLES + REPLY/TAP ANIMATIONS ====== */
   .bubble-me {
     display: inline-block;
     background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%);
@@ -172,7 +171,6 @@
   .bubble-other.bubble-pop {
     animation: bubbleReplyPop 0.44s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  /* ============================================== */
 
   .msg-row { display: flex; width: 100%; }
   .msg-row.me { justify-content: flex-end; }
@@ -543,12 +541,21 @@
   .call-ctrl.accept:hover { background: #16a34a; }
   .call-ctrl.muted { background: rgba(239,68,68,0.6); }
 
-  /* Кнопка громкой связи — только мобильная версия */
+  /* Кнопка демонстрации внутри звонка — активное состояние */
+  .call-ctrl.sharing-active {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: #fff !important;
+    animation: screenSharePulse 1.8s ease-in-out infinite;
+  }
+  .call-ctrl.sharing-active:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  }
+
   #btnSpeaker { display: none !important; }
   body.mobile-mode #btnSpeaker { display: flex !important; }
 
-  /* ====== Кнопка демонстрации экрана (только десктоп) ====== */
   body.mobile-mode #screenShareBtn { display: none !important; }
+  body.mobile-mode #btnScreenShareCall { display: none !important; }
 
   #screenShareBtn.active {
     background: linear-gradient(135deg, rgba(239,68,68,0.85), rgba(220,38,38,0.85)) !important;
@@ -567,7 +574,12 @@
     50%      { box-shadow: 0 0 0 1px rgba(239,68,68,0.6), 0 4px 22px rgba(239,68,68,0.7); }
   }
 
-  /* ====== Бейдж «Идёт демонстрация экрана» ====== */
+  /* screen-share-mode: показываем демонстрацию целиком (без обрезки) */
+  #remoteVideo.screen-share-mode {
+    object-fit: contain !important;
+    background: #000;
+  }
+
   #screenShareBadge {
     position: absolute;
     top: 24px;
@@ -609,7 +621,6 @@
     from { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(0.9); }
     to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
   }
-  /* =========================================================== */
 
   .call-avatar-pulse {
     aspect-ratio: 1 / 1;
@@ -928,7 +939,6 @@
     #callScreen.minimized .call-ctrl svg { width: 15px !important; height: 15px !important; }
   }
 
-  /* ===== REPLY ===== */
   .bubble-reply-quote {
     border-left: 2.5px solid rgba(255,255,255,0.55);
     background: rgba(255,255,255,0.14);
@@ -1023,7 +1033,6 @@
   }
   .reply-preview-close:active { transform: rotate(90deg) scale(0.9); }
 
-  /* ===== Контекстное меню ===== */
   #msgContextMenu {
     position: fixed;
     z-index: 100000;
@@ -1105,10 +1114,6 @@
   }
 
   .no-select { user-select: none; -webkit-user-select: none; }
-
-  /* ============================================================
-     МОБИЛЬНЫЙ РЕЖИМ
-     ============================================================ */
 
   #hamburgerBtn { display: none; }
   body.mobile-mode #hamburgerBtn { display: inline-flex !important; }
@@ -1289,9 +1294,6 @@
     bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   }
 
-  /* ============================================================
-     ПЛАВАЮЩАЯ ПИЛЮЛЯ АКТИВНОГО ЗВОНКА
-     ============================================================ */
   #callPill {
     position: fixed;
     left: 50%;
@@ -1410,7 +1412,6 @@
   <div class="blob blob-4"></div>
 </div>
 
-<!-- ===== ЭКРАН ВХОДА ===== -->
 <div id="loginScreen" class="fixed inset-0 flex items-center justify-center p-4" style="background: transparent;">
 
   <div id="nickView" class="glass rounded-[32px] p-10 w-full max-w-lg text-center nick-form">
@@ -1481,7 +1482,6 @@
   </div>
 </div>
 
-<!-- ===== ОСНОВНОЙ ИНТЕРФЕЙС ===== -->
 <div id="app" class="hidden">
   <aside class="glass" id="sidebar">
     <div>
@@ -1638,7 +1638,6 @@
   </main>
 </div>
 
-<!-- ===== МОДАЛКА СМЕНЫ НИКА ===== -->
 <div id="nickModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background: rgba(20,20,40,0.5); backdrop-filter: blur(8px);">
   <div class="glass rounded-[28px] p-8 w-full max-w-sm animate-modal">
     <h3 class="text-lg font-semibold mb-6">Изменить ник</h3>
@@ -1652,7 +1651,6 @@
   </div>
 </div>
 
-<!-- ===== ВХОДЯЩИЙ ЗВОНОК ===== -->
 <div id="incomingCallModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background: rgba(20,20,40,0.5); backdrop-filter: blur(8px);">
   <div class="glass rounded-[28px] p-8 w-full max-w-sm text-center animate-modal">
     <div class="calling-pulse call-avatar-pulse mx-auto mb-5" style="width:112px; height:112px;">
@@ -1671,7 +1669,6 @@
   </div>
 </div>
 
-<!-- ===== ЭКРАН ЗВОНКА ===== -->
 <div id="callScreen" class="hidden" style="color: white;">
   <div class="relative w-full h-full">
 
@@ -1704,12 +1701,10 @@
 
     <div class="call-frost" id="callFrost"></div>
 
-    <!-- ====== БЕЙДЖ ДЕМОНСТРАЦИИ ЭКРАНА ====== -->
     <div id="screenShareBadge" class="hidden">
       <span class="screen-share-dot"></span>
       <span>Демонстрация экрана</span>
     </div>
-    <!-- ======================================= -->
 
     <div class="absolute inset-0 flex items-center justify-center" style="z-index:4; pointer-events:none;">
       <div class="call-info-inner text-center">
@@ -1742,7 +1737,16 @@
         <svg id="iconCamOff" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/><path d="M3 3l18 18"/></svg>
       </button>
 
-      <!-- Кнопка громкой связи (только мобильная версия) -->
+      <button id="btnScreenShareCall" onclick="toggleScreenShare()" class="call-ctrl" title="Демонстрация экрана">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="13" rx="2"/>
+          <path d="M8 20h8"/>
+          <path d="M12 17v3"/>
+          <polyline points="9 10 12 7 15 10"/>
+          <line x1="12" y1="7" x2="12" y2="14"/>
+        </svg>
+      </button>
+
       <button id="btnSpeaker" onclick="toggleSpeaker()" class="call-ctrl" title="Громкая связь">
         <svg id="iconSpeakerOff" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M11 5L6 9H2v6h4l5 4V5z"/>
@@ -1775,7 +1779,6 @@
   </div>
 </div>
 
-<!-- ===== КОНТЕКСТНОЕ МЕНЮ СООБЩЕНИЯ ===== -->
 <div id="msgContextMenu" class="hidden">
   <button onclick="doReply()" type="button">
     <span class="ctx-icon">
@@ -1790,7 +1793,6 @@
   </button>
 </div>
 
-<!-- ===== Плавающая пилюля активного звонка ===== -->
 <div id="callPill">
   <span class="call-pill-dot"></span>
   <div class="call-pill-text">
@@ -1898,7 +1900,7 @@ const MINI_W = 280;
 const MINI_H = 380;
 const MINI_MARGIN = 20;
 
-// Pill position (persist in-memory)
+// Pill position
 let pillPos = { x: null, y: null };
 
 // Reply
@@ -1910,7 +1912,7 @@ const $ = (id) => document.getElementById(id);
 function generateRoomId() { return Math.random().toString(36).slice(2, 8).toUpperCase(); }
 
 // ============================================================
-//  ЗВУКИ (Web Audio API)
+//  ЗВУКИ
 // ============================================================
 let audioCtxGlobal = null;
 function getAudioCtx() {
@@ -2033,7 +2035,7 @@ function stopRingback() {
 function stopAllSounds() { stopRingtone(); stopRingback(); }
 
 // ============================================================
-//  УПРАВЛЕНИЕ АУДИОСЕССИЕЙ (iOS 16.4+ / Safari)
+//  УПРАВЛЕНИЕ АУДИОСЕССИЕЙ (iOS 16.4+)
 // ============================================================
 function setIOSAudioSession(type) {
   if (!navigator.audioSession) return;
@@ -2429,7 +2431,30 @@ function handleMessage(msg) {
     case 'screen-share':
       peerIsScreenSharing = !!msg.on;
       updateScreenShareBadge();
-      log(msg.on ? `🖥️ ${peerNick || 'Собеседник'} показывает экран` : `🖥️ ${peerNick || 'Собеседник'} остановил демонстрацию`, 'info');
+
+      // Меняем режим отображения remoteVideo:
+      // если идёт демонстрация — object-fit: contain (не обрезаем широкий экран)
+      const rv = $('remoteVideo');
+      if (rv) rv.classList.toggle('screen-share-mode', !!msg.on);
+
+      log(msg.on
+        ? `🖥️ ${peerNick || 'Собеседник'} показывает экран`
+        : `🖥️ ${peerNick || 'Собеседник'} остановил демонстрацию`,
+        'info');
+
+      // 📱 На мобильной версии — автосворачиваем звонок в мини-окно,
+      // чтобы демонстрация не разворачивалась на весь экран.
+      // Пользователь в любой момент может нажать ⤢ в верхней панели
+      // мини-окна, чтобы развернуть её на весь экран.
+      if (msg.on && document.body.classList.contains('mobile-mode')) {
+        const cs = $('callScreen');
+        if (cs && !cs.classList.contains('hidden') && !callMinimized && !callHidden) {
+          setTimeout(() => {
+            minimizeCall();
+            log('📱 Звонок свёрнут в мини-окно для просмотра демонстрации', 'info');
+          }, 280);
+        }
+      }
       break;
     case 'call-reject':
       log('Звонок отклонён', 'info');
@@ -2585,7 +2610,6 @@ function doReply() {
     setTimeout(() => bubble.classList.remove('bubble-pop'), 460);
   }
 
-  // Desktop: правый клик
   container.addEventListener('contextmenu', (e) => {
     const bubble = e.target.closest('.bubble-me, .bubble-other');
     if (!bubble) return;
@@ -2597,7 +2621,6 @@ function doReply() {
     });
   });
 
-  // Desktop: отклик на ЛКМ
   container.addEventListener('mousedown', (e) => {
     if (e.button !== 0) return;
     const bubble = e.target.closest('.bubble-me, .bubble-other');
@@ -2611,7 +2634,6 @@ function doReply() {
     container.querySelectorAll('.bubble-pressed').forEach(releaseBubble);
   });
 
-  // Mobile: long-press
   let pressTimer = null;
   let startPos = null;
   let longTriggered = false;
@@ -2887,7 +2909,6 @@ function createPeerConnection() {
   const conn = new RTCPeerConnection({ iceServers: ICE_SERVERS });
   conn.onicecandidate = (e) => { if (e.candidate) sendMQTT({ type: 'ice', candidate: e.candidate }); };
 
-  // Ре-негоциация — нужна для запуска демонстрации экрана в аудиозвонке
   conn.onnegotiationneeded = async () => {
     if (!conn.currentRemoteDescription) return;
     try {
@@ -2973,7 +2994,6 @@ async function startCall(type) {
 }
 
 async function handleOffer(sdp, callType, renegotiate) {
-  // Ре-негоциация во время активного звонка
   if (renegotiate && pc) {
     try {
       await pc.setRemoteDescription(new RTCSessionDescription(sdp));
@@ -3010,8 +3030,6 @@ async function acceptCall() {
   $('incomingCallModal').style.display = '';
   if (!incomingOffer) return;
 
-  // Сначала — весь UI. Иначе ontrack выставит "Соединение установлено"
-  // и покажет таймер, а последующие строки их перетрут/спрячут.
   const avatarSeed = peerNick || 'Собеседник';
   setAvatar($('callPeerAvatar'), avatarSeed);
   if ($('callPeerName')) $('callPeerName').innerText = peerNick || 'Собеседник';
@@ -3075,6 +3093,8 @@ function endCall(silent = false) {
   if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
   remoteStream = null;
   peerIsScreenSharing = false;
+  const rv = $('remoteVideo');
+  if (rv) rv.classList.remove('screen-share-mode');
   updateScreenShareBadge();
   $('callScreen').classList.add('hidden');
   $('remoteVideo').srcObject = null;
@@ -3113,7 +3133,6 @@ function updateCameraUI() {
 
 // ============================================================
 //  ГРОМКАЯ СВЯЗЬ
-//  iOS 16.4+ → Audio Session API, Chrome/Android → setSinkId
 // ============================================================
 async function toggleSpeaker() {
   isSpeakerOn = !isSpeakerOn;
@@ -3169,28 +3188,50 @@ function updateSpeakerUI() {
 
 // ============================================================
 //  ДЕМОНСТРАЦИЯ ЭКРАНА
-//  getDisplayMedia + микширование микрофона и системного звука
-//  Frame rate: 40–60 fps, FullHD, ~5 Мбит/с
-//
-//  ВАЖНО: getDisplayMedia() (в отличие от getUserMedia) НЕ поддерживает
-//  min/max в constraints — Chrome кидает "min constraints are not supported".
-//  Поэтому используем только ideal + мягкий fallback.
+//  ВАЖНО: getDisplayMedia() не поддерживает min/max —
+//  только ideal. Иначе Chrome кидает:
+//  "min constraints are not supported"
 // ============================================================
 async function toggleScreenShare() {
-  if (isScreenSharing) stopScreenShare();
-  else await startScreenShare();
+  log('🖱️ Клик по демонстрации экрана', 'info');
+  try {
+    if (isScreenSharing) {
+      stopScreenShare();
+    } else {
+      await startScreenShare();
+    }
+  } catch (e) {
+    log('❌ toggleScreenShare: ' + e.message, 'err');
+  }
 }
 
 async function startScreenShare() {
-  if (!pc) { alert('Сначала начните звонок'); return; }
-  if (isScreenSharing) return;
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-    alert('Ваш браузер не поддерживает демонстрацию экрана');
+  log('▶️ startScreenShare() вызван', 'info');
+
+  if (!pc) {
+    log('⚠️ Нет активного звонка — pc = null', 'warn');
+    alert('Сначала начните звонок');
+    return;
+  }
+  if (isScreenSharing) {
+    log('ℹ️ Уже демонстрирую', 'info');
+    return;
+  }
+  if (!navigator.mediaDevices) {
+    log('❌ navigator.mediaDevices недоступен (нужен HTTPS или localhost)', 'err');
+    alert('Демонстрация экрана требует HTTPS-соединения. Откройте страницу по https://');
+    return;
+  }
+  if (typeof navigator.mediaDevices.getDisplayMedia !== 'function') {
+    log('❌ getDisplayMedia не поддерживается этим браузером/устройством', 'err');
+    alert('Ваш браузер не поддерживает демонстрацию экрана.\n\n' +
+          'На мобильных (Chrome Android, iOS Safari) этой функции нет — ' +
+          'используйте компьютер.');
     return;
   }
 
   try {
-    // Только ideal — min/max не поддерживаются в getDisplayMedia
+    // Только ideal. min/max в getDisplayMedia не поддерживаются
     const preferred = {
       video: {
         frameRate: { ideal: 60 },
@@ -3231,7 +3272,6 @@ async function startScreenShare() {
     savedCameraTrack = (localStream && localStream.getVideoTracks()[0]) || null;
     savedMicTrack    = (localStream && localStream.getAudioTracks()[0]) || null;
 
-    // Видео
     let videoSender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
     if (videoSender) {
       await videoSender.replaceTrack(screenVideoTrack);
@@ -3240,7 +3280,6 @@ async function startScreenShare() {
       videoSender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
     }
 
-    // Параметры кодирования
     try {
       if (videoSender && videoSender.setParameters) {
         const params = videoSender.getParameters();
@@ -3255,7 +3294,6 @@ async function startScreenShare() {
       log('⚠️ Параметры кодирования: ' + e.message, 'warn');
     }
 
-    // Аудио
     if (screenAudioTrack && savedMicTrack) {
       await mixMicAndScreenAudio(savedMicTrack, screenAudioTrack);
     } else if (screenAudioTrack && !savedMicTrack) {
@@ -3274,7 +3312,6 @@ async function startScreenShare() {
     sendMQTT({ type: 'screen-share', on: true });
     log('🖥️ Демонстрация экрана запущена', 'ok');
 
-    // Пользователь остановил через встроенный UI браузера
     screenVideoTrack.onended = () => { stopScreenShare(); };
 
   } catch (e) {
@@ -3356,7 +3393,6 @@ function stopScreenShare() {
     $('localVideo').srcObject = localStream;
   }
 
-  // Оповещаем собеседника
   if (mqttClient && mqttClient.connected) {
     sendMQTT({ type: 'screen-share', on: false });
   }
@@ -3365,10 +3401,16 @@ function stopScreenShare() {
 }
 
 function updateScreenShareUI(active) {
-  const btn = $('screenShareBtn');
-  if (!btn) return;
-  btn.classList.toggle('active', !!active);
-  btn.title = active ? 'Остановить демонстрацию экрана' : 'Демонстрация экрана';
+  const btnHeader = $('screenShareBtn');
+  if (btnHeader) {
+    btnHeader.classList.toggle('active', !!active);
+    btnHeader.title = active ? 'Остановить демонстрацию экрана' : 'Демонстрация экрана';
+  }
+  const btnCall = $('btnScreenShareCall');
+  if (btnCall) {
+    btnCall.classList.toggle('sharing-active', !!active);
+    btnCall.title = active ? 'Остановить демонстрацию экрана' : 'Демонстрация экрана';
+  }
 }
 
 function updateScreenShareBadge() {
@@ -3377,7 +3419,6 @@ function updateScreenShareBadge() {
   const show = !!(isScreenSharing || peerIsScreenSharing);
   badge.classList.toggle('hidden', !show);
 
-  // Меняем текст в зависимости от того, кто шарит
   const label = badge.querySelector('span:last-child');
   if (label && show) {
     if (isScreenSharing) {
@@ -3387,7 +3428,6 @@ function updateScreenShareBadge() {
     }
   }
 }
-// ============================================================
 
 // ====== ТАЙМЕР ======
 function startCallTimer() {
@@ -3416,7 +3456,6 @@ function stopCallTimer() {
     cd.classList.add('hidden');
   }
 }
-// =================================
 
 // ============================================================
 //  МИНИ-ОКНО ЗВОНКА
