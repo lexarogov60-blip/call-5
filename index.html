@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-<title>DianaCalm</title>
+<title>DC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#C8CCD2" id="themeColorMeta">
 <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <style>
@@ -518,6 +521,49 @@
   #msgContextMenu button:active { transform: scale(0.97); }
   .dark #msgContextMenu button:hover { background: linear-gradient(135deg, rgba(165,180,252,0.16), rgba(139,154,224,0.09)); color: #E0E7FF; }
   .no-select { user-select: none; -webkit-user-select: none; }
+
+  /* ============================================================
+     ПОДПИСЬ DESIGNED BY МЯУ (рукописный стиль)
+     ============================================================ */
+  .dc-signature {
+    font-family: 'Caveat', 'Segoe Script', 'Bradley Hand', cursive;
+    font-size: 21px;
+    font-weight: 500;
+    font-style: normal;
+    color: var(--text-dim);
+    opacity: 0.68;
+    margin: 0;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    user-select: none;
+    -webkit-user-select: none;
+    transform: rotate(-1deg);
+    transform-origin: center;
+    display: inline-block;
+  }
+  .dark .dc-signature {
+    color: var(--text-muted);
+    opacity: 0.72;
+  }
+  .brand-signature {
+    font-family: 'Caveat', 'Segoe Script', cursive;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    opacity: 0.55;
+    line-height: 1;
+    margin-top: 1px;
+    user-select: none;
+    -webkit-user-select: none;
+    letter-spacing: 0.01em;
+    display: block;
+    white-space: nowrap;
+  }
+  .dark .brand-signature {
+    color: var(--text-muted);
+    opacity: 0.6;
+  }
+
   #hamburgerBtn { display: none; }
   body.mobile-mode #hamburgerBtn { display: inline-flex !important; }
   body.mobile-mode #headerLogsBtn { display: none !important; }
@@ -640,8 +686,9 @@
         <circle cx="16.5" cy="11.5" r="1.2" fill="currentColor" stroke="none"/>
       </svg>
     </div>
-    <h1 class="text-3xl font-semibold mb-2">DianaCalm</h1>
-    <p class="text-base mb-5" style="color:var(--text-muted);">Приватный чат и звонки для двоих</p>
+    <h1 class="text-3xl font-semibold mb-1">DC</h1>
+    <p class="dc-signature">designed by МЯУ</p>
+    <p class="text-base mb-5" style="color:var(--text-muted); margin-top: 18px;">Приватный чат и звонки для двоих</p>
 
     <div class="text-left mb-3">
       <label class="block text-sm font-medium mb-2 ml-2" style="color:var(--text-muted);">Ваш ник</label>
@@ -708,7 +755,10 @@
               <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
             </svg>
           </div>
-          <span class="brand-name hide-mobile">DianaCalm</span>
+          <div class="min-w-0 hide-mobile" style="display:flex; flex-direction:column; justify-content:center; line-height:1;">
+            <span class="brand-name">DC</span>
+            <span class="brand-signature">designed by МЯУ</span>
+          </div>
         </div>
         <button id="themeToggle" class="theme-btn" onclick="toggleTheme()" title="Сменить тему">
           <svg id="iconMoon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
@@ -3249,7 +3299,7 @@ async function startScreenShare() {
   try {
     // ⚠️ restrictOwnAudio + suppressLocalAudioPlayback — ключевые флаги
     //    против дублирования звука:
-    //    • restrictOwnAudio: браузер исключает звук самого DianaCalm из loopback
+    //    • restrictOwnAudio: браузер исключает звук самого DC из loopback
     //      (иначе собеседник слышит сам себя второй раз).
     //    • suppressLocalAudioPlayback: браузер не проигрывает захваченный звук
     //      локально через колонки (иначе слышим двойной звук сами).
