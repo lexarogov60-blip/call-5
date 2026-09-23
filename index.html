@@ -403,34 +403,13 @@
 
   /* ============ МИНИ-ОКНО НА ПК: инфо видно, контролы по наведению ============ */
   @media (min-width: 1025px) {
-    body:not(.mobile-mode) #callScreen.minimized .call-avatar-pulse {
-      width: 88px !important;
-      height: 88px !important;
-    }
-    body:not(.mobile-mode) #callScreen.minimized #callPeerAvatar {
-      font-size: 34px;
-    }
-    body:not(.mobile-mode) #callScreen.minimized #callPeerName {
-      font-size: 16px !important;
-      margin-top: 14px !important;
-      margin-bottom: 3px !important;
-    }
-    body:not(.mobile-mode) #callScreen.minimized #callStatusText {
-      font-size: 12px !important;
-    }
-    body:not(.mobile-mode) #callScreen.minimized #callDuration {
-      font-size: 14px;
-      margin-top: 10px;
-    }
-    body:not(.mobile-mode) #callScreen.minimized .voice-wave {
-      height: 24px;
-      margin: 10px auto 0;
-      gap: 4px;
-    }
-    body:not(.mobile-mode) #callScreen.minimized .voice-wave span {
-      width: 3px;
-      height: 8px;
-    }
+    body:not(.mobile-mode) #callScreen.minimized .call-avatar-pulse { width: 88px !important; height: 88px !important; }
+    body:not(.mobile-mode) #callScreen.minimized #callPeerAvatar { font-size: 34px; }
+    body:not(.mobile-mode) #callScreen.minimized #callPeerName { font-size: 16px !important; margin-top: 14px !important; margin-bottom: 3px !important; }
+    body:not(.mobile-mode) #callScreen.minimized #callStatusText { font-size: 12px !important; }
+    body:not(.mobile-mode) #callScreen.minimized #callDuration { font-size: 14px; margin-top: 10px; }
+    body:not(.mobile-mode) #callScreen.minimized .voice-wave { height: 24px; margin: 10px auto 0; gap: 4px; }
+    body:not(.mobile-mode) #callScreen.minimized .voice-wave span { width: 3px; height: 8px; }
 
     body:not(.mobile-mode) #callScreen.minimized .call-controls-bar {
       opacity: 0;
@@ -446,15 +425,6 @@
   }
 
   /* ================= SETTINGS MODAL ================= */
-  .settings-select { width: 100%; background: transparent; border: none; outline: none; font-size: 14px; color: var(--text); font-family: inherit; cursor: pointer; padding: 2px 0; -webkit-appearance: none; appearance: none; }
-  .settings-select option { background: var(--input-bg); color: var(--text); padding: 8px; }
-  .input-field.settings-field { position: relative; }
-  .input-field.settings-field::after {
-    content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
-    width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent;
-    border-top: 5px solid var(--text-dim); pointer-events: none;
-  }
-
   .settings-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--divider); }
   .settings-toggle-row:last-child { border-bottom: none; }
 
@@ -470,6 +440,53 @@
 
   .settings-hint { font-size: 12px; line-height: 1.55; color: var(--text-dim); background: rgba(139,154,224,0.09); border: 1px solid rgba(139,154,224,0.18); border-radius: 12px; padding: 10px 12px; }
   .dark .settings-hint { background: rgba(139,154,224,0.14); border-color: rgba(165,180,252,0.2); }
+
+  /* ============================================================
+     PC SETTINGS — ПРОСТОЙ КРАСИВЫЙ НАТИВНЫЙ SELECT МИКРОФОНА
+     ============================================================ */
+  .pc-settings-select {
+    width: 100%;
+    height: 48px;
+    padding: 0 42px 0 16px;
+    border: 1px solid var(--input-border);
+    border-radius: 14px;
+    background-color: var(--input-bg);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a92a0' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 18px 18px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -.005em;
+    cursor: pointer;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    transition: border-color .2s ease, box-shadow .25s ease, background-color .2s ease;
+  }
+  .pc-settings-select:hover {
+    border-color: rgba(139,154,224,.55);
+  }
+  .pc-settings-select:focus {
+    border-color: rgba(139,154,224,.75);
+    box-shadow: 0 0 0 4px rgba(139,154,224,.13);
+  }
+  .pc-settings-select option {
+    background: #1f2438;
+    color: #f5f7ff;
+    padding: 10px 14px;
+  }
+  :root:not(.dark) .pc-settings-select option {
+    background: #ffffff;
+    color: #1f2937;
+  }
+  .pc-settings-select:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+  }
 
   .bubble-reply-quote { border-left: 2.5px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.14); border-radius: 8px; padding: 5px 10px; margin-bottom: 6px; font-size: 12px; line-height: 1.35; max-width: 260px; overflow: hidden; }
   .bubble-other .bubble-reply-quote { border-left-color: rgba(109,127,214,0.75); background: rgba(139,154,224,0.1); }
@@ -563,19 +580,7 @@
   #callScreen.ui-hidden .mini-resize-handle,
   #callScreen.ui-hidden #callMoreMenu { opacity: 0 !important; pointer-events: none !important; }
 
-  .dc-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 999999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity .18s ease, visibility .18s ease;
-  }
+  .dc-modal { position: fixed; inset: 0; z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .18s ease, visibility .18s ease; }
   .dc-modal.show { opacity: 1; visibility: visible; pointer-events: auto; }
   .dc-modal-backdrop { position: absolute; inset: 0; background: rgba(6, 10, 22, .34); backdrop-filter: blur(10px) saturate(120%); -webkit-backdrop-filter: blur(10px) saturate(120%); }
   .dc-modal-card { position: relative; width: min(280px, calc(100vw - 40px)); padding: 12px 12px 10px; border-radius: 16px; background: var(--glass-bg); border: 1px solid var(--glass-border); box-shadow: 0 22px 70px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255,255,255,.28); color: var(--text); transform: translateY(8px) scale(.97); transition: transform .18s ease; overflow: hidden; }
@@ -591,7 +596,6 @@
   .dc-modal-button:hover { filter: brightness(1.06); transform: translateY(-1px); }
   .dc-modal-button:active { transform: translateY(0); }
   @media (max-width: 520px) { .dc-modal-card { width: min(280px, calc(100vw - 32px)); padding: 11px; border-radius: 15px; } }
-
 </style>
 </head>
 <body>
@@ -893,18 +897,9 @@
 
     <div class="mb-5">
       <label class="block text-sm font-medium mb-2" style="color:var(--text-muted);">Микрофон</label>
-      <div class="dc-mic-picker" id="pcMicPicker">
-        <button class="dc-mic-picker-button" id="pcMicPickerButton" type="button" aria-haspopup="listbox" aria-expanded="false">
-          <span id="pcMicSelectedLabel">Микрофон по умолчанию</span>
-          <svg class="dc-mic-picker-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m6 9 6 6 6-6"/>
-          </svg>
-        </button>
-        <div class="dc-mic-options" id="pcMicOptions" role="listbox"></div>
-        <select id="pcMicSelect" aria-hidden="true" tabindex="-1">
-          <option value="">Микрофон по умолчанию</option>
-        </select>
-      </div>
+      <select id="pcMicSelect" class="pc-settings-select" onchange="onMicSelectChange()">
+        <option value="">Микрофон по умолчанию</option>
+      </select>
       <div id="pcMicStatus" style="min-height:14px; font-size:12px; color:var(--text-dim); margin-top:6px;"></div>
     </div>
 
@@ -1423,13 +1418,11 @@ function restoreAudioSession() { setIOSAudioSession('auto'); }
 // ============================================================
 function applyMobileMode(on) {
   const sb = $('sidebar');
-  if (sb) {
-    if (on) {
-      sb.style.width = '';
-      sb.style.minWidth = '';
-      sb.style.maxWidth = '';
-      sb.style.flexBasis = '';
-    }
+  if (sb && on) {
+    sb.style.width = '';
+    sb.style.minWidth = '';
+    sb.style.maxWidth = '';
+    sb.style.flexBasis = '';
   }
 
   if (on) {
@@ -1688,39 +1681,9 @@ async function ensureMicPermissionForSettings() {
   }
 }
 
-function closeMicPicker() {
-  const picker = $('pcMicPicker');
-  const btn = $('pcMicPickerButton');
-  if (picker) picker.classList.remove('open');
-  if (btn) btn.setAttribute('aria-expanded', 'false');
-}
-
-function setSelectedMic(deviceId, label) {
-  selectedMicId = deviceId || '';
-  const select = $('pcMicSelect');
-  const labelEl = $('pcMicSelectedLabel');
-  if (select) select.value = selectedMicId;
-  if (labelEl) labelEl.textContent = label || 'Микрофон по умолчанию';
-
-  document.querySelectorAll('.dc-mic-option').forEach(opt => {
-    opt.classList.toggle('selected', opt.dataset.deviceId === selectedMicId);
-  });
-}
-
-function toggleMicPicker() {
-  const picker = $('pcMicPicker');
-  const btn = $('pcMicPickerButton');
-  if (!picker) return;
-  const open = !picker.classList.contains('open');
-  picker.classList.toggle('open', open);
-  if (btn) btn.setAttribute('aria-expanded', String(open));
-}
-
 async function refreshMicrophoneList() {
   const select = $('pcMicSelect');
-  const optionsBox = $('pcMicOptions');
-  const labelEl = $('pcMicSelectedLabel');
-  if (!select || !optionsBox) return;
+  if (!select) return;
 
   await ensureMicPermissionForSettings();
 
@@ -1729,69 +1692,47 @@ async function refreshMicrophoneList() {
     const inputs = devices.filter(d => d.kind === 'audioinput');
 
     select.innerHTML = '';
-    optionsBox.innerHTML = '';
 
     if (!inputs.length) {
-      const option = document.createElement('option');
-      option.value = '';
-      option.textContent = 'Микрофон не найден';
-      select.appendChild(option);
-      const empty = document.createElement('div');
-      empty.className = 'dc-mic-option';
-      empty.textContent = 'Микрофон не найден';
-      empty.style.opacity = '.55';
-      empty.style.cursor = 'default';
-      optionsBox.appendChild(empty);
-      if (labelEl) labelEl.textContent = 'Микрофон не найден';
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'Микрофон не найден';
+      select.appendChild(opt);
+      select.disabled = true;
       return;
     }
+    select.disabled = false;
 
     inputs.forEach((device, index) => {
-      const option = document.createElement('option');
-      option.value = device.deviceId;
-      option.textContent = device.label || `Микрофон ${index + 1}`;
-      select.appendChild(option);
-
-      const item = document.createElement('div');
-      item.className = 'dc-mic-option';
-      item.dataset.deviceId = device.deviceId;
-      item.setAttribute('role', 'option');
-      item.textContent = device.label || `Микрофон ${index + 1}`;
-      item.addEventListener('click', () => {
-        setSelectedMic(device.deviceId, device.label || `Микрофон ${index + 1}`);
-        closeMicPicker();
-      });
-      optionsBox.appendChild(item);
+      const opt = document.createElement('option');
+      opt.value = device.deviceId;
+      opt.textContent = device.label || `Микрофон ${index + 1}`;
+      select.appendChild(opt);
     });
 
     const exists = inputs.some(d => d.deviceId === selectedMicId);
-    if (!exists) selectedMicId = '';
-
-    const selected = inputs.find(d => d.deviceId === selectedMicId);
-    setSelectedMic(selectedMicId, selected?.label || (selectedMicId ? 'Выбранный микрофон' : 'Микрофон по умолчанию'));
+    if (exists) {
+      select.value = selectedMicId;
+    } else {
+      selectedMicId = inputs[0].deviceId;
+      select.value = selectedMicId;
+      try { localStorage.setItem('dc-mic-device', selectedMicId); } catch (e) {}
+    }
   } catch (e) {
     log('⚠️ Список микрофонов: ' + e.message, 'warn');
   }
 }
 
-(function initMicPicker() {
-  const btn = $('pcMicPickerButton');
-  const picker = $('pcMicPicker');
-  if (!btn || !picker) return;
-
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleMicPicker();
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!picker.contains(e.target)) closeMicPicker();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeMicPicker();
-  });
-})();
+function onMicSelectChange() {
+  const select = $('pcMicSelect');
+  if (!select) return;
+  selectedMicId = select.value || '';
+  try { localStorage.setItem('dc-mic-device', selectedMicId); } catch (e) {}
+  const label = select.options[select.selectedIndex]?.textContent || 'по умолчанию';
+  log('🎤 Выбран микрофон: ' + label, 'info');
+  startSettingsLevelMeter();
+  applyMicrophoneSettingsToCall();
+}
 
 async function openSettings() {
   closeSidebarIfMobile();
@@ -1814,7 +1755,6 @@ function closeSettings() {
   if (!modal) return;
   modal.classList.add('hidden');
   modal.style.display = '';
-  closeMicPicker();
   stopSettingsLevelMeter();
 }
 
@@ -1897,7 +1837,7 @@ async function applyMicrophoneSettingsToCall() {
 
 async function saveSettings() {
   const select = $('pcMicSelect');
-  if (select) selectedMicId = select.value;
+  if (select) selectedMicId = select.value || '';
   micEchoCancellation = !!$('pcEchoCancellation')?.checked;
   micNoiseSuppression = !!$('pcNoiseSuppression')?.checked;
   micAutoGainControl = !!$('pcAutoGainControl')?.checked;
@@ -3307,6 +3247,12 @@ async function startScreenShare() {
   }
 
   try {
+    // ⚠️ restrictOwnAudio + suppressLocalAudioPlayback — ключевые флаги
+    //    против дублирования звука:
+    //    • restrictOwnAudio: браузер исключает звук самого DianaCalm из loopback
+    //      (иначе собеседник слышит сам себя второй раз).
+    //    • suppressLocalAudioPlayback: браузер не проигрывает захваченный звук
+    //      локально через колонки (иначе слышим двойной звук сами).
     const preferred = {
       video: {
         frameRate: { ideal: 60 },
@@ -3314,7 +3260,13 @@ async function startScreenShare() {
         height:    { ideal: 1080 },
         cursor: 'always'
       },
-      audio: true
+      audio: {
+        restrictOwnAudio: true,
+        suppressLocalAudioPlayback: true,
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false
+      }
     };
 
     try {
@@ -3324,13 +3276,16 @@ async function startScreenShare() {
       try {
         screenStream = await navigator.mediaDevices.getDisplayMedia({
           video: { frameRate: { ideal: 60 } },
-          audio: true
+          audio: {
+            restrictOwnAudio: true,
+            suppressLocalAudioPlayback: true
+          }
         });
       } catch (e2) {
-        log('⚠️ Fallback: ' + e2.message + ' — только видео', 'warn');
+        log('⚠️ Fallback 2: ' + e2.message + ' — минимальные', 'warn');
         screenStream = await navigator.mediaDevices.getDisplayMedia({
           video: true,
-          audio: false
+          audio: true
         });
       }
     }
