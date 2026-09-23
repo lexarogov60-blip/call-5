@@ -767,15 +767,14 @@
     animation: callScreenReveal 0.42s cubic-bezier(0.34, 1.4, 0.64, 1) both;
   }
 
+  /* УБРАН БЛЮР — теперь просто затемняем фон */
   .call-frost {
     position: absolute;
     inset: 0;
     z-index: 3;
     pointer-events: none;
     opacity: 0;
-    background: rgba(18, 20, 40, 0.66);
-    backdrop-filter: blur(30px) saturate(160%);
-    -webkit-backdrop-filter: blur(30px) saturate(160%);
+    background: rgba(18, 20, 40, 0.65);
     transition: opacity 0.55s ease;
     border-radius: inherit;
   }
@@ -829,7 +828,8 @@
     transition:
       bottom 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
       padding 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
-      gap 0.6s cubic-bezier(0.34, 1.15, 0.64, 1);
+      gap 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
+      opacity 0.3s ease;
   }
 
   .call-mini-topbar {
@@ -911,6 +911,7 @@
         transparent 70%);
     border-radius: 0 0 14px 0;
     pointer-events: auto;
+    transition: opacity 0.3s ease;
   }
   #callScreen.minimized .mini-resize-handle { display: block; }
 
@@ -951,6 +952,7 @@
   #callScreen.minimized .call-ctrl svg { width: 18px !important; height: 18px !important; }
   #callScreen.minimized #btnMinimizeCall { display: none; }
   #callScreen.minimized #btnHideCall { display: none; }
+  #callScreen.minimized #btnFullscreenVideo { display: none !important; }
   #callScreen.minimized #screenShareBadge {
     top: 8px;
     padding: 4px 9px;
@@ -1425,6 +1427,23 @@
   .call-pill-btn:active { transform: scale(0.9); }
   .call-pill-btn.end { background: rgba(239,68,68,0.9); }
   .call-pill-btn.end:hover { background: #ef4444; }
+
+  /* ===== Скрытие интерфейса при двойном тапе ===== */
+  #callScreen.ui-hidden .call-controls-bar,
+  #callScreen.ui-hidden .call-info-inner,
+  #callScreen.ui-hidden .local-video-pip,
+  #callScreen.ui-hidden #screenShareBadge {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Кнопка полного экрана — только на мобильных */
+  #btnFullscreenVideo {
+    display: none;
+  }
+  body.mobile-mode #btnFullscreenVideo {
+    display: flex;
+  }
 </style>
 </head>
 <body>
@@ -1777,6 +1796,15 @@
         </svg>
       </button>
 
+      <button id="btnFullscreenVideo" onclick="toggleVideoFullscreen()" class="call-ctrl" title="Полный экран">
+        <svg id="iconFullscreenEnter" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+        </svg>
+        <svg id="iconFullscreenExit" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+        </svg>
+      </button>
+
       <button id="btnSpeaker" onclick="toggleSpeaker()" class="call-ctrl" title="Громкая связь">
         <svg id="iconSpeakerOff" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M11 5L6 9H2v6h4l5 4V5z"/>
@@ -1936,6 +1964,9 @@ let pillPos = { x: null, y: null };
 // Reply
 let replyTo = null;
 let contextMenuMsg = null;
+
+// UI скрытие интерфейса
+let uiHidden = false;
 
 const $ = (id) => document.getElementById(id);
 
@@ -2132,6 +2163,8 @@ function toggleMobileMode() {
     if (sb) sb.classList.remove('open');
     if (ov) ov.classList.remove('open');
   }
+  // Обновляем видимость кнопки полного экрана при смене режима
+  updateScreenShareUI(isScreenSharing);
 }
 
 function toggleSidebar() {
@@ -2457,11 +2490,11 @@ function handleMessage(msg) {
     case 'screen-share':
       peerIsScreenSharing = !!msg.on;
       updateScreenShareBadge();
+      updateScreenShareUI(isScreenSharing);
 
       const rv = $('remoteVideo');
       if (rv) rv.classList.toggle('screen-share-mode', !!msg.on);
 
-      // Прячем аватар/имя/таймер — они мешают смотреть демонстрацию.
       if (msg.on) {
         setCallInfoOverlay(false);
       } else {
@@ -2475,7 +2508,6 @@ function handleMessage(msg) {
         : `🖥️ ${peerNick || 'Собеседник'} остановил демонстрацию`,
         'info');
 
-      // 📱 На телефоне — автосворачиваем звонок в мини-окно.
       if (msg.on && document.body.classList.contains('mobile-mode')) {
         const cs = $('callScreen');
         if (cs && !cs.classList.contains('hidden') && !callMinimized && !callHidden) {
@@ -3003,6 +3035,7 @@ async function startCall(type) {
   if ($('callPeerName')) $('callPeerName').innerText = peerNick || 'Собеседник';
 
   resetCallScreenState();
+  toggleCallUI(false);
   $('callScreen').classList.remove('hidden');
   $('remotePlaceholder').classList.remove('hidden');
   setCallStatus('Исходящий звонок…');
@@ -3073,6 +3106,7 @@ async function acceptCall() {
   if ($('callPeerName')) $('callPeerName').innerText = peerNick || 'Собеседник';
 
   resetCallScreenState();
+  toggleCallUI(false);
   $('callScreen').classList.remove('hidden');
   $('remotePlaceholder').classList.remove('hidden');
   setCallStatus('Соединение…');
@@ -3125,6 +3159,7 @@ function endCall(silent = false) {
   stopAllSounds();
   clearTimeout(callStateTimeout);
   resetCallScreenState();
+  toggleCallUI(false);
   stopVoiceWave();
   hideCallPill();
   callHidden = false;
@@ -3135,6 +3170,7 @@ function endCall(silent = false) {
   const rv = $('remoteVideo');
   if (rv) rv.classList.remove('screen-share-mode');
   updateScreenShareBadge();
+  updateScreenShareUI(false);
   setCallInfoOverlay(true);
   $('callScreen').classList.add('hidden');
   $('remoteVideo').srcObject = null;
@@ -3146,6 +3182,7 @@ function endCall(silent = false) {
   isMuted = false; isCameraOff = false; isCaller = false;
   isSpeakerOn = false;
   updateMuteUI(); updateCameraUI(); updateSpeakerUI();
+  updateFullscreenIcon();
 }
 
 function toggleMute() {
@@ -3227,10 +3264,107 @@ function updateSpeakerUI() {
 }
 
 // ============================================================
+//  ПОЛНОЭКРАННЫЙ РЕЖИМ ДЛЯ ВИДЕО
+// ============================================================
+function toggleVideoFullscreen() {
+  const video = $('remoteVideo');
+  if (!video) return;
+
+  // iOS: свой API
+  if (video.webkitEnterFullscreen && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    if (!video.webkitDisplayingFullscreen) {
+      video.webkitEnterFullscreen();
+    } else {
+      video.webkitExitFullscreen();
+    }
+    return;
+  }
+
+  // Стандартный API
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    if (video.requestFullscreen) {
+      video.requestFullscreen().catch(e => log('⚠️ Fullscreen: ' + e.message, 'warn'));
+    } else if (video.webkitRequestFullscreen) {
+      video.webkitRequestFullscreen();
+    } else if (video.msRequestFullscreen) {
+      video.msRequestFullscreen();
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  }
+}
+
+function updateFullscreenIcon() {
+  const enterIcon = $('iconFullscreenEnter');
+  const exitIcon = $('iconFullscreenExit');
+  if (!enterIcon || !exitIcon) return;
+  const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.webkitDisplayingFullscreen);
+  enterIcon.classList.toggle('hidden', isFullscreen);
+  exitIcon.classList.toggle('hidden', !isFullscreen);
+}
+
+document.addEventListener('fullscreenchange', updateFullscreenIcon);
+document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
+document.addEventListener('webkitbeginfullscreen', updateFullscreenIcon);
+document.addEventListener('webkitendfullscreen', updateFullscreenIcon);
+
+// ============================================================
+//  ДВОЙНОЙ ТАП — СКРЫТИЕ ИНТЕРФЕЙСА
+// ============================================================
+function toggleCallUI(forceState = null) {
+  const cs = $('callScreen');
+  if (!cs) return;
+  if (forceState !== null) {
+    uiHidden = forceState;
+  } else {
+    uiHidden = !uiHidden;
+  }
+  cs.classList.toggle('ui-hidden', uiHidden);
+}
+
+(function initCallScreenTaps() {
+  const cs = $('callScreen');
+  if (!cs) return;
+
+  let lastTap = 0;
+  const DOUBLE_DELAY = 300;
+
+  function onTap(e) {
+    // Не скрываем UI в мини-режиме
+    if (callMinimized) return;
+
+    // Игнорируем клики по элементам управления
+    if (e.target.closest('.call-controls-bar') ||
+        e.target.closest('.call-mini-topbar') ||
+        e.target.closest('.mini-resize-handle') ||
+        e.target.closest('#screenShareBadge') ||
+        e.target.closest('.local-video-pip')) return;
+
+    const now = Date.now();
+    if (now - lastTap < DOUBLE_DELAY) {
+      // Двойной тап
+      if (e.cancelable) e.preventDefault();
+      toggleCallUI();
+      if (navigator.vibrate) { try { navigator.vibrate(10); } catch(err){} }
+      lastTap = 0;
+    } else {
+      // Одиночный тап — если UI скрыт, показываем его
+      if (uiHidden) toggleCallUI(false);
+      lastTap = now;
+    }
+  }
+
+  cs.addEventListener('click', onTap);
+})();
+
+// ============================================================
 //  ДЕМОНСТРАЦИЯ ЭКРАНА
-//  ВАЖНО: getDisplayMedia() не поддерживает min/max —
-//  только ideal. Иначе Chrome кидает:
-//  "min constraints are not supported"
 // ============================================================
 async function toggleScreenShare() {
   log('🖱️ Клик по демонстрации экрана', 'info');
@@ -3271,7 +3405,6 @@ async function startScreenShare() {
   }
 
   try {
-    // Только ideal. min/max в getDisplayMedia не поддерживаются
     const preferred = {
       video: {
         frameRate: { ideal: 60 },
@@ -3451,6 +3584,14 @@ function updateScreenShareUI(active) {
     btnCall.classList.toggle('sharing-active', !!active);
     btnCall.title = active ? 'Остановить демонстрацию экрана' : 'Демонстрация экрана';
   }
+
+  // Кнопка полного экрана — только на мобильных и когда есть что смотреть (демонстрация)
+  const btnFullscreen = $('btnFullscreenVideo');
+  if (btnFullscreen) {
+    const isMobile = document.body.classList.contains('mobile-mode');
+    const showFullscreen = isMobile && (isScreenSharing || peerIsScreenSharing);
+    btnFullscreen.style.display = showFullscreen ? 'flex' : 'none';
+  }
 }
 
 function updateScreenShareBadge() {
@@ -3522,7 +3663,6 @@ function minimizeCall() {
   const vw = window.innerWidth, vh = window.innerHeight;
   const isMob = document.body.classList.contains('mobile-mode');
 
-  // На телефоне окно шире — чтобы широкий экран ПК не зажимался в узкую полоску.
   const w = isMob
     ? Math.min(vw - 24, 480)
     : MINI_W;
@@ -3653,6 +3793,8 @@ function resetCallScreenState() {
   cs.classList.remove('dragging');
   cs.classList.remove('hiding-anim');
   cs.classList.remove('revealing');
+  cs.classList.remove('ui-hidden');
+  uiHidden = false;
   hideCallPill();
   setFullscreenDim();
 }
