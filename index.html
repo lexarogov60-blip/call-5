@@ -543,10 +543,73 @@
   .call-ctrl.accept:hover { background: #16a34a; }
   .call-ctrl.muted { background: rgba(239,68,68,0.6); }
 
-  /* ====== Кнопка громкой связи — ТОЛЬКО мобильная версия ====== */
+  /* Кнопка громкой связи — только мобильная версия */
   #btnSpeaker { display: none !important; }
   body.mobile-mode #btnSpeaker { display: flex !important; }
-  /* ============================================================ */
+
+  /* ====== Кнопка демонстрации экрана (только десктоп) ====== */
+  body.mobile-mode #screenShareBtn { display: none !important; }
+
+  #screenShareBtn.active {
+    background: linear-gradient(135deg, rgba(239,68,68,0.85), rgba(220,38,38,0.85)) !important;
+    color: #fff !important;
+    box-shadow:
+      0 0 0 1px rgba(239,68,68,0.4),
+      0 4px 14px rgba(239,68,68,0.4) !important;
+    animation: screenSharePulse 1.8s ease-in-out infinite;
+  }
+  #screenShareBtn.active:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+    transform: translateY(-2px) scale(1.04) !important;
+  }
+  @keyframes screenSharePulse {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(239,68,68,0.4), 0 4px 14px rgba(239,68,68,0.4); }
+    50%      { box-shadow: 0 0 0 1px rgba(239,68,68,0.6), 0 4px 22px rgba(239,68,68,0.7); }
+  }
+
+  /* ====== Бейдж «Идёт демонстрация экрана» ====== */
+  #screenShareBadge {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 7;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(239,68,68,0.92);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    box-shadow:
+      0 8px 24px rgba(239,68,68,0.45),
+      0 0 0 1px rgba(255,255,255,0.15) inset;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    animation: badgeIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #screenShareBadge.hidden { display: none !important; }
+
+  .screen-share-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.35);
+    animation: onlinePulse 1.4s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes badgeIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(0.9); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  }
+  /* =========================================================== */
 
   .call-avatar-pulse {
     aspect-ratio: 1 / 1;
@@ -849,6 +912,13 @@
   #callScreen.minimized .call-ctrl svg { width: 18px !important; height: 18px !important; }
   #callScreen.minimized #btnMinimizeCall { display: none; }
   #callScreen.minimized #btnHideCall { display: none; }
+  #callScreen.minimized #screenShareBadge {
+    top: 8px;
+    padding: 4px 9px;
+    font-size: 10px;
+    gap: 5px;
+  }
+  #callScreen.minimized .screen-share-dot { width: 6px; height: 6px; }
 
   @media (max-width: 640px) {
     #callScreen.minimized { border-radius: 22px; }
@@ -1511,6 +1581,15 @@
           <button onclick="startCall('video')" class="btn-icon header-call-btn" title="Видеозвонок">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
           </button>
+          <button onclick="toggleScreenShare()" id="screenShareBtn" class="btn-icon header-call-btn" title="Демонстрация экрана">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="13" rx="2"/>
+              <path d="M8 20h8"/>
+              <path d="M12 17v3"/>
+              <polyline points="9 10 12 7 15 10"/>
+              <line x1="12" y1="7" x2="12" y2="14"/>
+            </svg>
+          </button>
           <button id="headerLogsBtn" onclick="toggleLogs()" class="btn-icon" title="Диагностика">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
           </button>
@@ -1625,6 +1704,13 @@
 
     <div class="call-frost" id="callFrost"></div>
 
+    <!-- ====== БЕЙДЖ ДЕМОНСТРАЦИИ ЭКРАНА ====== -->
+    <div id="screenShareBadge" class="hidden">
+      <span class="screen-share-dot"></span>
+      <span>Демонстрация экрана</span>
+    </div>
+    <!-- ======================================= -->
+
     <div class="absolute inset-0 flex items-center justify-center" style="z-index:4; pointer-events:none;">
       <div class="call-info-inner text-center">
         <div class="calling-pulse call-avatar-pulse mx-auto" style="width:128px; height:128px;">
@@ -1656,7 +1742,7 @@
         <svg id="iconCamOff" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/><path d="M3 3l18 18"/></svg>
       </button>
 
-      <!-- ====== КНОПКА ГРОМКОЙ СВЯЗИ (только в мобильной версии) ====== -->
+      <!-- Кнопка громкой связи (только мобильная версия) -->
       <button id="btnSpeaker" onclick="toggleSpeaker()" class="call-ctrl" title="Громкая связь">
         <svg id="iconSpeakerOff" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M11 5L6 9H2v6h4l5 4V5z"/>
@@ -1667,7 +1753,6 @@
           <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
         </svg>
       </button>
-      <!-- ============================================================ -->
 
       <button id="btnMinimizeCall" onclick="toggleCallMinimize()" class="call-ctrl" title="Свернуть к чату">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -1789,6 +1874,15 @@ let peerCheckInterval = null;
 let lastPeerPing = 0;
 let callStateTimeout = null;
 let appStarted = false;
+
+// Демонстрация экрана
+let isScreenSharing = false;
+let screenStream = null;
+let savedCameraTrack = null;
+let savedMicTrack = null;
+let mixAudioCtx = null;
+let mixAudioSources = null;
+let peerIsScreenSharing = false;
 
 // Voice-wave
 let audioCtx = null;
@@ -1940,13 +2034,9 @@ function stopAllSounds() { stopRingtone(); stopRingback(); }
 
 // ============================================================
 //  УПРАВЛЕНИЕ АУДИОСЕССИЕЙ (iOS 16.4+ / Safari)
-//  Решает две задачи:
-//  1) Во время звонка переводит звук на громкую связь (play-and-record).
-//  2) После звонка сбрасывает сессию обратно в 'auto', чтобы звук
-//     вернулся на обычный динамик телефона (иначе звук "залипает").
 // ============================================================
 function setIOSAudioSession(type) {
-  if (!navigator.audioSession) return; // не iOS 16.4+ / не Safari
+  if (!navigator.audioSession) return;
   try {
     navigator.audioSession.type = type;
     log(`🔊 Аудиосессия: ${type}`, 'info');
@@ -1955,13 +2045,9 @@ function setIOSAudioSession(type) {
   }
 }
 function setupCallAudioSession() {
-  // "play-and-record" — режим для звонков. На iOS роутит звук
-  // на громкую связь (loudspeaker) и держит микрофон активным.
   setIOSAudioSession('play-and-record');
 }
 function restoreAudioSession() {
-  // "auto" — возвращаем контроль системе. Звук уведомлений,
-  // музыки и т.п. снова идёт через штатный маршрут.
   setIOSAudioSession('auto');
 }
 
@@ -2337,9 +2423,14 @@ function handleMessage(msg) {
     case 'typing':
       showTypingIndicator(!!msg.on);
       break;
-    case 'offer': handleOffer(msg.sdp, msg.callType); break;
+    case 'offer': handleOffer(msg.sdp, msg.callType, msg.renegotiate); break;
     case 'answer': handleAnswer(msg.sdp); break;
     case 'ice': handleIce(msg.candidate); break;
+    case 'screen-share':
+      peerIsScreenSharing = !!msg.on;
+      updateScreenShareBadge();
+      log(msg.on ? `🖥️ ${peerNick || 'Собеседник'} показывает экран` : `🖥️ ${peerNick || 'Собеседник'} остановил демонстрацию`, 'info');
+      break;
     case 'call-reject':
       log('Звонок отклонён', 'info');
       stopAllSounds();
@@ -2494,7 +2585,7 @@ function doReply() {
     setTimeout(() => bubble.classList.remove('bubble-pop'), 460);
   }
 
-  // ====== Desktop: правый клик ======
+  // Desktop: правый клик
   container.addEventListener('contextmenu', (e) => {
     const bubble = e.target.closest('.bubble-me, .bubble-other');
     if (!bubble) return;
@@ -2506,7 +2597,7 @@ function doReply() {
     });
   });
 
-  // ====== Desktop: отклик на ЛКМ ======
+  // Desktop: отклик на ЛКМ
   container.addEventListener('mousedown', (e) => {
     if (e.button !== 0) return;
     const bubble = e.target.closest('.bubble-me, .bubble-other');
@@ -2520,7 +2611,7 @@ function doReply() {
     container.querySelectorAll('.bubble-pressed').forEach(releaseBubble);
   });
 
-  // ====== Mobile: long-press ======
+  // Mobile: long-press
   let pressTimer = null;
   let startPos = null;
   let longTriggered = false;
@@ -2537,13 +2628,11 @@ function doReply() {
     pressTimer = setTimeout(() => {
       longTriggered = true;
       releaseBubble(bubble);
-      // «Пружинка» — визуальная замена вибрации (на iOS navigator.vibrate не работает)
       flashBubble(bubble);
       showContextMenu(t.clientX, t.clientY, {
         text: bubble.dataset.text || '',
         mine: bubble.dataset.mine === '1'
       });
-      // Пытаемся вибрировать — работает только на Android Chrome
       if (navigator.vibrate) { try { navigator.vibrate(15); } catch(e){} }
     }, 480);
   }, { passive: true });
@@ -2797,6 +2886,20 @@ function tryStartVoiceWave(retries = 15) {
 function createPeerConnection() {
   const conn = new RTCPeerConnection({ iceServers: ICE_SERVERS });
   conn.onicecandidate = (e) => { if (e.candidate) sendMQTT({ type: 'ice', candidate: e.candidate }); };
+
+  // Ре-негоциация — нужна для запуска демонстрации экрана в аудиозвонке
+  conn.onnegotiationneeded = async () => {
+    if (!conn.currentRemoteDescription) return;
+    try {
+      const offer = await conn.createOffer();
+      await conn.setLocalDescription(offer);
+      sendMQTT({ type: 'offer', sdp: offer, callType: currentCallType, renegotiate: true });
+      log('📤 Ре-негоциация (offer)', 'info');
+    } catch (e) {
+      log('⚠️ Renegotiate: ' + e.message, 'warn');
+    }
+  };
+
   conn.ontrack = (e) => {
     log(`🎬 Трек: ${e.track.kind}`, 'ok');
     if (!remoteStream) remoteStream = new MediaStream();
@@ -2853,8 +2956,6 @@ async function startCall(type) {
 
   try {
     localStream = await getLocalStream(type === 'video');
-    // ВАЖНО: сессию включаем ПОСЛЕ getUserMedia — иначе Safari
-    // может проигнорировать смену типа до выдачи разрешений.
     setupCallAudioSession();
     $('localVideo').srcObject = localStream;
     pc = createPeerConnection();
@@ -2871,7 +2972,21 @@ async function startCall(type) {
   } catch (e) { log('❌ Ошибка: ' + e.message, 'err'); endCall(true); }
 }
 
-async function handleOffer(sdp, callType) {
+async function handleOffer(sdp, callType, renegotiate) {
+  // Ре-негоциация во время активного звонка
+  if (renegotiate && pc) {
+    try {
+      await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      sendMQTT({ type: 'answer', sdp: answer });
+      log('✅ Ре-негоциация выполнена', 'ok');
+    } catch (e) {
+      log('Ошибка ре-негоциации: ' + e.message, 'err');
+    }
+    return;
+  }
+
   if (pc) { sendMQTT({ type: 'call-reject' }); return; }
   currentCallType = callType;
   isCaller = false;
@@ -2909,7 +3024,6 @@ async function acceptCall() {
   $('voiceWave').classList.add('hidden');
   $('btnCamera').style.display = currentCallType === 'video' ? 'flex' : 'none';
 
-  // Теперь работаем с медиа / peer connection
   try {
     localStream = await getLocalStream(currentCallType === 'video');
     setupCallAudioSession();
@@ -2948,9 +3062,8 @@ function rejectCall() {
 }
 
 function endCall(silent = false) {
-  // Сбрасываем iOS-аудиосессию в самом начале — иначе после звонка
-  // звук остаётся на громкой связи или уходит в "ушной" режим.
   restoreAudioSession();
+  if (isScreenSharing || screenStream) stopScreenShare();
   if (!silent) sendMQTT({ type: 'call-end' });
   stopAllSounds();
   clearTimeout(callStateTimeout);
@@ -2961,6 +3074,8 @@ function endCall(silent = false) {
   if (pc) { try { pc.close(); } catch(e){} pc = null; }
   if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
   remoteStream = null;
+  peerIsScreenSharing = false;
+  updateScreenShareBadge();
   $('callScreen').classList.add('hidden');
   $('remoteVideo').srcObject = null;
   $('localVideo').srcObject = null;
@@ -2998,26 +3113,18 @@ function updateCameraUI() {
 
 // ============================================================
 //  ГРОМКАЯ СВЯЗЬ
-//  — На iOS 16.4+ используем Audio Session API (setSinkId не работает).
-//  — На Chrome/Edge/Android — setSinkId.
-//  — На Firefox — не поддерживается ничего (ограничение браузера).
+//  iOS 16.4+ → Audio Session API, Chrome/Android → setSinkId
 // ============================================================
 async function toggleSpeaker() {
   isSpeakerOn = !isSpeakerOn;
   updateSpeakerUI();
 
-  // --- ПУТЬ 1: iOS Safari (navigator.audioSession доступен) ---
   if (navigator.audioSession) {
     try {
       if (isSpeakerOn) {
-        // play-and-record на iOS автоматически направляет звук
-        // на громкую связь (loudspeaker).
         navigator.audioSession.type = 'play-and-record';
         log('🔊 Громкая связь вкл. (iOS Audio Session)', 'ok');
       } else {
-        // 'playback' во время звонка обычно роутит звук на ушной
-        // динамик. Микрофон при этом остаётся активен,
-        // т.к. getUserMedia уже захватил трек.
         navigator.audioSession.type = 'playback';
         log('🔈 Громкая связь выкл. (iOS Audio Session)', 'ok');
       }
@@ -3027,7 +3134,6 @@ async function toggleSpeaker() {
     return;
   }
 
-  // --- ПУТЬ 2: Chrome / Edge / Android (setSinkId) ---
   const rv = $('remoteVideo');
   if (!rv) return;
   if (typeof rv.setSinkId !== 'function') {
@@ -3036,7 +3142,7 @@ async function toggleSpeaker() {
   }
   try {
     if (isSpeakerOn) {
-      await rv.setSinkId('default'); // обычно = громкая связь
+      await rv.setSinkId('default');
       log('🔊 Громкая связь вкл. (setSinkId)', 'ok');
     } else {
       const devices = await navigator.mediaDevices.enumerateDevices();
@@ -3059,6 +3165,205 @@ function updateSpeakerUI() {
   if (off) off.classList.toggle('hidden',  isSpeakerOn);
   const btn = $('btnSpeaker');
   if (btn) btn.classList.toggle('muted', !isSpeakerOn);
+}
+
+// ============================================================
+//  ДЕМОНСТРАЦИЯ ЭКРАНА
+//  getDisplayMedia + микширование микрофона и системного звука
+//  Frame rate: 40–60 fps, FullHD, ~5 Мбит/с
+// ============================================================
+async function toggleScreenShare() {
+  if (isScreenSharing) stopScreenShare();
+  else await startScreenShare();
+}
+
+async function startScreenShare() {
+  if (!pc) { alert('Сначала начните звонок'); return; }
+  if (isScreenSharing) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+    alert('Ваш браузер не поддерживает демонстрацию экрана');
+    return;
+  }
+
+  try {
+    const constraints = {
+      video: {
+        frameRate: { ideal: 60, min: 40, max: 60 },
+        width:     { ideal: 1920, max: 1920 },
+        height:    { ideal: 1080, max: 1080 },
+        cursor: 'always'
+      },
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false
+      }
+    };
+
+    screenStream = await navigator.mediaDevices.getDisplayMedia(constraints);
+    const screenVideoTrack = screenStream.getVideoTracks()[0];
+    const screenAudioTrack = screenStream.getAudioTracks()[0];
+
+    if (!screenVideoTrack) throw new Error('нет видео-трека');
+
+    savedCameraTrack = (localStream && localStream.getVideoTracks()[0]) || null;
+    savedMicTrack    = (localStream && localStream.getAudioTracks()[0]) || null;
+
+    // Видео
+    let videoSender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+    if (videoSender) {
+      await videoSender.replaceTrack(screenVideoTrack);
+    } else {
+      pc.addTrack(screenVideoTrack, screenStream);
+      videoSender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+    }
+
+    // Параметры кодирования
+    try {
+      if (videoSender && videoSender.setParameters) {
+        const params = videoSender.getParameters();
+        if (!params.encodings || params.encodings.length === 0) params.encodings = [{}];
+        params.encodings[0].maxFramerate = 60;
+        params.encodings[0].maxBitrate = 5000000;
+        params.degradationPreference = 'maintain-framerate';
+        await videoSender.setParameters(params);
+        log('⚙️ Кодек: 60 fps, 5 Мбит/с, maintain-framerate', 'ok');
+      }
+    } catch (e) {
+      log('⚠️ Параметры кодирования: ' + e.message, 'warn');
+    }
+
+    // Аудио
+    if (screenAudioTrack && savedMicTrack) {
+      await mixMicAndScreenAudio(savedMicTrack, screenAudioTrack);
+    } else if (screenAudioTrack && !savedMicTrack) {
+      const audioSender = pc.getSenders().find(s => s.track && s.track.kind === 'audio');
+      if (audioSender) await audioSender.replaceTrack(screenAudioTrack);
+      else pc.addTrack(screenAudioTrack, screenStream);
+    } else {
+      log('ℹ️ Системный звук не выбран — только видео', 'info');
+    }
+
+    if ($('localVideo')) $('localVideo').srcObject = screenStream;
+
+    isScreenSharing = true;
+    updateScreenShareUI(true);
+    updateScreenShareBadge();
+    sendMQTT({ type: 'screen-share', on: true });
+    log('🖥️ Демонстрация экрана запущена', 'ok');
+
+    // Пользователь остановил через встроенный UI браузера
+    screenVideoTrack.onended = () => { stopScreenShare(); };
+
+  } catch (e) {
+    log('❌ Демонстрация: ' + e.message, 'err');
+    stopScreenShare();
+  }
+}
+
+async function mixMicAndScreenAudio(micTrack, screenAudioTrack) {
+  try {
+    if (!mixAudioCtx) {
+      mixAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (mixAudioCtx.state === 'suspended') await mixAudioCtx.resume();
+
+    const micSrc    = mixAudioCtx.createMediaStreamSource(new MediaStream([micTrack]));
+    const screenSrc = mixAudioCtx.createMediaStreamSource(new MediaStream([screenAudioTrack]));
+    const dest      = mixAudioCtx.createMediaStreamDestination();
+
+    const screenGain = mixAudioCtx.createGain();
+    screenGain.gain.value = 0.85;
+
+    micSrc.connect(dest);
+    screenSrc.connect(screenGain);
+    screenGain.connect(dest);
+
+    const mixedTrack = dest.stream.getAudioTracks()[0];
+
+    const audioSender = pc.getSenders().find(s => s.track && s.track.kind === 'audio');
+    if (audioSender) await audioSender.replaceTrack(mixedTrack);
+    else pc.addTrack(mixedTrack, dest.stream);
+
+    mixAudioSources = { micSrc, screenSrc, screenGain, dest };
+    log('🎚️ Микрофон + системный звук смикшированы', 'ok');
+  } catch (e) {
+    log('⚠️ Микс аудио не удался: ' + e.message, 'warn');
+  }
+}
+
+function stopScreenShare() {
+  if (!isScreenSharing && !screenStream) return;
+
+  if (screenStream) {
+    screenStream.getTracks().forEach(t => { try { t.stop(); } catch(e){} });
+    screenStream = null;
+  }
+
+  if (pc && savedCameraTrack) {
+    savedCameraTrack.enabled = !isCameraOff;
+    const videoSender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+    if (videoSender) {
+      videoSender.replaceTrack(savedCameraTrack).catch(() => {});
+    }
+  }
+
+  if (pc && savedMicTrack) {
+    savedMicTrack.enabled = !isMuted;
+    const audioSender = pc.getSenders().find(s => s.track && s.track.kind === 'audio');
+    if (audioSender) {
+      audioSender.replaceTrack(savedMicTrack).catch(() => {});
+    }
+  }
+
+  if (mixAudioSources) {
+    try { mixAudioSources.micSrc.disconnect(); } catch(e){}
+    try { mixAudioSources.screenSrc.disconnect(); } catch(e){}
+    try { mixAudioSources.screenGain.disconnect(); } catch(e){}
+    try { mixAudioSources.dest.disconnect(); } catch(e){}
+    mixAudioSources = null;
+  }
+
+  savedCameraTrack = null;
+  savedMicTrack = null;
+  isScreenSharing = false;
+  updateScreenShareUI(false);
+  updateScreenShareBadge();
+
+  if ($('localVideo')) {
+    $('localVideo').srcObject = localStream;
+  }
+
+  // Оповещаем собеседника
+  if (mqttClient && mqttClient.connected) {
+    sendMQTT({ type: 'screen-share', on: false });
+  }
+
+  log('🖥️ Демонстрация остановлена', 'info');
+}
+
+function updateScreenShareUI(active) {
+  const btn = $('screenShareBtn');
+  if (!btn) return;
+  btn.classList.toggle('active', !!active);
+  btn.title = active ? 'Остановить демонстрацию экрана' : 'Демонстрация экрана';
+}
+
+function updateScreenShareBadge() {
+  const badge = $('screenShareBadge');
+  if (!badge) return;
+  const show = !!(isScreenSharing || peerIsScreenSharing);
+  badge.classList.toggle('hidden', !show);
+
+  // Меняем текст в зависимости от того, кто шарит
+  const label = badge.querySelector('span:last-child');
+  if (label && show) {
+    if (isScreenSharing) {
+      label.textContent = 'Вы показываете экран';
+    } else {
+      label.textContent = (peerNick || 'Собеседник') + ' показывает экран';
+    }
+  }
 }
 // ============================================================
 
@@ -3481,6 +3786,9 @@ function resetCallScreenState() {
 
 window.addEventListener('beforeunload', () => {
   restoreAudioSession();
+  if (isScreenSharing) {
+    try { sendMQTT({ type: 'screen-share', on: false }); } catch(e){}
+  }
   if (mqttClient && mqttClient.connected) sendMQTT({ type: 'bye' });
 });
 </script>
