@@ -374,7 +374,8 @@
     transition: bottom 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
                 padding 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
                 gap 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
-                opacity 0.35s ease;
+                opacity 0.32s ease,
+                transform 0.42s cubic-bezier(0.34, 1.4, 0.64, 1);
   }
   .call-mini-topbar { position: absolute; top: 0; left: 0; right: 0; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; z-index: 10; background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0)); cursor: grab; user-select: none; -webkit-user-select: none; opacity: 0; pointer-events: none; transition: opacity 0.4s ease 0.15s; }
   #callScreen.minimized .call-mini-topbar { opacity: 1; pointer-events: auto; }
@@ -402,6 +403,51 @@
   #callScreen.minimized #screenShareBadge { top: 8px; padding: 4px 9px; font-size: 10px; gap: 5px; }
   #callScreen.minimized .screen-share-dot { width: 6px; height: 6px; }
   @media (max-width: 640px) { #callScreen.minimized { border-radius: 22px; } #callScreen.minimized .call-avatar-pulse { width: 60px !important; height: 60px !important; } #callScreen.minimized #callPeerAvatar { font-size: 22px; } #callScreen.minimized .call-ctrl { width: 36px; height: 36px; } #callScreen.minimized .call-ctrl svg { width: 15px !important; height: 15px !important; } }
+
+  /* ============ МИНИ-ОКНО НА ПК: инфо видно, контролы по наведению ============ */
+  @media (min-width: 1025px) {
+    body:not(.mobile-mode) #callScreen.minimized .call-avatar-pulse {
+      width: 88px !important;
+      height: 88px !important;
+    }
+    body:not(.mobile-mode) #callScreen.minimized #callPeerAvatar {
+      font-size: 34px;
+    }
+    body:not(.mobile-mode) #callScreen.minimized #callPeerName {
+      font-size: 16px !important;
+      margin-top: 14px !important;
+      margin-bottom: 3px !important;
+    }
+    body:not(.mobile-mode) #callScreen.minimized #callStatusText {
+      font-size: 12px !important;
+    }
+    body:not(.mobile-mode) #callScreen.minimized #callDuration {
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    body:not(.mobile-mode) #callScreen.minimized .voice-wave {
+      height: 24px;
+      margin: 10px auto 0;
+      gap: 4px;
+    }
+    body:not(.mobile-mode) #callScreen.minimized .voice-wave span {
+      width: 3px;
+      height: 8px;
+    }
+
+    body:not(.mobile-mode) #callScreen.minimized .call-controls-bar {
+      opacity: 0;
+      transform: translateX(-50%) translateY(24px);
+      pointer-events: none;
+    }
+
+    body:not(.mobile-mode) #callScreen.minimized:hover .call-controls-bar {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+  }
+
   .bubble-reply-quote { border-left: 2.5px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.14); border-radius: 8px; padding: 5px 10px; margin-bottom: 6px; font-size: 12px; line-height: 1.35; max-width: 260px; overflow: hidden; }
   .bubble-other .bubble-reply-quote { border-left-color: rgba(109,127,214,0.75); background: rgba(139,154,224,0.1); }
   .bubble-reply-author { font-weight: 600; margin-bottom: 2px; font-size: 11.5px; letter-spacing: 0.01em; }
@@ -2127,14 +2173,13 @@ function showTypingIndicator(show) {
 async function getLocalStream(video) {
   log(`Запрос ${video ? 'камеры и микрофона' : 'микрофона'}…`);
 
-  // ✅ Моно, 48 кГц, без NS/AGC — чтобы голос не «утопал» и не «шакалился»
+  // ✅ Моно, без NS/AGC, БЕЗ навязывания sampleRate/sampleSize — браузер использует
+  //    нативную частоту микрофона, поэтому нет ресемплинга и «плавающего» тона.
   const audioConstraints = {
     echoCancellation: true,
     noiseSuppression: false,
     autoGainControl: false,
-    channelCount: 1,
-    sampleRate: 48000,
-    sampleSize: 16
+    channelCount: 1
   };
 
   try {
@@ -2290,8 +2335,8 @@ function createPeerConnection() {
 
 // ============================================================
 //  ПРИОРИТЕТ АУДИО-СЕНДЕРОВ
-//  Все аудио-треки получают высокий приоритет и капнутый битрейт,
-//  чтобы голос не «шакалился», когда рядом идёт видео + системный звук.
+//  64 кбит/с достаточно, чтобы Opus не «прыгал» между SILK/CELT
+//  в тихих местах и не проглатывал голос. Плюс high priority.
 // ============================================================
 function prioritizeAudioSenders() {
   if (!pc) return;
@@ -2302,7 +2347,7 @@ function prioritizeAudioSenders() {
       if (!p.encodings || p.encodings.length === 0) p.encodings = [{}];
       p.encodings[0].priority = 'high';
       p.encodings[0].networkPriority = 'high';
-      p.encodings[0].maxBitrate = 40000;
+      p.encodings[0].maxBitrate = 64000;
       s.setParameters(p);
     } catch (e) {
       // некоторые браузеры не дают менять параметры — не критично
@@ -2734,6 +2779,9 @@ function toggleCallUI(forceState = null) {
 
 function scheduleMiniUiHide() {
   clearTimeout(miniUiHideTimer);
+  // На ПК инфо (таймер, аватар, имя) не скрываем — только контролы через CSS :hover.
+  // Автоскрытие всего UI оставляем только для мобильного режима.
+  if (!document.body.classList.contains('mobile-mode')) return;
   miniUiHideTimer = setTimeout(() => {
     if (callMinimized) {
       toggleCallUI(true);
