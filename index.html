@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <title>DC</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#C8CCD2" id="themeColorMeta">
 <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <style>
@@ -64,7 +61,7 @@
   @keyframes float2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-80px,-60px) scale(1.1); } }
   @keyframes float3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-50px,70px) scale(1.2); } }
   @keyframes float4 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(70px,-50px) scale(1.05); } }
-  .glass { background: var(--glass-bg); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid var(--glass-border); box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.55); }
+  .glass { background: var(--glass-bg); background-clip: padding-box; backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid var(--glass-border); box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.55); }
   .dark .glass { box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.05); }
   .glass-2 { background: var(--glass-2-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-2-border); }
   .bubble-me { display: inline-block; background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%); color: #fff; border-radius: 22px 22px 6px 22px; padding: 10px 16px; font-size: 15px; line-height: 1.45; letter-spacing: -0.01em; word-break: break-word; max-width: 100%; box-shadow: 0 4px 16px rgba(109,127,214,0.3), inset 0 1px 0 rgba(255,255,255,0.2); cursor: pointer; user-select: none; -webkit-user-select: none; transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease; will-change: transform; }
@@ -194,8 +191,8 @@
   .dark .header-call-btn { background: linear-gradient(135deg, rgba(165,180,252,0.2), rgba(139,154,224,0.14)); color: #C7D2FE !important; }
   body > #loginScreen { position: relative; z-index: 10000; }
   #app { height: 100vh; height: 100dvh; width: 100vw; display: flex; overflow: hidden; position: relative; z-index: 2; }
-  aside { display: flex; flex-direction: column; justify-content: space-between; padding: 20px 14px; margin: 16px; border-radius: 32px; overflow: hidden; flex-shrink: 0; }
-  main { flex: 1; display: flex; gap: 16px; margin: 16px 16px 16px 0; overflow: hidden; min-width: 0; position: relative; }
+  aside { display: flex; flex-direction: column; justify-content: space-between; padding: 20px 14px; margin: 16px; border-radius: 32px; overflow: hidden; flex-shrink: 0; isolation: isolate; }
+  main { flex: 1; display: flex; gap: 16px; margin: 16px 16px 16px 0; overflow: hidden; min-width: 0; position: relative; border-radius: 32px; }
   .resize-handle { width: 8px; cursor: col-resize; flex-shrink: 0; position: relative; align-self: stretch; z-index: 50; display: flex; align-items: center; justify-content: center; }
   .resize-handle::after { content: ''; width: 3px; height: 44px; background: rgba(139,154,224,0.5); border-radius: 3px; opacity: 0; transition: opacity 0.25s, height 0.25s; }
   .resize-handle:hover::after, .resize-handle.dragging::after { opacity: 1; height: 64px; }
@@ -523,12 +520,12 @@
   .no-select { user-select: none; -webkit-user-select: none; }
 
   /* ============================================================
-     ПОДПИСЬ DESIGNED BY МЯУ (рукописный стиль)
+     ПОДПИСЬ DESIGNED BY МЯУ (строгий шрифт Inter)
      ============================================================ */
   .dc-signature {
-    font-family: 'Caveat', 'Segoe Script', 'Bradley Hand', cursive;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     font-size: 21px;
-    font-weight: 500;
+    font-weight: 400;
     font-style: normal;
     color: var(--text-dim);
     opacity: 0.68;
@@ -537,8 +534,6 @@
     letter-spacing: 0.02em;
     user-select: none;
     -webkit-user-select: none;
-    transform: rotate(-1deg);
-    transform-origin: center;
     display: inline-block;
   }
   .dark .dc-signature {
@@ -546,7 +541,7 @@
     opacity: 0.72;
   }
   .brand-signature {
-    font-family: 'Caveat', 'Segoe Script', cursive;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     font-size: 13px;
     font-weight: 500;
     color: var(--text-dim);
@@ -574,7 +569,7 @@
   body.mobile-mode #sidebar .sidebar-action span.hide-mobile { display: inline !important; }
   body.mobile-mode #sidebar .peers-section { display: block !important; }
   body.mobile-mode .resize-handle { display: none !important; }
-  body.mobile-mode main { margin: 0 !important; gap: 0 !important; padding: 0 !important; flex: 1; min-width: 0; }
+  body.mobile-mode main { margin: 0 !important; gap: 0 !important; padding: 0 !important; flex: 1; min-width: 0; border-radius: 0 !important; }
   body.mobile-mode main > .glass { border-radius: 0 !important; border: none !important; box-shadow: none !important; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
   body.mobile-mode header { padding: 12px 14px !important; padding-top: calc(12px + env(safe-area-inset-top, 0px)) !important; background: var(--glass-bg); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border-bottom: 1px solid var(--border-bottom); flex-shrink: 0; position: relative; z-index: 5; }
   body.mobile-mode .chat-area { margin: 0 !important; border-radius: 0 !important; padding: 14px !important; }
@@ -1508,21 +1503,51 @@ function applyMobileMode(on) {
 }
 
 function toggleMobileMode() {
-  const isOn = document.body.classList.contains('mobile-mode');
-  applyMobileMode(!isOn);
-  try { localStorage.setItem('cc-mobile-mode', !isOn ? '1' : '0'); } catch(e) {}
-  const cs = $('callScreen');
-  if (cs && !cs.classList.contains('hidden') && !callMinimized && !callHidden) {
-    setTimeout(() => { setFullscreenDim(); }, 60);
+  const app = $('app');
+
+  if (!app) {
+    const isOn = document.body.classList.contains('mobile-mode');
+    applyMobileMode(!isOn);
+    return;
   }
-  if (!isOn) {
-    const sb = $('sidebar');
-    const ov = $('sidebarOverlay');
-    if (sb) sb.classList.remove('open');
-    if (ov) ov.classList.remove('open');
-  }
-  closeCallMoreMenu();
-  updateMoreMenuVisibility();
+
+  // ==== Плавная анимация перехода: fade-out → смена класса → fade-in ====
+  app.style.willChange = 'opacity, transform';
+  app.style.transition = 'opacity 0.22s ease, transform 0.38s cubic-bezier(0.34, 1.15, 0.64, 1)';
+  app.style.opacity = '0';
+  app.style.transform = 'scale(0.965)';
+
+  setTimeout(() => {
+    const isOn = document.body.classList.contains('mobile-mode');
+    applyMobileMode(!isOn);
+    try { localStorage.setItem('cc-mobile-mode', !isOn ? '1' : '0'); } catch(e) {}
+
+    if (!isOn) {
+      const sb = $('sidebar');
+      const ov = $('sidebarOverlay');
+      if (sb) sb.classList.remove('open');
+      if (ov) ov.classList.remove('open');
+    }
+    closeCallMoreMenu();
+    updateMoreMenuVisibility();
+
+    const cs = $('callScreen');
+    if (cs && !cs.classList.contains('hidden') && !callMinimized && !callHidden) {
+      setTimeout(() => { setFullscreenDim(); }, 40);
+    }
+
+    // Fade-in обратно
+    requestAnimationFrame(() => {
+      app.style.opacity = '1';
+      app.style.transform = 'scale(1)';
+      setTimeout(() => {
+        app.style.transition = '';
+        app.style.opacity = '';
+        app.style.transform = '';
+        app.style.willChange = '';
+      }, 440);
+    });
+  }, 240);
 }
 
 function toggleSidebar() {
@@ -3297,12 +3322,9 @@ async function startScreenShare() {
   }
 
   try {
-    // ⚠️ restrictOwnAudio + suppressLocalAudioPlayback — ключевые флаги
-    //    против дублирования звука:
-    //    • restrictOwnAudio: браузер исключает звук самого DC из loopback
-    //      (иначе собеседник слышит сам себя второй раз).
-    //    • suppressLocalAudioPlayback: браузер не проигрывает захваченный звук
-    //      локально через колонки (иначе слышим двойной звук сами).
+    // restrictOwnAudio + suppressLocalAudioPlayback — против дублирования звука:
+    // браузер исключит звук самого DC из loopback и не будет проигрывать
+    // захваченный звук локально через колонки.
     const preferred = {
       video: {
         frameRate: { ideal: 60 },
@@ -3367,7 +3389,6 @@ async function startScreenShare() {
       }
     } catch (e) {}
 
-    // Discord-style: звук демонстрации идёт ОТДЕЛЬНЫМ каналом (своим stream'ом).
     if (screenAudioTrack) {
       try {
         await screenAudioTrack.applyConstraints({ channelCount: 1 });
