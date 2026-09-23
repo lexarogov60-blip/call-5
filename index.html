@@ -573,7 +573,24 @@
     50%      { box-shadow: 0 0 0 1px rgba(239,68,68,0.6), 0 4px 22px rgba(239,68,68,0.7); }
   }
 
-  /* screen-share-mode: показываем демонстрацию целиком (без обрезки) */
+  /* Кнопка ВОЗОБНОВИТЬ демонстрацию */
+  #btnResumeScreenShare {
+    display: none;
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    color: #fff !important;
+    animation: resumePulse 1.6s ease-in-out infinite;
+  }
+  #btnResumeScreenShare.visible {
+    display: flex !important;
+  }
+  #btnResumeScreenShare:hover {
+    background: linear-gradient(135deg, #d97706, #b45309) !important;
+  }
+  @keyframes resumePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.6); }
+    50%      { box-shadow: 0 0 0 10px rgba(245,158,11,0); }
+  }
+
   #remoteVideo.screen-share-mode {
     object-fit: contain !important;
     background: #000;
@@ -603,6 +620,7 @@
     animation: badgeIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     pointer-events: none;
     white-space: nowrap;
+    transition: opacity 0.3s ease;
   }
   #screenShareBadge.hidden { display: none !important; }
 
@@ -767,7 +785,6 @@
     animation: callScreenReveal 0.42s cubic-bezier(0.34, 1.4, 0.64, 1) both;
   }
 
-  /* УБРАН БЛЮР — теперь просто затемняем фон */
   .call-frost {
     position: absolute;
     inset: 0;
@@ -829,7 +846,7 @@
       bottom 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
       padding 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
       gap 0.6s cubic-bezier(0.34, 1.15, 0.64, 1),
-      opacity 0.3s ease;
+      opacity 0.35s ease;
   }
 
   .call-mini-topbar {
@@ -890,7 +907,6 @@
     transform: scale(0.9);
   }
 
-  /* ===== Уголок для ручного ресайза мини-окна ===== */
   .mini-resize-handle {
     display: none;
     position: absolute;
@@ -1428,21 +1444,25 @@
   .call-pill-btn.end { background: rgba(239,68,68,0.9); }
   .call-pill-btn.end:hover { background: #ef4444; }
 
-  /* ===== Скрытие интерфейса при двойном тапе ===== */
+  /* ===== Скрытие интерфейса звонка (двойной тап) ===== */
   #callScreen.ui-hidden .call-controls-bar,
   #callScreen.ui-hidden .call-info-inner,
   #callScreen.ui-hidden .local-video-pip,
-  #callScreen.ui-hidden #screenShareBadge {
+  #callScreen.ui-hidden #screenShareBadge,
+  #callScreen.ui-hidden .call-mini-topbar,
+  #callScreen.ui-hidden .mini-resize-handle {
     opacity: 0 !important;
     pointer-events: none !important;
   }
 
-  /* Кнопка полного экрана — только на мобильных */
   #btnFullscreenVideo {
     display: none;
   }
   body.mobile-mode #btnFullscreenVideo {
     display: flex;
+  }
+  #callScreen.minimized #btnFullscreenVideo {
+    display: none !important;
   }
 </style>
 </head>
@@ -1796,6 +1816,13 @@
         </svg>
       </button>
 
+      <button id="btnResumeScreenShare" onclick="resumeScreenShare()" class="call-ctrl" title="Возобновить демонстрацию">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+        </svg>
+      </button>
+
       <button id="btnFullscreenVideo" onclick="toggleVideoFullscreen()" class="call-ctrl" title="Полный экран">
         <svg id="iconFullscreenEnter" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -1943,6 +1970,7 @@ let savedMicTrack = null;
 let mixAudioCtx = null;
 let mixAudioSources = null;
 let peerIsScreenSharing = false;
+let shareInterrupted = false; // true, если демка была прервана браузером
 
 // Voice-wave
 let audioCtx = null;
@@ -1957,6 +1985,7 @@ let miniCallPos = { x: null, y: null };
 const MINI_W = 280;
 const MINI_H = 380;
 const MINI_MARGIN = 20;
+let miniUiHideTimer = null; // таймер автоскрытия UI в мини-окне
 
 // Pill position
 let pillPos = { x: null, y: null };
@@ -2163,7 +2192,6 @@ function toggleMobileMode() {
     if (sb) sb.classList.remove('open');
     if (ov) ov.classList.remove('open');
   }
-  // Обновляем видимость кнопки полного экрана при смене режима
   updateScreenShareUI(isScreenSharing);
 }
 
@@ -3036,6 +3064,7 @@ async function startCall(type) {
 
   resetCallScreenState();
   toggleCallUI(false);
+  hideResumeShareButton();
   $('callScreen').classList.remove('hidden');
   $('remotePlaceholder').classList.remove('hidden');
   setCallStatus('Исходящий звонок…');
@@ -3107,6 +3136,7 @@ async function acceptCall() {
 
   resetCallScreenState();
   toggleCallUI(false);
+  hideResumeShareButton();
   $('callScreen').classList.remove('hidden');
   $('remotePlaceholder').classList.remove('hidden');
   setCallStatus('Соединение…');
@@ -3158,8 +3188,10 @@ function endCall(silent = false) {
   if (!silent) sendMQTT({ type: 'call-end' });
   stopAllSounds();
   clearTimeout(callStateTimeout);
+  clearTimeout(miniUiHideTimer);
   resetCallScreenState();
   toggleCallUI(false);
+  hideResumeShareButton();
   stopVoiceWave();
   hideCallPill();
   callHidden = false;
@@ -3270,7 +3302,6 @@ function toggleVideoFullscreen() {
   const video = $('remoteVideo');
   if (!video) return;
 
-  // iOS: свой API
   if (video.webkitEnterFullscreen && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
     if (!video.webkitDisplayingFullscreen) {
       video.webkitEnterFullscreen();
@@ -3280,7 +3311,6 @@ function toggleVideoFullscreen() {
     return;
   }
 
-  // Стандартный API
   if (!document.fullscreenElement && !document.webkitFullscreenElement) {
     if (video.requestFullscreen) {
       video.requestFullscreen().catch(e => log('⚠️ Fullscreen: ' + e.message, 'warn'));
@@ -3315,7 +3345,7 @@ document.addEventListener('webkitbeginfullscreen', updateFullscreenIcon);
 document.addEventListener('webkitendfullscreen', updateFullscreenIcon);
 
 // ============================================================
-//  ДВОЙНОЙ ТАП — СКРЫТИЕ ИНТЕРФЕЙСА
+//  ДВОЙНОЙ ТАП — СКРЫТИЕ ИНТЕРФЕЙСА + ТАП В МИНИ-РЕЖИМЕ
 // ============================================================
 function toggleCallUI(forceState = null) {
   const cs = $('callScreen');
@@ -3328,6 +3358,15 @@ function toggleCallUI(forceState = null) {
   cs.classList.toggle('ui-hidden', uiHidden);
 }
 
+function scheduleMiniUiHide() {
+  clearTimeout(miniUiHideTimer);
+  miniUiHideTimer = setTimeout(() => {
+    if (callMinimized) {
+      toggleCallUI(true);
+    }
+  }, 2000);
+}
+
 (function initCallScreenTaps() {
   const cs = $('callScreen');
   if (!cs) return;
@@ -3336,25 +3375,31 @@ function toggleCallUI(forceState = null) {
   const DOUBLE_DELAY = 300;
 
   function onTap(e) {
-    // Не скрываем UI в мини-режиме
-    if (callMinimized) return;
-
     // Игнорируем клики по элементам управления
     if (e.target.closest('.call-controls-bar') ||
         e.target.closest('.call-mini-topbar') ||
         e.target.closest('.mini-resize-handle') ||
         e.target.closest('#screenShareBadge') ||
-        e.target.closest('.local-video-pip')) return;
+        e.target.closest('.local-video-pip') ||
+        e.target.closest('button')) return;
+
+    // В мини-окне: любой тап возвращает интерфейс + перезапускает таймер
+    if (callMinimized) {
+      if (uiHidden) {
+        toggleCallUI(false);
+      }
+      scheduleMiniUiHide();
+      return;
+    }
 
     const now = Date.now();
     if (now - lastTap < DOUBLE_DELAY) {
-      // Двойной тап
+      // Двойной тап в полноэкранном режиме — скрыть/показать интерфейс
       if (e.cancelable) e.preventDefault();
       toggleCallUI();
       if (navigator.vibrate) { try { navigator.vibrate(10); } catch(err){} }
       lastTap = 0;
     } else {
-      // Одиночный тап — если UI скрыт, показываем его
       if (uiHidden) toggleCallUI(false);
       lastTap = now;
     }
@@ -3371,12 +3416,38 @@ async function toggleScreenShare() {
   try {
     if (isScreenSharing) {
       stopScreenShare();
+      hideResumeShareButton();
     } else {
       await startScreenShare();
     }
   } catch (e) {
     log('❌ toggleScreenShare: ' + e.message, 'err');
   }
+}
+
+function showResumeShareButton() {
+  shareInterrupted = true;
+  const btn = $('btnResumeScreenShare');
+  if (btn) btn.classList.add('visible');
+  log('🔄 Кнопка возобновления демонстрации показана', 'info');
+}
+
+function hideResumeShareButton() {
+  shareInterrupted = false;
+  const btn = $('btnResumeScreenShare');
+  if (btn) btn.classList.remove('visible');
+}
+
+async function resumeScreenShare() {
+  if (isScreenSharing) return;
+  if (!pc) {
+    alert('Звонок уже завершён');
+    hideResumeShareButton();
+    return;
+  }
+  hideResumeShareButton();
+  log('🔄 Возобновление демонстрации…', 'info');
+  await startScreenShare();
 }
 
 async function startScreenShare() {
@@ -3485,7 +3556,16 @@ async function startScreenShare() {
     sendMQTT({ type: 'screen-share', on: true });
     log('🖥️ Демонстрация экрана запущена', 'ok');
 
-    screenVideoTrack.onended = () => { stopScreenShare(); };
+    // Обработчик прерывания демонстрации браузером
+    screenVideoTrack.onended = () => {
+      log('🖥️ Демонстрация прервана браузером (fullscreen/stop)', 'warn');
+      const wasActive = isScreenSharing;
+      // Обнуляем onended, чтобы stopScreenShare не дёргал его снова
+      try { screenVideoTrack.onended = null; } catch(e){}
+      if (wasActive) {
+        stopScreenShare(false, true); // второй параметр — interrupted
+      }
+    };
 
   } catch (e) {
     log('❌ Демонстрация: ' + e.message, 'err');
@@ -3524,10 +3604,12 @@ async function mixMicAndScreenAudio(micTrack, screenAudioTrack) {
   }
 }
 
-function stopScreenShare() {
+function stopScreenShare(silent = false, interrupted = false) {
   if (!isScreenSharing && !screenStream) return;
 
   if (screenStream) {
+    // Сначала убираем onended, чтобы не было рекурсии
+    screenStream.getVideoTracks().forEach(t => { try { t.onended = null; } catch(e){} });
     screenStream.getTracks().forEach(t => { try { t.stop(); } catch(e){} });
     screenStream = null;
   }
@@ -3566,11 +3648,16 @@ function stopScreenShare() {
     $('localVideo').srcObject = localStream;
   }
 
-  if (mqttClient && mqttClient.connected) {
+  if (!silent && mqttClient && mqttClient.connected) {
     sendMQTT({ type: 'screen-share', on: false });
   }
 
   log('🖥️ Демонстрация остановлена', 'info');
+
+  // Если прервано браузером — показываем кнопку возобновления
+  if (interrupted && pc && pc.connectionState === 'connected') {
+    showResumeShareButton();
+  }
 }
 
 function updateScreenShareUI(active) {
@@ -3585,7 +3672,6 @@ function updateScreenShareUI(active) {
     btnCall.title = active ? 'Остановить демонстрацию экрана' : 'Демонстрация экрана';
   }
 
-  // Кнопка полного экрана — только на мобильных и когда есть что смотреть (демонстрация)
   const btnFullscreen = $('btnFullscreenVideo');
   if (btnFullscreen) {
     const isMobile = document.body.classList.contains('mobile-mode');
@@ -3684,6 +3770,10 @@ function minimizeCall() {
 
   const mpn = $('miniPeerName');
   if (mpn) mpn.textContent = peerNick || 'Собеседник';
+
+  // Показываем UI и через 2 сек прячем
+  toggleCallUI(false);
+  scheduleMiniUiHide();
 }
 
 function expandCall() {
@@ -3698,6 +3788,10 @@ function expandCall() {
   cs.style.width = window.innerWidth + 'px';
   cs.style.height = window.innerHeight + 'px';
   hideCallPill();
+
+  // Сбрасываем таймер автоскрытия и показываем UI
+  clearTimeout(miniUiHideTimer);
+  toggleCallUI(false);
 }
 
 function toggleCallMinimize() {
@@ -3764,6 +3858,7 @@ function hideCall() {
     cs.classList.remove('minimized');
     cs.classList.remove('hiding-anim');
     callMinimized = false;
+    clearTimeout(miniUiHideTimer);
     showCallPill();
   }, 420);
 }
@@ -3778,6 +3873,7 @@ function restoreCallFromPill() {
   callMinimized = false;
   hideCallPill();
   setFullscreenDim();
+  toggleCallUI(false);
 
   cs.classList.add('revealing');
   setTimeout(() => cs.classList.remove('revealing'), 480);
@@ -3787,6 +3883,7 @@ function resetCallScreenState() {
   callMinimized = false;
   callHidden = false;
   miniCallPos = { x: null, y: null };
+  clearTimeout(miniUiHideTimer);
   const cs = $('callScreen');
   if (!cs) return;
   cs.classList.remove('minimized');
