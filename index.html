@@ -241,7 +241,7 @@
   @media (max-width: 1024px) { .resize-handle { display: none; } aside { width: 84px !important; min-width: 84px !important; flex-basis: 84px !important; padding: 20px 8px; } aside .hide-mobile { display: none; } main { margin: 16px 12px 16px 0; } }
   .nick-form { animation: modalIn 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
   /* Больше воздуха между надписью «Ваш ник» и полем ввода */
-  #nickView .text-left > label { margin-bottom: 12px !important; }
+  #nickView .text-left > label { margin-bottom: 20px !important; }
   #nickView .text-left { margin-bottom: 12px !important; }
   #nickView .btn-primary { margin-top: 18px !important; }
   .logo-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; animation: logoFloat 4s ease-in-out infinite; box-shadow: 0 12px 32px rgba(109,127,214,0.4), 0 0 0 6px rgba(139,154,224,0.15); }
@@ -505,8 +505,7 @@
   #callScreen.ui-hidden #callMoreMenu { opacity: 0 !important; pointer-events: none !important; }
 
   /* ============================================================
-     DIANACALM — CUSTOM MODAL
-     Replaces native browser/Electron alert() windows.
+     DIANACALM — CUSTOM MODAL (компактный)
      ============================================================ */
   .dc-modal {
     position: fixed;
@@ -538,9 +537,9 @@
 
   .dc-modal-card {
     position: relative;
-    width: min(330px, calc(100vw - 44px));
-    padding: 16px;
-    border-radius: 18px;
+    width: min(280px, calc(100vw - 40px));
+    padding: 12px 12px 10px;
+    border-radius: 16px;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     box-shadow:
@@ -564,13 +563,13 @@
 
   .dc-modal-glow {
     position: absolute;
-    width: 150px;
-    height: 150px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
-    top: -90px;
-    left: -70px;
+    top: -75px;
+    left: -55px;
     background: var(--blob-3);
-    filter: blur(45px);
+    filter: blur(40px);
     opacity: .22;
     pointer-events: none;
   }
@@ -579,33 +578,34 @@
     position: relative;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+  }
+
+  /* Заголовок полностью убран */
+  .dc-modal-title {
+    display: none !important;
   }
 
   .dc-modal-icon {
-    flex: 0 0 40px;
-    width: 40px;
-    height: 40px;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 13px;
+    border-radius: 11px;
     background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%);
     color: #fff;
-    font-size: 19px;
+    font-size: 16px;
     font-weight: 700;
-    box-shadow: 0 8px 24px rgba(109,127,214,.28);
-  }
-
-  .dc-modal-title {
-    display: none;
+    box-shadow: 0 6px 18px rgba(109,127,214,.28);
   }
 
   .dc-modal-message {
     margin-top: 0;
     color: var(--text-muted);
-    font-size: 14px;
-    line-height: 1.45;
+    font-size: 13px;
+    line-height: 1.4;
     white-space: pre-line;
   }
 
@@ -613,22 +613,22 @@
     position: relative;
     display: flex;
     justify-content: flex-end;
-    margin-top: 14px;
+    margin-top: 8px;
   }
 
   .dc-modal-button {
-    min-width: 68px;
-    height: 34px;
-    padding: 0 14px;
+    min-width: 56px;
+    height: 28px;
+    padding: 0 12px;
     border: 0;
-    border-radius: 12px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #8B9AE0 0%, #6D7FD6 100%);
     color: #fff;
     font: inherit;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 7px 18px rgba(109,127,214,.24);
+    box-shadow: 0 6px 16px rgba(109,127,214,.24);
     transition: transform .15s ease, filter .15s ease;
   }
 
@@ -643,9 +643,9 @@
 
   @media (max-width: 520px) {
     .dc-modal-card {
-      width: min(330px, calc(100vw - 32px));
-      padding: 15px;
-      border-radius: 17px;
+      width: min(280px, calc(100vw - 32px));
+      padding: 11px;
+      border-radius: 15px;
     }
   }
 
@@ -1261,6 +1261,30 @@ function playNotifySound() {
   });
 }
 
+// ✅ ЗВУК СБРАСЫВАНИЯ ТРУБКИ — два коротких нисходящих тона
+function playHangupSound() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const tones = [
+    { f: 740, at: 0.00, dur: 0.14, vol: 0.16 },
+    { f: 520, at: 0.17, dur: 0.26, vol: 0.14 }
+  ];
+  tones.forEach(n => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(n.f, t + n.at);
+    gain.gain.setValueAtTime(0, t + n.at);
+    gain.gain.linearRampToValueAtTime(n.vol, t + n.at + 0.010);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + n.at + n.dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t + n.at);
+    osc.stop(t + n.at + n.dur + 0.03);
+  });
+}
+
 let ringtoneTimer = null;
 let ringtoneOscs = [];
 function playRingtone() {
@@ -1382,7 +1406,6 @@ function applyMobileMode(on) {
         sb.style.flexBasis = w + 'px';
       }
     } catch(e) {}
-    // Восстанавливаем правый отступ чата
     try {
       const rm = parseInt(localStorage.getItem('cc-chat-right-margin') || '16', 10);
       const mainEl = document.querySelector('main');
@@ -2398,6 +2421,8 @@ function rejectCall() {
   $('incomingCallModal').style.display = '';
   sendMQTT({ type: 'call-reject' });
   incomingOffer = null;
+  // Звук сбрасывания трубки при отклонении входящего
+  try { playHangupSound(); } catch (e) {}
 }
 
 function endCall(silent = false) {
@@ -2406,6 +2431,8 @@ function endCall(silent = false) {
   if (isScreenSharing || screenStream) stopScreenShare();
   if (!silent) sendMQTT({ type: 'call-end' });
   stopAllSounds();
+  // ✅ Звук сбрасывания трубки
+  try { playHangupSound(); } catch (e) {}
   clearTimeout(callStateTimeout);
   clearTimeout(miniUiHideTimer);
   resetCallScreenState();
@@ -3534,10 +3561,9 @@ function resetCallScreenState() {
   const mainEl = document.querySelector('main');
   if (!handle || !mainEl) return;
 
-  const MIN = 0;   // минимум отступа (чат максимально широкий)
-  const MAX = 400; // максимум отступа (чат сильно сужен)
+  const MIN = 0;
+  const MAX = 400;
 
-  // Восстанавливаем сохранённую позицию
   try {
     const saved = parseInt(localStorage.getItem('cc-chat-right-margin') || '16', 10);
     if (!isNaN(saved) && saved >= MIN && saved <= MAX && !document.body.classList.contains('mobile-mode') && window.innerWidth > 1024) {
@@ -3561,7 +3587,6 @@ function resetCallScreenState() {
   document.addEventListener('mousemove', (e) => {
     if (!dragging) return;
     const dx = e.clientX - startX;
-    // тянем влево (dx<0) — margin растёт, чат сужается
     let newMargin = startMargin - dx;
     newMargin = Math.max(MIN, Math.min(MAX, newMargin));
     mainEl.style.marginRight = newMargin + 'px';
@@ -3604,7 +3629,10 @@ function showCustomModal(message, title = '', icon = '✓') {
 
   if (!modal || !titleEl || !messageEl || !button) return;
 
-  titleEl.textContent = title;
+  // Заголовок принудительно скрыт — не пишем в него текст
+  titleEl.textContent = '';
+  titleEl.style.display = 'none';
+
   messageEl.textContent = message;
   if (iconEl) iconEl.textContent = icon;
 
